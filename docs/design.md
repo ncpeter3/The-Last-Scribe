@@ -4,7 +4,7 @@
 - **Player:** male or female scribe (aide to each chapter's hero).
 - **Scope:** every story, chronological, starting with Adam and Eve. Chapters are self-contained so they can ship one at a time.
 - **Loop:** arrive, serve, act, reflect (see the shared design doc).
-- **View:** top-down 3D (angled bird's-eye camera, free movement with a thumb joystick). Currently built from procedural low-poly shapes as stand-ins for final art.
+- **View:** top-down 3D (angled bird's-eye camera, free movement with a thumb joystick). Art is free CC0 low-poly 3D from Quaternius (see shared_assets/CREDITS.md), built by tools/art/.
 - **Combat:** occasional, period weapons, no blood. Not every chapter has combat (Genesis 1-3 has none; it uses exploration and care-taking challenges instead).
 - **Text:** KJV (public domain).
 - **Monetization:** free for now.

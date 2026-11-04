@@ -1,5 +1,7 @@
 extends Node3D
-## The scribe: a simple low-poly figure that walks freely on the ground plane (top-down 3D).
+## The scribe: walks freely on the ground plane (top-down 3D). Uses the real 3D model
+## (shared_assets/characters/scribe_female.glb or scribe_male.glb) with Idle/Walk animations,
+## or a simple low-poly figure if the model is missing.
 ## Move with WASD or the on-screen joystick (move_vec: x = right, y = down the screen / +Z).
 ## frozen stops movement during dialogue; min_x/max_x and z limits keep the scribe in bounds.
 
@@ -15,8 +17,14 @@ var female := true
 var _visual: Node3D
 var _legs: Array[Node3D] = []
 var _t := 0.0
+var _model := false
 
 func _ready() -> void:
+	var id := "scribe_female" if female else "scribe_male"
+	if CharacterFactory.has_model(id):
+		_visual = CharacterFactory.make(id, self, Vector3.ZERO)
+		_model = true
+		return
 	_visual = Node3D.new()
 	add_child(_visual)
 	var robe := Color(0.82, 0.74, 0.55)
@@ -52,9 +60,14 @@ func _process(delta: float) -> void:
 		# Face the direction of travel (the figure's front is +X).
 		var target := atan2(-v.y, v.x)
 		_visual.rotation.y = lerp_angle(_visual.rotation.y, target, 0.25)
+		if _model:
+			CharacterFactory.play(_visual, "Walk", 0.0, clampf(v.length() * 1.3, 0.6, 1.3))
+			return
 		_visual.position.y = absf(sin(_t)) * 0.07
 		_legs[0].rotation.z = sin(_t) * 0.6
 		_legs[1].rotation.z = -sin(_t) * 0.6
+	elif _model:
+		CharacterFactory.play(_visual, "Idle")
 	else:
 		_visual.position.y = lerpf(_visual.position.y, 0.0, 0.2)
 		for l in _legs:
