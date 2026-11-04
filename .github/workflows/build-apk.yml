@@ -29,6 +29,10 @@ jobs:
             echo "export/android/debug_keystore_pass = \"android\"";
             echo "export/android/java_sdk_path = \"$(dirname $(dirname $(readlink -f $(which javac))))\""; } > ~/.config/godot/editor_settings-4.3.tres
           cat ~/.config/godot/editor_settings-4.3.tres
+      - name: Install Android build tools 34 (Godot 4.3 targets SDK 34)
+        run: |
+          yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses > /dev/null || true
+          sdkmanager --sdk_root=$ANDROID_HOME "build-tools;34.0.0" "platforms;android-34"
       - name: Export debug APK
         run: |
           ls /usr/lib/android-sdk /usr/lib/android-sdk/build-tools /usr/lib/android-sdk/platforms 2>&1 || true
