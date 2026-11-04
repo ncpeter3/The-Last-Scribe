@@ -8,3 +8,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Import and load scripts headless
         run: godot --headless --import --quit
+      - name: Play through chapter 1 (every story beat and challenge)
+        run: |
+          set -o pipefail
+          timeout 300 godot --headless res://tools/test/playtest.tscn 2>&1 | grep -v 'mesh_get_surface_count\|Parameter "m" is null' | tee playtest.log
+          if grep -q "SCRIPT ERROR" playtest.log; then echo "Script errors during playthrough"; exit 1; fi
+        shell: bash

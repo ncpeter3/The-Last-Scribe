@@ -9,3 +9,21 @@
 - **Text:** KJV (public domain).
 - **Monetization:** free for now.
 - **Scribe role:** mostly an observer of the main story, but the world is open to explore and interact with (animals, plants, objects). In Adam and Eve there are no other characters to talk to until they have children.
+
+## Chapter 1 challenges (Eden)
+
+Each challenge starts right after the verse it teaches, and the next story beat waits until it
+is done, so the story is never skipped or reordered. None can be failed: a wrong answer gets a
+hint and another try. Data lives in `beats.json` (`challenge`, `after_lines`); code is in
+`chapters/01_adam_and_eve/challenges/` on top of `core/challenges/challenge.gd`.
+
+| After | Challenge | Teaches |
+|---|---|---|
+| Genesis 2:15-17 | Dress and keep the garden: fill a jar at the river, water thirsty plants | 2:15, 2:10 |
+| Genesis 2:18-19 | Record every creature as cattle, fowl of the air, or beast of the field (walk up slowly or they startle) | 2:19-20 |
+| Genesis 2:21-25 | Gather fruit from every tree but the forbidden one | 2:16-17 |
+| Genesis 3:1-7 | None: the serpent scene is only watched | |
+| Genesis 3:8-9 | Where art thou? Follow rustling leaves to where Adam and Eve hid | 3:8-13 |
+| Genesis 3:21-23 | Scroll check: fill in missing words from recorded verses | review |
+
+`tools/test/playtest.tscn` plays the whole chapter headless and runs in CI.

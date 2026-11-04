@@ -3,11 +3,21 @@ extends Node3D
 ## Story beats trigger in order as the scribe reaches each station (the way forward is blocked until
 ## the current beat is told, so the order of Scripture is kept). Between stations the world is open:
 ## walk freely and tap "Look" on glowing orbs for Scribe's notes and bonus verses.
+## A beat can have a challenge (see core/challenges/challenge.gd) that starts right after the
+## beat's verses and has its own area of the world; the beat's "after_lines" play when it's done.
 ## All text lives in data/beats.json. Distances are in meters.
 
 const DialogueBox := preload("res://core/ui/dialogue_box.gd")
 const Scribe := preload("res://core/player/scribe.gd")
 const Joystick := preload("res://core/ui/joystick.gd")
+const ChoicePanel := preload("res://core/ui/choice_panel.gd")
+const CHALLENGES := {
+	"tend_garden": preload("res://chapters/01_adam_and_eve/challenges/tend_garden.gd"),
+	"name_animals": preload("res://chapters/01_adam_and_eve/challenges/name_animals.gd"),
+	"gather_fruit": preload("res://chapters/01_adam_and_eve/challenges/gather_fruit.gd"),
+	"find_hiding": preload("res://chapters/01_adam_and_eve/challenges/find_hiding.gd"),
+	"scroll_quiz": preload("res://chapters/01_adam_and_eve/challenges/scroll_quiz.gd"),
+}
 const DATA := "res://chapters/01_adam_and_eve/data/beats.json"
 const NOTE_RANGE := 1.4
 
@@ -16,6 +26,7 @@ const GROUND := {
 	"sky": Color(0.4, 0.62, 0.35), "animals": Color(0.45, 0.68, 0.35), "rest": Color(0.68, 0.74, 0.4),
 	"eden": Color(0.3, 0.65, 0.3), "naming": Color(0.35, 0.7, 0.32), "flowers": Color(0.38, 0.72, 0.4),
 	"tree": Color(0.3, 0.55, 0.28), "dark": Color(0.2, 0.3, 0.2), "gate": Color(0.55, 0.4, 0.25),
+	"garden": Color(0.33, 0.67, 0.31),
 }
 # Land animals made on day six and named by Adam: [model id, scale].
 const LAND_ANIMALS := [["cow", 1.0], ["horse", 1.0], ["sheep", 1.0], ["pig", 1.0], ["llama", 1.0], ["zebra", 1.0],
@@ -33,6 +44,14 @@ var _orbs: Array = []
 var _beat_index := 0
 var _world_end := 0.0
 var _look_button: Button
+var _action_button: Button
+var _status_label: Label
+var _choice: CanvasLayer
+var _regions: Array = []  # {kind, x0, x1}: the scenery of each stretch of the world, in order
+var _challenges: Dictionary = {}  # beat index -> Challenge
+var _challenge: Challenge  # the one running now
+var _dialogue_cb := Callable()
+var _choice_cb := Callable()
 var _joystick: Control
 var _title_label: Label
 var _journal_panel: PanelContainer
@@ -48,7 +67,7 @@ func _ready() -> void:
 	var data = JSON.parse_string(FileAccess.get_file_as_string(DATA))
 	_beats = data["beats"]
 	_discoverables = data["discoverables"]
-	_world_end = float(_beats[-1]["x"]) + 14.0
+	_compute_regions()
 	_build_environment()
 	_build_world()
 	_build_scribe()
@@ -56,6 +75,9 @@ func _ready() -> void:
 	_dialogue = DialogueBox.new()
 	add_child(_dialogue)
 	_dialogue.finished.connect(_on_dialogue_finished)
+	_choice = ChoicePanel.new()
+	add_child(_choice)
+	_choice.chosen.connect(_on_choice)
 	_apply_mood(Color(_beats[0]["tint"]))
 	_update_limit()
 	_cam.position = _cam_target()
@@ -73,10 +95,20 @@ func _process(delta: float) -> void:
 	for i in _orbs.size():
 		var o: Node3D = _orbs[i]
 		o.position.y = 1.3 + sin(_time * 2.0 + i) * 0.12
-	if _dialogue.active:
+	if _challenge and _challenge.running:
+		_status_label.text = _challenge.status()
+	if _dialogue.active or _choice.active:
 		_look_button.hide()
+		_action_button.hide()
 		return
-	if _beat_index < _beats.size() and _scribe.position.x >= float(_beats[_beat_index]["x"]) - 0.05:
+	if _challenge:
+		_challenge.tick(delta)
+		if _challenge == null:  # finished during tick
+			return
+		var label := _challenge.action()
+		_action_button.visible = label != ""
+		_action_button.text = label
+	elif _beat_index < _beats.size() and _scribe.position.x >= float(_beats[_beat_index]["x"]) - 0.05:
 		_start_beat()
 		return
 	_near = {}
@@ -92,28 +124,82 @@ func _process(delta: float) -> void:
 
 func _start_beat() -> void:
 	var beat: Dictionary = _beats[_beat_index]
-	_freeze()
 	_title_label.text = "%s  (%d/%d)" % [beat["title"], _beat_index + 1, _beats.size()]
 	_apply_mood(Color(beat["tint"]), 2.0)
-	_dialogue.play(beat["lines"])
+	say(beat["lines"], _after_beat_lines)
 
-func _freeze() -> void:
-	_scribe.frozen = true
-	_scribe.move_vec = Vector2.ZERO
-	_joystick.cancel()
-
-func _on_dialogue_finished() -> void:
-	_scribe.frozen = false
-	if _near_was_look:
-		_near_was_look = false
+func _after_beat_lines() -> void:
+	var ch: Challenge = _challenges.get(_beat_index)
+	if ch == null:
+		_finish_beat()
 		return
+	_challenge = ch
+	ch.completed.connect(_on_challenge_done, CONNECT_ONE_SHOT)
+	_scribe.max_x = maxf(ch.x1, float(_beats[_beat_index]["x"]))
+	_status_label.text = ""
+	_status_label.show()
+	var intro: Array = ch.cfg.get("intro", [])
+	if intro.is_empty():
+		ch.begin()
+	else:
+		say(intro, ch.begin)
+
+func _on_challenge_done() -> void:
+	var ch := _challenge
+	_challenge = null
+	_action_button.hide()
+	_status_label.hide()
+	var lines: Array = ch.cfg.get("done", []) + _beats[_beat_index].get("after_lines", [])
+	if lines.is_empty():
+		_finish_beat()
+	else:
+		say(lines, _finish_beat)
+
+func _finish_beat() -> void:
 	_beat_index += 1
 	if _beat_index >= _beats.size():
 		GameState.complete_chapter("01_adam_and_eve")
 		_title_label.text = "Chapter complete: %d verses recorded" % GameState.unlocked_verses.size()
 	_update_limit()
 
-var _near_was_look := false
+func _freeze() -> void:
+	_scribe.frozen = true
+	_scribe.move_vec = Vector2.ZERO
+	_joystick.cancel()
+	_joystick.enabled = false
+
+func _unfreeze() -> void:
+	_scribe.frozen = false
+	_joystick.enabled = true
+
+## Play dialogue lines, then call `then` (if valid). Used by beats, notes and challenges.
+func say(lines: Array, then: Callable = Callable()) -> void:
+	_freeze()
+	_dialogue_cb = then
+	_dialogue.play(lines)
+
+## Show a question with answer buttons, then call `then` with the index chosen.
+func ask(question: String, options: Array, then: Callable) -> void:
+	_freeze()
+	_choice_cb = then
+	_choice.ask(question, options)
+
+func get_scribe() -> Node3D:
+	return _scribe
+
+func _on_dialogue_finished() -> void:
+	_unfreeze()
+	var cb := _dialogue_cb
+	_dialogue_cb = Callable()
+	if cb.is_valid():
+		cb.call()
+
+func _on_choice(i: int) -> void:
+	_unfreeze()
+	var cb := _choice_cb
+	_choice_cb = Callable()
+	if cb.is_valid():
+		cb.call(i)
 
 func _update_limit() -> void:
 	if _beat_index < _beats.size():
@@ -127,9 +213,19 @@ func _on_look() -> void:
 	var lines := [{"speaker": _near["name"], "text": _near["note"]}]
 	if _near.has("verse"):
 		lines[0]["verse"] = _near["verse"]
-	_freeze()
-	_near_was_look = true
-	_dialogue.play(lines)
+	say(lines)
+
+func _unhandled_input(event: InputEvent) -> void:
+	# E on a keyboard does whatever the on-screen button would.
+	if event.is_action_pressed("interact"):
+		if _action_button.visible:
+			_on_action()
+		elif _look_button.visible:
+			_on_look()
+
+func _on_action() -> void:
+	if _challenge and not _dialogue.active and not _choice.active:
+		_challenge.act()
 
 # ---------- environment and mood ----------
 
@@ -184,34 +280,50 @@ func _set_mood(c: Color) -> void:
 
 # ---------- world building ----------
 
+func _compute_regions() -> void:
+	# Each beat's scenery leads up to its station; a challenge adds its own area right after it.
+	var x0 := -20.0
+	for b in _beats:
+		var x1 := float(b["x"])
+		_regions.append({"kind": String(b["scenery"]), "x0": x0, "x1": x1})
+		x0 = x1
+		var ch: Dictionary = b.get("challenge", {})
+		if float(ch.get("x1", 0.0)) > x1:
+			_regions.append({"kind": String(ch.get("scenery", b["scenery"])), "x0": x1, "x1": float(ch["x1"])})
+			x0 = float(ch["x1"])
+	_world_end = x0 + 14.0
+	_regions.append({"kind": "gate", "x0": x0, "x1": _world_end + 30.0})
+
 func _build_world() -> void:
 	var root := Node3D.new()
 	root.name = "World"
 	add_child(root)
-	var x0 := -20.0
+	for r in _regions:
+		_build_section(root, String(r["kind"]), float(r["x0"]), float(r["x1"]))
 	for i in _beats.size():
 		var b: Dictionary = _beats[i]
-		var x1 := float(b["x"])
-		_build_section(root, String(b["scenery"]), x0, x1)
-		_marker(root, x1)
+		var x := float(b["x"])
+		_marker(root, x)
 		for f in b.get("figures", []):
-			_figure(root, String(f), x1, String(b["id"]))
-		x0 = x1
-	_build_section(root, "gate", x0, _world_end + 30.0)
+			_figure(root, String(f), x, String(b["id"]))
+		if b.has("challenge"):
+			var ch: Challenge = CHALLENGES[String(b["challenge"]["type"])].new()
+			ch.setup(self, b["challenge"], x)
+			root.add_child(ch)
+			ch.build()
+			_challenges[i] = ch
 	_build_ground(root)
 	for d in _discoverables:
 		_orb(root, float(d["x"]))
 
 func _scenery_at(x: float) -> Dictionary:
-	var x0 := -20.0
 	var prev := "void"
-	for b in _beats:
-		var x1 := float(b["x"])
-		if x < x1:
-			return {"kind": String(b["scenery"]), "prev": prev, "x0": x0, "x1": x1}
-		prev = String(b["scenery"])
-		x0 = x1
-	return {"kind": "gate", "prev": prev, "x0": x0, "x1": _world_end + 30.0}
+	for r in _regions:
+		if x < float(r["x1"]):
+			return {"kind": r["kind"], "prev": prev, "x0": r["x0"], "x1": r["x1"]}
+		prev = r["kind"]
+	var last: Dictionary = _regions[-1]
+	return {"kind": last["kind"], "prev": prev, "x0": last["x0"], "x1": last["x1"]}
 
 func _ground_color(x: float) -> Color:
 	var s := _scenery_at(x)
@@ -272,7 +384,7 @@ func _build_section(root: Node3D, kind: String, x0: float, x1: float) -> void:
 			_scatter_plants(root, x0, x1, 1.3, true)
 			for i in int(len * 0.8):
 				Props.flower(root, Vector3(_rng.randf_range(x0, x1), 0, _rng.randf_range(-8, 8)), Color(1, 0.9, 0.5))
-		"eden", "naming", "flowers", "tree", "dark":
+		"eden", "naming", "flowers", "tree", "dark", "garden":
 			_build_garden(root, kind, x0, x1)
 		"gate":
 			_scatter_plants(root, x0, x1, 0.5, false)
@@ -304,8 +416,10 @@ func _build_garden(root: Node3D, kind: String, x0: float, x1: float) -> void:
 		leaf = Color(0.1, 0.25, 0.15)
 		dense = 1.3
 	var len := x1 - x0
+	# Challenge areas ("garden") keep trees back so the play space stays open and in view.
+	var near := 8.0 if kind == "garden" else 2.8
 	for i in int(len * dense):
-		var p := Vector3(_rng.randf_range(x0, x1), 0, _side_z(2.8, 16.0))
+		var p := Vector3(_rng.randf_range(x0, x1), 0, _side_z(near, 16.0))
 		Props.tree(root, p, _rng.randf_range(0.9, 1.7), leaf.lightened(_rng.randf_range(-0.05, 0.1)), Color(0.9, 0.75, 0.2) if _rng.randf() < 0.3 else Color(0, 0, 0, 0),
 				"dead_tree" if kind == "dark" and _rng.randf() < 0.35 else "")
 	for i in int(len * 1.5):
@@ -390,6 +504,31 @@ func _build_hud() -> void:
 	_look_button.pressed.connect(_on_look)
 	_look_button.hide()
 	layer.add_child(_look_button)
+	_action_button = Button.new()
+	_action_button.custom_minimum_size = Vector2(460, 120)
+	_action_button.position = Vector2(780, 420)
+	_action_button.add_theme_font_size_override("font_size", 32)
+	var gold := StyleBoxFlat.new()
+	gold.bg_color = Color(0.55, 0.42, 0.12, 0.92)
+	gold.set_corner_radius_all(16)
+	_action_button.add_theme_stylebox_override("normal", gold)
+	var gold_hi := gold.duplicate()
+	gold_hi.bg_color = Color(0.7, 0.55, 0.18, 0.95)
+	_action_button.add_theme_stylebox_override("hover", gold_hi)
+	_action_button.add_theme_stylebox_override("pressed", gold_hi)
+	_action_button.pressed.connect(_on_action)
+	_action_button.hide()
+	layer.add_child(_action_button)
+	_status_label = Label.new()
+	_status_label.position = Vector2(30, 70)
+	_status_label.size = Vector2(1040, 0)
+	_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_status_label.add_theme_font_size_override("font_size", 26)
+	_status_label.add_theme_color_override("font_color", Color(1.0, 0.92, 0.6))
+	_status_label.add_theme_color_override("font_outline_color", Color.BLACK)
+	_status_label.add_theme_constant_override("outline_size", 7)
+	_status_label.hide()
+	layer.add_child(_status_label)
 	var journal_btn := Button.new()
 	journal_btn.text = "Journal"
 	journal_btn.position = Vector2(1090, 20)
