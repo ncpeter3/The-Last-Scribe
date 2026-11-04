@@ -21,13 +21,7 @@ jobs:
       - name: Create debug keystore and configure Godot
         run: |
           keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999 -deststoretype pkcs12
-          godot --headless --quit --import || true
-          EDITOR_SETTINGS=$(ls ~/.config/godot/editor_settings-4*.tres 2>/dev/null | head -1)
-          [ -z "$EDITOR_SETTINGS" ] && EDITOR_SETTINGS=~/.config/godot/editor_settings-4.3.tres
           mkdir -p ~/.config/godot
-          cat >> "$EDITOR_SETTINGS" <<SETTINGS
-          SETTINGS
-          sed -i '/^\[resource\]/d' "$EDITOR_SETTINGS" 2>/dev/null || true
           { echo "[gd_resource type=\"EditorSettings\" format=3]"; echo; echo "[resource]";
             echo "export/android/android_sdk_path = \"${ANDROID_HOME:-/usr/lib/android-sdk}\"";
             echo "export/android/debug_keystore = \"$(pwd)/debug.keystore\"";
