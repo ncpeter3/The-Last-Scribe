@@ -18,13 +18,12 @@ jobs:
         run: |
           mkdir -v -p ~/.local/share/godot/export_templates/
           mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
-      - name: Create debug keystore and configure Godot
+      - name: Configure Godot (fixed debug keystore so updates install over older builds)
         run: |
-          keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999 -deststoretype pkcs12
           mkdir -p ~/.config/godot
           { echo "[gd_resource type=\"EditorSettings\" format=3]"; echo; echo "[resource]";
             echo "export/android/android_sdk_path = \"${ANDROID_HOME:-/usr/lib/android-sdk}\"";
-            echo "export/android/debug_keystore = \"$(pwd)/debug.keystore\"";
+            echo "export/android/debug_keystore = \"$(pwd)/android/debug.keystore\"";
             echo "export/android/debug_keystore_user = \"androiddebugkey\"";
             echo "export/android/debug_keystore_pass = \"android\"";
             echo "export/android/java_sdk_path = \"$(dirname $(dirname $(readlink -f $(which javac))))\""; } > ~/.config/godot/editor_settings-4.3.tres
