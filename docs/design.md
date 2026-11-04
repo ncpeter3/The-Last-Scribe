@@ -8,3 +8,4 @@
 - **Combat:** occasional, period weapons, no blood. Not every chapter has combat (Genesis 1-3 has none; it uses exploration and care-taking challenges instead).
 - **Text:** KJV (public domain).
 - **Monetization:** free for now.
+- **Scribe role:** mostly an observer of the main story, but the world is open to explore and interact with (animals, plants, objects). In Adam and Eve there are no other characters to talk to until they have children.
