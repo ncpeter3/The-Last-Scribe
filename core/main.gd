@@ -23,8 +23,54 @@ func _ready() -> void:
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 40)
 	box.add_child(row)
-	row.add_child(_button("Female scribe", "female"))
-	row.add_child(_button("Male scribe", "male"))
+	row.add_child(_choice("Female scribe", "female"))
+	row.add_child(_choice("Male scribe", "male"))
+
+var _turntables: Array[Node3D] = []
+
+func _process(delta: float) -> void:
+	for t in _turntables:
+		t.rotation.y += delta * 0.6
+
+## A button with a small 3D preview of the scribe above it.
+func _choice(text: String, gender: String) -> Control:
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 8)
+	var id := "scribe_" + gender
+	if CharacterFactory.has_model(id):
+		var holder := SubViewportContainer.new()
+		holder.stretch = true
+		holder.custom_minimum_size = Vector2(320, 260)
+		var vp := SubViewport.new()
+		vp.own_world_3d = true
+		vp.transparent_bg = true
+		holder.add_child(vp)
+		var stage := Node3D.new()
+		vp.add_child(stage)
+		var turn := Node3D.new()
+		stage.add_child(turn)
+		var model := CharacterFactory.make(id, turn, Vector3.ZERO)
+		model.rotation.y = -PI / 2.0  # face the camera
+		CharacterFactory.play(model, "Idle")
+		_turntables.append(turn)
+		var cam := Camera3D.new()
+		cam.position = Vector3(0, 1.1, 3.2)
+		cam.rotation_degrees = Vector3(-8, 0, 0)
+		cam.fov = 40
+		stage.add_child(cam)
+		var sun := DirectionalLight3D.new()
+		sun.rotation_degrees = Vector3(-35, 25, 0)
+		stage.add_child(sun)
+		var env := WorldEnvironment.new()
+		env.environment = Environment.new()
+		env.environment.background_mode = Environment.BG_CLEAR_COLOR
+		env.environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+		env.environment.ambient_light_color = Color(0.9, 0.85, 0.8)
+		env.environment.ambient_light_energy = 0.6
+		stage.add_child(env)
+		col.add_child(holder)
+	col.add_child(_button(text, gender))
+	return col
 
 func _label(text: String, size: int, color: Color) -> Label:
 	var l := Label.new()

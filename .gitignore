@@ -6,3 +6,4 @@ export/
 *.keystore
 android/build/
 .mono/
+art_sources/

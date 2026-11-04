@@ -17,7 +17,9 @@ const GROUND := {
 	"eden": Color(0.3, 0.65, 0.3), "naming": Color(0.35, 0.7, 0.32), "flowers": Color(0.38, 0.72, 0.4),
 	"tree": Color(0.3, 0.55, 0.28), "dark": Color(0.2, 0.3, 0.2), "gate": Color(0.55, 0.4, 0.25),
 }
-const ANIMAL_COLORS := [Color(0.7, 0.5, 0.3), Color(0.85, 0.8, 0.7), Color(0.55, 0.4, 0.3), Color(0.8, 0.65, 0.35), Color(0.4, 0.4, 0.42)]
+# Land animals made on day six and named by Adam: [model id, scale].
+const LAND_ANIMALS := [["cow", 1.0], ["horse", 1.0], ["sheep", 1.0], ["pig", 1.0], ["llama", 1.0], ["zebra", 1.0],
+	["wolf", 1.0], ["fox", 1.0], ["dog", 1.0], ["cat", 1.0], ["chick", 1.2], ["sheep", 0.9], ["cow", 0.9]]
 
 var _scribe: Node3D
 var _cam: Camera3D
@@ -193,7 +195,7 @@ func _build_world() -> void:
 		_build_section(root, String(b["scenery"]), x0, x1)
 		_marker(root, x1)
 		for f in b.get("figures", []):
-			_figure(root, String(f), x1)
+			_figure(root, String(f), x1, String(b["id"]))
 		x0 = x1
 	_build_section(root, "gate", x0, _world_end + 30.0)
 	_build_ground(root)
@@ -245,6 +247,8 @@ func _build_section(root: Node3D, kind: String, x0: float, x1: float) -> void:
 		"sea":
 			for i in int(len * 0.3):
 				Props.rock(root, Vector3(_rng.randf_range(x0, sea_split), 0.0, _side_z(3.0, 14.0)), _rng.randf_range(0.6, 1.8), Color(0.45, 0.5, 0.52))
+			for i in 8:
+				Props.creature(root, "fish", Vector3(_rng.randf_range(x0, sea_split), 0.05, _side_z(2.0, 10.0)), 1.6)
 			_scatter_plants(root, sea_split, x1, 0.9, false)
 		"sky":
 			_scatter_plants(root, x0, x1, 1.0, true)
@@ -257,11 +261,13 @@ func _build_section(root: Node3D, kind: String, x0: float, x1: float) -> void:
 				Props.bird(root, Vector3(_rng.randf_range(x0, x1), _rng.randf_range(3, 6), _rng.randf_range(-8, 8)), Color(0.9, 0.9, 0.95))
 			Props.slab(root, mid + 2, mid + 9, Color(0.2, 0.5, 0.75), -12, -5, 0.03, 0.1)
 			for i in 6:
-				Props.add(root, Props.sphere(0.25, 0.5, 6), Color(0.95, 0.55, 0.2), Vector3(mid + _rng.randf_range(2.5, 8.5), 0.06, _rng.randf_range(-11.5, -5.5)))
+				Props.creature(root, "fish", Vector3(mid + _rng.randf_range(2.5, 8.5), 0.05, _rng.randf_range(-11.5, -5.5)), 1.4)
+			Props.creature(root, "whale", Vector3(mid + 5.5, -0.9, -8.5), 0.55)
+			Props.creature(root, "eagle", Vector3(mid - 3, 4.5, -6), 1.0)
 		"animals":
 			_scatter_plants(root, x0, x1, 1.0, true)
 			for i in int(len * 0.5):
-				Props.animal(root, Vector3(_rng.randf_range(x0, x1), 0, _side_z(2.0, 9.0)), ANIMAL_COLORS[_rng.randi() % ANIMAL_COLORS.size()], _rng.randf_range(0.8, 1.3), _rng.randf() < 0.2)
+				_land_animal(root, Vector3(_rng.randf_range(x0, x1), 0, _side_z(2.0, 9.0)))
 		"rest":
 			_scatter_plants(root, x0, x1, 1.3, true)
 			for i in int(len * 0.8):
@@ -286,6 +292,8 @@ func _scatter_plants(root: Node3D, x0: float, x1: float, density: float, trees: 
 		var p := Vector3(_rng.randf_range(x0, x1), 0, _side_z(2.5, 12.0))
 		if trees and _rng.randf() < 0.3:
 			Props.tree(root, p + Vector3(0, 0, signf(p.z) * _rng.randf_range(0, 5)), _rng.randf_range(0.8, 1.5), Color(0.2, 0.55, 0.25))
+		elif _rng.randf() < 0.12:
+			Props.nature(root, "bush", p, _rng.randf_range(0.5, 0.8))
 		else:
 			Props.grass(root, p, Color(0.25, 0.6, 0.25))
 
@@ -298,18 +306,25 @@ func _build_garden(root: Node3D, kind: String, x0: float, x1: float) -> void:
 	var len := x1 - x0
 	for i in int(len * dense):
 		var p := Vector3(_rng.randf_range(x0, x1), 0, _side_z(2.8, 16.0))
-		Props.tree(root, p, _rng.randf_range(0.9, 1.7), leaf.lightened(_rng.randf_range(-0.05, 0.1)), Color(0.9, 0.75, 0.2) if _rng.randf() < 0.3 else Color(0, 0, 0, 0))
+		Props.tree(root, p, _rng.randf_range(0.9, 1.7), leaf.lightened(_rng.randf_range(-0.05, 0.1)), Color(0.9, 0.75, 0.2) if _rng.randf() < 0.3 else Color(0, 0, 0, 0),
+				"dead_tree" if kind == "dark" and _rng.randf() < 0.35 else "")
 	for i in int(len * 1.5):
 		Props.flower(root, Vector3(_rng.randf_range(x0, x1), 0, _rng.randf_range(-6, 6)), [Color(1, 0.5, 0.6), Color(1, 0.9, 0.4), Color(0.7, 0.6, 1.0), Color(1, 1, 1)][_rng.randi() % 4])
 	if kind == "eden":
 		Props.slab(root, x0, x1, Color(0.25, 0.55, 0.8), -9.5, -6.0, 0.03, 0.1)
-		Props.tree(root, Vector3(x1 - 4.0, 0, -3.2), 1.3, Color(0.3, 0.7, 0.3), Color(1.0, 0.85, 0.3))
+		# The tree of life in the midst of the garden (Genesis 2:9).
+		Props.tree(root, Vector3(x1 - 4.0, 0, -3.6), 1.6, Color(0.3, 0.7, 0.3), Color(1.0, 0.85, 0.3), "tree_2")
 	if kind == "naming":
 		for i in int(len * 0.9):
-			Props.animal(root, Vector3(_rng.randf_range(x0, x1), 0, _side_z(1.6, 6.0)), ANIMAL_COLORS[_rng.randi() % ANIMAL_COLORS.size()], _rng.randf_range(0.7, 1.4), _rng.randf() < 0.25)
+			_land_animal(root, Vector3(_rng.randf_range(x0, x1), 0, _side_z(1.6, 6.0)))
 	if kind == "tree":
-		Props.tree(root, Vector3(x1 - 3.0, 0, -2.6), 1.7, Color(0.2, 0.5, 0.25), Color(0.85, 0.15, 0.15))
+		# The tree of the knowledge of good and evil: a twisted tree with red-gold leaves.
+		Props.tree(root, Vector3(x1 - 3.0, 0, -3.4), 0.55, Color(0.2, 0.5, 0.25), Color(0.85, 0.15, 0.15), "twisted_tree")
 		Props.serpent(root, Vector3(x1 - 3.7, 0, -1.8))
+
+func _land_animal(root: Node3D, pos: Vector3) -> void:
+	var a: Array = LAND_ANIMALS[_rng.randi() % LAND_ANIMALS.size()]
+	Props.creature(root, a[0], pos, float(a[1]) * _rng.randf_range(0.9, 1.1))
 
 func _marker(root: Node3D, x: float) -> void:
 	Props.add(root, Props.box(Vector3(0.5, 2.0, 0.5)), Color(0.85, 0.8, 0.65), Vector3(x, 1.0, -1.6))
@@ -327,12 +342,14 @@ func _orb(root: Node3D, x: float) -> void:
 	o.add_child(l)
 	_orbs.append(o)
 
-func _figure(root: Node3D, kind: String, x: float) -> void:
+func _figure(root: Node3D, kind: String, x: float, beat_id: String) -> void:
+	# At the gate they wear the coats of skins God made for them (Genesis 3:21).
+	var suffix := "_skins" if beat_id == "gate" else ""
 	match kind:
 		"adam":
-			CharacterFactory.make("adam", root, Vector3(x + 1.8, 0, -1.4), true)
+			CharacterFactory.make("adam" + suffix, root, Vector3(x + 1.8, 0, -1.4), true)
 		"eve":
-			CharacterFactory.make("eve", root, Vector3(x + 3.0, 0, -1.4), true)
+			CharacterFactory.make("eve" + suffix, root, Vector3(x + 3.0, 0, -1.4), true)
 		"serpent":
 			pass  # drawn with the tree
 		"cherub":
