@@ -1,0 +1,46 @@
+name: Build Android APK
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "4.3"
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    container: barichello/godot-ci:4.3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up export templates
+        run: |
+          mkdir -v -p ~/.local/share/godot/export_templates/
+          mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+      - name: Create debug keystore and configure Godot
+        run: |
+          keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999 -deststoretype pkcs12
+          godot --headless --quit --import || true
+          EDITOR_SETTINGS=$(ls ~/.config/godot/editor_settings-4*.tres 2>/dev/null | head -1)
+          [ -z "$EDITOR_SETTINGS" ] && EDITOR_SETTINGS=~/.config/godot/editor_settings-4.3.tres
+          mkdir -p ~/.config/godot
+          cat >> "$EDITOR_SETTINGS" <<SETTINGS
+          SETTINGS
+          sed -i '/^\[resource\]/d' "$EDITOR_SETTINGS" 2>/dev/null || true
+          { echo "[gd_resource type=\"EditorSettings\" format=3]"; echo; echo "[resource]";
+            echo "export/android/android_sdk_path = \"${ANDROID_HOME:-/usr/lib/android-sdk}\"";
+            echo "export/android/debug_keystore = \"$(pwd)/debug.keystore\"";
+            echo "export/android/debug_keystore_user = \"androiddebugkey\"";
+            echo "export/android/debug_keystore_pass = \"android\"";
+            echo "export/android/java_sdk_path = \"$(dirname $(dirname $(readlink -f $(which javac))))\""; } > ~/.config/godot/editor_settings-4.3.tres
+          cat ~/.config/godot/editor_settings-4.3.tres
+      - name: Export debug APK
+        run: |
+          mkdir -v -p build
+          godot --headless --verbose --export-debug "Android" build/the-last-scribe.apk
+          ls -la build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: the-last-scribe-debug-apk
+          path: build/the-last-scribe.apk
