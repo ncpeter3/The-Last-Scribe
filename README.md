@@ -16,3 +16,6 @@ Open the folder in Godot 4.3+ and press Play. Android export: install the Androi
 - `docs/` design notes
 
 Design plan: see `docs/design.md`.
+
+## Debug signing key
+`android/debug.keystore` is a public debug-only key (password `android`). It keeps every test build signed the same way so a new APK installs over the old one. Do not use it for a Play Store release; a separate private release key will be made for that.
