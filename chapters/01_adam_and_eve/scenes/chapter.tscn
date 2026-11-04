@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://chapters/01_adam_and_eve/scenes/chapter.gd" id="1"]
+
+[node name="Chapter" type="Node2D"]
+script = ExtResource("1")

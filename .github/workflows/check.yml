@@ -1,0 +1,10 @@
+name: Check project
+on: [push, pull_request]
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    container: barichello/godot-ci:4.3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import and load scripts headless
+        run: godot --headless --import --quit
