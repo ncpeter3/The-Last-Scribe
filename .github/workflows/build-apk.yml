@@ -31,6 +31,9 @@ jobs:
           cat ~/.config/godot/editor_settings-4.3.tres
       - name: Export debug APK
         run: |
+          ls /usr/lib/android-sdk /usr/lib/android-sdk/build-tools /usr/lib/android-sdk/platforms 2>&1 || true
+          ls ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable | head -30
+          godot --headless --import || true
           mkdir -v -p build
           godot --headless --verbose --export-debug "Android" build/the-last-scribe.apk
           ls -la build
