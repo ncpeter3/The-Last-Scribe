@@ -95,7 +95,7 @@ func _process(delta: float) -> void:
 	for i in _orbs.size():
 		var o: Node3D = _orbs[i]
 		o.position.y = 1.3 + sin(_time * 2.0 + i) * 0.12
-	if _challenge:
+	if _challenge and _challenge.running:
 		_status_label.text = _challenge.status()
 	if _dialogue.active or _choice.active:
 		_look_button.hide()
