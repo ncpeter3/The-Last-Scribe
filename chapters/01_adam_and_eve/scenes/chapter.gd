@@ -330,9 +330,9 @@ func _orb(root: Node3D, x: float) -> void:
 func _figure(root: Node3D, kind: String, x: float) -> void:
 	match kind:
 		"adam":
-			Props.person(root, Vector3(x + 1.8, 0, -1.4), false, true)
+			CharacterFactory.make("adam", root, Vector3(x + 1.8, 0, -1.4), true)
 		"eve":
-			Props.person(root, Vector3(x + 3.0, 0, -1.4), true, true)
+			CharacterFactory.make("eve", root, Vector3(x + 3.0, 0, -1.4), true)
 		"serpent":
 			pass  # drawn with the tree
 		"cherub":
