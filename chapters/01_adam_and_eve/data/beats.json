@@ -3,25 +3,88 @@
   "title": "In the Beginning",
   "scripture": "Genesis 1-3 (KJV)",
   "beats": [
-    {
-      "id": "arrive",
-      "lines": [
-        {"speaker": "Codex", "text": "Year 2060. The last true copies are gone. You are a scribe, sent to see it with your own eyes and write it down faithfully."},
-        {"speaker": "Narrator", "text": "In the beginning God created the heaven and the earth.", "verse": "Genesis 1:1"}
-      ]
-    },
-    {
-      "id": "creation",
-      "lines": [
-        {"speaker": "Narrator", "text": "And God said, Let there be light: and there was light.", "verse": "Genesis 1:3"},
-        {"speaker": "Narrator", "text": "And God saw every thing that he had made, and, behold, it was very good.", "verse": "Genesis 1:31"}
-      ]
-    },
-    {
-      "id": "garden",
-      "lines": [
-        {"speaker": "Narrator", "text": "And the LORD God planted a garden eastward in Eden; and there he put the man whom he had formed.", "verse": "Genesis 2:8"}
-      ]
-    }
+    {"id": "arrive", "x": 600, "tint": "#1a1a2e", "title": "The Void",
+     "lines": [
+      {"speaker": "Codex", "text": "Year 2060. No true copy of the text survives. You are a scribe, sent to see it with your own eyes and record it faithfully. Watch, listen, and write."},
+      {"speaker": "Scripture", "text": "In the beginning God created the heaven and the earth.", "verse": "Genesis 1:1"}
+     ]},
+    {"id": "day1", "x": 1500, "tint": "#f5e6a8", "title": "Day One: Light",
+     "lines": [
+      {"speaker": "Scripture", "text": "And God said, Let there be light: and there was light.", "verse": "Genesis 1:3"},
+      {"speaker": "Scripture", "text": "And God called the light Day, and the darkness he called Night. And the evening and the morning were the first day.", "verse": "Genesis 1:5"}
+     ]},
+    {"id": "day2_3", "x": 2500, "tint": "#8fc7e8", "title": "Days Two and Three: Sky, Sea, and Land",
+     "lines": [
+      {"speaker": "Scripture", "text": "And God said, Let there be a firmament in the midst of the waters, and let it divide the waters from the waters.", "verse": "Genesis 1:6"},
+      {"speaker": "Scripture", "text": "And God said, Let the waters under the heaven be gathered together unto one place, and let the dry land appear: and it was so.", "verse": "Genesis 1:9"},
+      {"speaker": "Scripture", "text": "And God said, Let the earth bring forth grass, the herb yielding seed, and the fruit tree yielding fruit after his kind, whose seed is in itself, upon the earth: and it was so.", "verse": "Genesis 1:11"}
+     ]},
+    {"id": "day4_5", "x": 3500, "tint": "#9ad0a0", "title": "Days Four and Five: Lights, Birds, and Fish",
+     "lines": [
+      {"speaker": "Scripture", "text": "And God said, Let there be lights in the firmament of the heaven to divide the day from the night; and let them be for signs, and for seasons, and for days, and years:", "verse": "Genesis 1:14"},
+      {"speaker": "Scripture", "text": "And God said, Let the waters bring forth abundantly the moving creature that hath life, and fowl that may fly above the earth in the open firmament of heaven.", "verse": "Genesis 1:20"}
+     ]},
+    {"id": "day6", "x": 4500, "tint": "#b5d99c", "title": "Day Six: Animals and Man",
+     "lines": [
+      {"speaker": "Scripture", "text": "And God said, Let the earth bring forth the living creature after his kind, cattle, and creeping thing, and beast of the earth after his kind: and it was so.", "verse": "Genesis 1:24"},
+      {"speaker": "Scripture", "text": "So God created man in his own image, in the image of God created he him; male and female created he them.", "verse": "Genesis 1:27"},
+      {"speaker": "Scripture", "text": "And God saw every thing that he had made, and, behold, it was very good. And the evening and the morning were the sixth day.", "verse": "Genesis 1:31"}
+     ]},
+    {"id": "day7", "x": 5400, "tint": "#f2d98a", "title": "Day Seven: Rest",
+     "lines": [
+      {"speaker": "Scripture", "text": "And on the seventh day God ended his work which he had made; and he rested on the seventh day from all his work which he had made.", "verse": "Genesis 2:2"}
+     ]},
+    {"id": "adam", "x": 6400, "tint": "#a6d98b", "title": "Adam in Eden",
+     "lines": [
+      {"speaker": "Scripture", "text": "And the LORD God formed man of the dust of the ground, and breathed into his nostrils the breath of life; and man became a living soul.", "verse": "Genesis 2:7"},
+      {"speaker": "Scripture", "text": "And the LORD God planted a garden eastward in Eden; and there he put the man whom he had formed.", "verse": "Genesis 2:8"},
+      {"speaker": "Scripture", "text": "And the LORD God took the man, and put him into the garden of Eden to dress it and to keep it.", "verse": "Genesis 2:15"},
+      {"speaker": "Scripture", "text": "And the LORD God commanded the man, saying, Of every tree of the garden thou mayest freely eat: But of the tree of the knowledge of good and evil, thou shalt not eat of it: for in the day that thou eatest thereof thou shalt surely die.", "verse": "Genesis 2:16-17"}
+     ]},
+    {"id": "naming", "x": 7500, "tint": "#8fd18f", "title": "Adam Names the Animals",
+     "lines": [
+      {"speaker": "Scripture", "text": "...and whatsoever Adam called every living creature, that was the name thereof.", "verse": "Genesis 2:19"},
+      {"speaker": "Scripture", "text": "...but for Adam there was not found an help meet for him.", "verse": "Genesis 2:20"}
+     ]},
+    {"id": "eve", "x": 8500, "tint": "#c9e6a0", "title": "Eve",
+     "lines": [
+      {"speaker": "Scripture", "text": "And Adam said, This is now bone of my bones, and flesh of my flesh: she shall be called Woman, because she was taken out of Man.", "verse": "Genesis 2:23"}
+     ]},
+    {"id": "serpent", "x": 9600, "tint": "#5a7a4a", "title": "The Serpent",
+     "lines": [
+      {"speaker": "Scripture", "text": "Now the serpent was more subtil than any beast of the field which the LORD God had made. And he said unto the woman, Yea, hath God said, Ye shall not eat of every tree of the garden?", "verse": "Genesis 3:1"},
+      {"speaker": "Scripture", "text": "And when the woman saw that the tree was good for food, and that it was pleasant to the eyes, and a tree to be desired to make one wise, she took of the fruit thereof, and did eat, and gave also unto her husband with her; and he did eat.", "verse": "Genesis 3:6"},
+      {"speaker": "Scripture", "text": "And the eyes of them both were opened, and they knew that they were naked; and they sewed fig leaves together, and made themselves aprons.", "verse": "Genesis 3:7"}
+     ]},
+    {"id": "hiding", "x": 10600, "tint": "#6b6a4a", "title": "Hiding from God",
+     "lines": [
+      {"speaker": "Scripture", "text": "And they heard the voice of the LORD God walking in the garden in the cool of the day: and Adam and his wife hid themselves from the presence of the LORD God amongst the trees of the garden.", "verse": "Genesis 3:8"},
+      {"speaker": "Scripture", "text": "And the LORD God called unto Adam, and said unto him, Where art thou?", "verse": "Genesis 3:9"},
+      {"speaker": "Scripture", "text": "And I will put enmity between thee and the woman, and between thy seed and her seed; it shall bruise thy head, and thou shalt bruise his heel.", "verse": "Genesis 3:15"}
+     ]},
+    {"id": "gate", "x": 11600, "tint": "#8a5a3a", "title": "Out of Eden",
+     "lines": [
+      {"speaker": "Scripture", "text": "Unto Adam also and to his wife did the LORD God make coats of skins, and clothed them.", "verse": "Genesis 3:21"},
+      {"speaker": "Scripture", "text": "Therefore the LORD God sent him forth from the garden of Eden, to till the ground from whence he was taken.", "verse": "Genesis 3:23"},
+      {"speaker": "Codex", "text": "You have recorded all of it. Chapter complete."}
+     ]}
+  ],
+  "discoverables": [
+    {"x": 900, "name": "Darkness over the deep", "note": "Scribe's note: Genesis 1:2 says the earth was without form and void, and darkness was upon the face of the deep. Creation begins from nothing but God's word.", "verse": "Genesis 1:2"},
+    {"x": 1900, "name": "Evening and morning", "note": "Scribe's note: each day in Genesis 1 ends 'the evening and the morning', so the Hebrew day begins at evening. You'll see this pattern every day of creation."},
+    {"x": 2900, "name": "Waters gathered", "note": "Scribe's note: God names the dry land Earth and the gathered waters Seas, and sees that it is good (Genesis 1:10).", "verse": "Genesis 1:10"},
+    {"x": 3100, "name": "Seed-bearing plants", "note": "Scribe's note: plants reproduce 'after his kind'. This phrase repeats through the chapter and describes the order God set in creation."},
+    {"x": 3900, "name": "Sun, moon, and stars", "note": "Scribe's note: on the fourth day the lights are set for signs, seasons, days, and years, so they mark time and guide travelers (Genesis 1:14-18).", "verse": "Genesis 1:16"},
+    {"x": 4100, "name": "Fish and birds", "note": "Scribe's note: on the fifth day God blesses the sea creatures and birds, saying 'Be fruitful, and multiply' (Genesis 1:22).", "verse": "Genesis 1:22"},
+    {"x": 4800, "name": "Dominion", "note": "Scribe's note: man and woman are given care over the creatures of land, sea, and air (Genesis 1:28).", "verse": "Genesis 1:28"},
+    {"x": 5700, "name": "A day set apart", "note": "Scribe's note: God blessed and sanctified the seventh day (Genesis 2:3). It becomes the pattern for the Sabbath in later Scripture.", "verse": "Genesis 2:3"},
+    {"x": 6700, "name": "The river of Eden", "note": "Scribe's note: Genesis 2:10 describes a river going out of Eden to water the garden and then dividing into four heads.", "verse": "Genesis 2:10"},
+    {"x": 6900, "name": "Tree of life", "note": "Scribe's note: two trees stand in the midst of the garden: the tree of life and the tree of knowledge of good and evil (Genesis 2:9).", "verse": "Genesis 2:9"},
+    {"x": 7800, "name": "Animals brought to Adam", "note": "Scribe's note: God brings the animals to Adam to see what he would call them. Adam names them all, but finds no companion like himself."},
+    {"x": 8800, "name": "Marriage", "note": "Scribe's note: Genesis 2:24 says a man shall leave his father and mother and cleave unto his wife, and they shall be one flesh.", "verse": "Genesis 2:24"},
+    {"x": 9300, "name": "Garden tools", "note": "Scribe's note: Adam was put in the garden to dress it and to keep it (Genesis 2:15). Work existed before the fall."},
+    {"x": 10100, "name": "Fig leaves", "note": "Scribe's note: after eating, Adam and Eve sew fig leaves into aprons (Genesis 3:7)."},
+    {"x": 11100, "name": "Eve named", "note": "Scribe's note: Adam calls his wife Eve, because she was the mother of all living (Genesis 3:20).", "verse": "Genesis 3:20"},
+    {"x": 11450, "name": "Cherubim and a flaming sword", "note": "Scribe's note: God places cherubim and a flaming sword at the east of Eden to keep the way of the tree of life (Genesis 3:24).", "verse": "Genesis 3:24"}
   ]
 }
