@@ -1,11 +1,11 @@
 # The Last Scribe
 
-A 2.5D Android game (Godot 4) about scribes from the year 2060, when physical books are gone and no digital copy of scripture can be trusted. A scribe travels back to witness each Bible story as the hero's aide and record it faithfully. Stories are played in chronological order, starting with Adam and Eve.
+A top-down 3D Android game (Godot 4) about scribes from the year 2060, when physical books are gone and no digital copy of scripture can be trusted. A scribe travels back to witness each Bible story as the hero's aide and record it faithfully. Stories are played in chronological order, starting with Adam and Eve.
 
 Scripture quotes use the KJV. Target audience: ages 10+. No blood; enemies are driven off or knocked down.
 
 ## Status
-Early scaffold. Chapter 1 (Genesis 1-3) is playable as a 2.5D walk through creation and Eden with placeholder low-poly art: walk with on-screen buttons, tap through the story beats, tap glowing orbs for notes. Verses unlock into a saved journal list.
+Early scaffold. Chapter 1 (Genesis 1-3) is playable as a top-down 3D walk through creation and Eden with placeholder low-poly art: walk with the on-screen joystick, tap through the story beats, tap glowing orbs for notes. Verses unlock into a saved journal list.
 
 ## Run
 Open the folder in Godot 4.3+ and press Play. Android export: install the Android SDK and export templates, then use Project > Export.

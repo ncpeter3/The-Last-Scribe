@@ -1,12 +1,13 @@
 extends Node3D
-## Chapter 1: Genesis 1-3, as a 2.5D side-scrolling world (3D scene, side-on camera).
+## Chapter 1: Genesis 1-3, as a top-down 3D world (angled bird's-eye camera, free movement).
 ## Story beats trigger in order as the scribe reaches each station (the way forward is blocked until
 ## the current beat is told, so the order of Scripture is kept). Between stations the world is open:
-## walk back and forth and tap "Look" on glowing orbs for Scribe's notes and bonus verses.
+## walk freely and tap "Look" on glowing orbs for Scribe's notes and bonus verses.
 ## All text lives in data/beats.json. Distances are in meters.
 
 const DialogueBox := preload("res://core/ui/dialogue_box.gd")
 const Scribe := preload("res://core/player/scribe.gd")
+const Joystick := preload("res://core/ui/joystick.gd")
 const DATA := "res://chapters/01_adam_and_eve/data/beats.json"
 const NOTE_RANGE := 1.4
 
@@ -30,6 +31,7 @@ var _orbs: Array = []
 var _beat_index := 0
 var _world_end := 0.0
 var _look_button: Button
+var _joystick: Control
 var _title_label: Label
 var _journal_panel: PanelContainer
 var _journal_text: RichTextLabel
@@ -54,13 +56,18 @@ func _ready() -> void:
 	_dialogue.finished.connect(_on_dialogue_finished)
 	_apply_mood(Color(_beats[0]["tint"]))
 	_update_limit()
-	_cam.position = Vector3(_scribe.position.x + 2.2, 3.0, 7.5)
+	_cam.position = _cam_target()
+
+func _cam_target() -> Vector3:
+	# Angled bird's-eye view. The scribe sits in the upper half of the screen so the
+	# dialogue box at the bottom never covers them.
+	return _scribe.position + Vector3(1.0, 9.5, 6.5)
 
 func _process(delta: float) -> void:
 	_time += delta
 	# Camera follows the scribe from the side, with a little look-ahead.
-	var target_x := _scribe.position.x + 2.2
-	_cam.position.x = lerpf(_cam.position.x, target_x, minf(1.0, delta * 4.0))
+	_cam.position = _cam.position.lerp(_cam_target(), minf(1.0, delta * 4.0))
+	_scribe.move_vec = _joystick.value
 	for i in _orbs.size():
 		var o: Node3D = _orbs[i]
 		o.position.y = 1.3 + sin(_time * 2.0 + i) * 0.12
@@ -90,7 +97,8 @@ func _start_beat() -> void:
 
 func _freeze() -> void:
 	_scribe.frozen = true
-	_scribe.move_dir = 0.0
+	_scribe.move_vec = Vector2.ZERO
+	_joystick.cancel()
 
 func _on_dialogue_finished() -> void:
 	_scribe.frozen = false
@@ -139,13 +147,14 @@ func _build_environment() -> void:
 	we.environment = _env
 	add_child(we)
 	_sun = DirectionalLight3D.new()
-	_sun.rotation_degrees = Vector3(-42, -30, 0)
+	_sun.rotation_degrees = Vector3(-58, -30, 0)
 	_sun.shadow_enabled = true
+	_sun.shadow_opacity = 0.55
 	_sun.directional_shadow_max_distance = 40.0
 	add_child(_sun)
 	_cam = Camera3D.new()
-	_cam.fov = 52.0
-	_cam.rotation_degrees = Vector3(-19, 0, 0)
+	_cam.fov = 46.0
+	_cam.rotation_degrees = Vector3(-58, 0, 0)
 	_cam.far = 200.0
 	add_child(_cam)
 
@@ -214,7 +223,7 @@ func _build_ground(root: Node3D) -> void:
 	# Ground in 2 m strips whose color blends smoothly between scenes.
 	var x := -20.0
 	while x < _world_end + 30.0:
-		Props.slab(root, x, x + 2.0, _ground_color(x + 1.0), -40.0, 4.0)
+		Props.slab(root, x, x + 2.0, _ground_color(x + 1.0), -40.0, 40.0)
 		x += 2.0
 
 func _build_section(root: Node3D, kind: String, x0: float, x1: float) -> void:
@@ -226,53 +235,57 @@ func _build_section(root: Node3D, kind: String, x0: float, x1: float) -> void:
 	match kind:
 		"void":
 			for i in int(len * 1.2):
-				Props.add(root, Props.sphere(_rng.randf_range(0.04, 0.12), 1.0, 4), Color(1, 1, 0.9), Vector3(_rng.randf_range(x0, x1), _rng.randf_range(2, 25), _rng.randf_range(-40, -8)), 3.0)
+				Props.add(root, Props.sphere(_rng.randf_range(0.05, 0.14), 1.0, 4), Color(1, 1, 0.9), Vector3(_rng.randf_range(x0, x1), _rng.randf_range(0.5, 7), _rng.randf_range(-12, 12)), 3.0)
 		"light":
 			for i in 5:
 				var bx := _rng.randf_range(x0 + 2, x1 - 2)
-				var beam := Props.add(root, Props.box(Vector3(0.7, 40, 0.7)), Color(1, 0.95, 0.6, 0.22), Vector3(bx, 18, _rng.randf_range(-12, -3)), 1.5)
+				var beam := Props.add(root, Props.box(Vector3(0.7, 40, 0.7)), Color(1, 0.95, 0.6, 0.22), Vector3(bx, 18, _side_z(3.0, 12.0)), 1.5)
 				beam.material_override.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-			Props.add(root, Props.sphere(2.5), Color(1, 0.95, 0.7), Vector3((x0 + x1) / 2, 14, -35), 3.0)
+			Props.add(root, Props.sphere(1.6), Color(1, 0.95, 0.7), Vector3((x0 + x1) / 2, 7, -10), 3.0)
 		"sea":
 			for i in int(len * 0.3):
-				Props.rock(root, Vector3(_rng.randf_range(x0, sea_split), 0.0, _rng.randf_range(-14, -3)), _rng.randf_range(0.6, 1.8), Color(0.45, 0.5, 0.52))
+				Props.rock(root, Vector3(_rng.randf_range(x0, sea_split), 0.0, _side_z(3.0, 14.0)), _rng.randf_range(0.6, 1.8), Color(0.45, 0.5, 0.52))
 			_scatter_plants(root, sea_split, x1, 0.9, false)
 		"sky":
 			_scatter_plants(root, x0, x1, 1.0, true)
 			var mid := (x0 + x1) / 2.0
-			Props.add(root, Props.sphere(4.0), Color(1, 0.9, 0.5), Vector3(mid - 8, 24, -70), 3.0)
-			Props.add(root, Props.sphere(3.0), Color(0.9, 0.92, 1.0), Vector3(mid + 10, 20, -70), 1.2)
+			Props.add(root, Props.sphere(1.3), Color(1, 0.9, 0.5), Vector3(mid - 5, 8, -9), 3.0)
+			Props.add(root, Props.sphere(1.0), Color(0.9, 0.92, 1.0), Vector3(mid + 5, 8, -9), 1.2)
 			for i in 6:
-				Props.add(root, Props.sphere(0.1, 1.0, 4), Color(1, 1, 0.9), Vector3(_rng.randf_range(x0, x1), _rng.randf_range(12, 26), -60), 3.0)
+				Props.add(root, Props.sphere(0.1, 1.0, 4), Color(1, 1, 0.9), Vector3(_rng.randf_range(x0, x1), _rng.randf_range(6, 12), _rng.randf_range(-12, -6)), 3.0)
 			for i in 7:
-				Props.bird(root, Vector3(_rng.randf_range(x0, x1), _rng.randf_range(4, 8), _rng.randf_range(-6, -1)), Color(0.9, 0.9, 0.95))
+				Props.bird(root, Vector3(_rng.randf_range(x0, x1), _rng.randf_range(3, 6), _rng.randf_range(-8, 8)), Color(0.9, 0.9, 0.95))
 			Props.slab(root, mid + 2, mid + 9, Color(0.2, 0.5, 0.75), -12, -5, 0.03, 0.1)
 			for i in 6:
 				Props.add(root, Props.sphere(0.25, 0.5, 6), Color(0.95, 0.55, 0.2), Vector3(mid + _rng.randf_range(2.5, 8.5), 0.06, _rng.randf_range(-11.5, -5.5)))
 		"animals":
 			_scatter_plants(root, x0, x1, 1.0, true)
 			for i in int(len * 0.5):
-				Props.animal(root, Vector3(_rng.randf_range(x0, x1), 0, _rng.randf_range(-9, -2)), ANIMAL_COLORS[_rng.randi() % ANIMAL_COLORS.size()], _rng.randf_range(0.8, 1.3), _rng.randf() < 0.2)
+				Props.animal(root, Vector3(_rng.randf_range(x0, x1), 0, _side_z(2.0, 9.0)), ANIMAL_COLORS[_rng.randi() % ANIMAL_COLORS.size()], _rng.randf_range(0.8, 1.3), _rng.randf() < 0.2)
 		"rest":
 			_scatter_plants(root, x0, x1, 1.3, true)
 			for i in int(len * 0.8):
-				Props.flower(root, Vector3(_rng.randf_range(x0, x1), 0, _rng.randf_range(-8, 2)), Color(1, 0.9, 0.5))
+				Props.flower(root, Vector3(_rng.randf_range(x0, x1), 0, _rng.randf_range(-8, 8)), Color(1, 0.9, 0.5))
 		"eden", "naming", "flowers", "tree", "dark":
 			_build_garden(root, kind, x0, x1)
 		"gate":
 			_scatter_plants(root, x0, x1, 0.5, false)
-			for sz in [-3.2, -5.5]:
+			for sz in [-3.2, 3.2]:
 				Props.flame(root, Vector3(x0 + 3.5, 0, sz))
-				Props.cherub(root, Vector3(x0 + 2.2, 0, sz - 0.4))
+				Props.cherub(root, Vector3(x0 + 2.2, 0, sz * 1.3))
 			for i in int(len * 0.15):
-				Props.rock(root, Vector3(_rng.randf_range(x0 + 6, x1), 0, _rng.randf_range(-12, -3)), _rng.randf_range(0.6, 1.5), Color(0.5, 0.4, 0.3))
+				Props.rock(root, Vector3(_rng.randf_range(x0 + 6, x1), 0, _side_z(3.0, 12.0)), _rng.randf_range(0.6, 1.5), Color(0.5, 0.4, 0.3))
+
+func _side_z(near: float, far: float) -> float:
+	# A random depth on either side of the path, never closer than `near`.
+	return _rng.randf_range(near, far) * (1.0 if _rng.randf() < 0.5 else -1.0)
 
 func _scatter_plants(root: Node3D, x0: float, x1: float, density: float, trees: bool) -> void:
 	var n := int((x1 - x0) * density)
 	for i in n:
-		var p := Vector3(_rng.randf_range(x0, x1), 0, _rng.randf_range(-12, -2.5))
+		var p := Vector3(_rng.randf_range(x0, x1), 0, _side_z(2.5, 12.0))
 		if trees and _rng.randf() < 0.3:
-			Props.tree(root, p + Vector3(0, 0, -_rng.randf_range(0, 6)), _rng.randf_range(0.8, 1.5), Color(0.2, 0.55, 0.25))
+			Props.tree(root, p + Vector3(0, 0, signf(p.z) * _rng.randf_range(0, 5)), _rng.randf_range(0.8, 1.5), Color(0.2, 0.55, 0.25))
 		else:
 			Props.grass(root, p, Color(0.25, 0.6, 0.25))
 
@@ -284,16 +297,16 @@ func _build_garden(root: Node3D, kind: String, x0: float, x1: float) -> void:
 		dense = 1.3
 	var len := x1 - x0
 	for i in int(len * dense):
-		var p := Vector3(_rng.randf_range(x0, x1), 0, -_rng.randf_range(2.8, 16.0))
+		var p := Vector3(_rng.randf_range(x0, x1), 0, _side_z(2.8, 16.0))
 		Props.tree(root, p, _rng.randf_range(0.9, 1.7), leaf.lightened(_rng.randf_range(-0.05, 0.1)), Color(0.9, 0.75, 0.2) if _rng.randf() < 0.3 else Color(0, 0, 0, 0))
 	for i in int(len * 1.5):
-		Props.flower(root, Vector3(_rng.randf_range(x0, x1), 0, _rng.randf_range(-3, 2.5)), [Color(1, 0.5, 0.6), Color(1, 0.9, 0.4), Color(0.7, 0.6, 1.0), Color(1, 1, 1)][_rng.randi() % 4])
+		Props.flower(root, Vector3(_rng.randf_range(x0, x1), 0, _rng.randf_range(-6, 6)), [Color(1, 0.5, 0.6), Color(1, 0.9, 0.4), Color(0.7, 0.6, 1.0), Color(1, 1, 1)][_rng.randi() % 4])
 	if kind == "eden":
 		Props.slab(root, x0, x1, Color(0.25, 0.55, 0.8), -9.5, -6.0, 0.03, 0.1)
 		Props.tree(root, Vector3(x1 - 4.0, 0, -3.2), 1.3, Color(0.3, 0.7, 0.3), Color(1.0, 0.85, 0.3))
 	if kind == "naming":
 		for i in int(len * 0.9):
-			Props.animal(root, Vector3(_rng.randf_range(x0, x1), 0, _rng.randf_range(-6, -1.5)), ANIMAL_COLORS[_rng.randi() % ANIMAL_COLORS.size()], _rng.randf_range(0.7, 1.4), _rng.randf() < 0.25)
+			Props.animal(root, Vector3(_rng.randf_range(x0, x1), 0, _side_z(1.6, 6.0)), ANIMAL_COLORS[_rng.randi() % ANIMAL_COLORS.size()], _rng.randf_range(0.7, 1.4), _rng.randf() < 0.25)
 	if kind == "tree":
 		Props.tree(root, Vector3(x1 - 3.0, 0, -2.6), 1.7, Color(0.2, 0.5, 0.25), Color(0.85, 0.15, 0.15))
 		Props.serpent(root, Vector3(x1 - 3.7, 0, -1.8))
@@ -341,18 +354,18 @@ func _build_hud() -> void:
 	_title_label.add_theme_font_size_override("font_size", 34)
 	_title_label.add_theme_color_override("font_outline_color", Color.BLACK)
 	_title_label.add_theme_constant_override("outline_size", 8)
-	_title_label.text = "Walk right to begin"
+	_title_label.text = "Follow the path to the right"
 	layer.add_child(_title_label)
-	for spec in [["<", -1.0, Vector2(40, 560)], [">", 1.0, Vector2(200, 560)]]:
-		var b := Button.new()
-		b.text = spec[0]
-		b.custom_minimum_size = Vector2(140, 120)
-		b.position = spec[2]
-		b.modulate = Color(1, 1, 1, 0.8)
-		b.add_theme_font_size_override("font_size", 48)
-		b.button_down.connect(func(): _scribe.move_dir = spec[1])
-		b.button_up.connect(func(): _scribe.move_dir = 0.0)
-		layer.add_child(b)
+	_joystick = Joystick.new()
+	_joystick.set_anchors_preset(Control.PRESET_FULL_RECT)
+	layer.add_child(_joystick)
+	var hint := Label.new()
+	hint.text = "Drag on the left side to walk"
+	hint.position = Vector2(40, 640)
+	hint.add_theme_font_size_override("font_size", 26)
+	hint.add_theme_color_override("font_outline_color", Color.BLACK)
+	hint.add_theme_constant_override("outline_size", 6)
+	layer.add_child(hint)
 	_look_button = Button.new()
 	_look_button.custom_minimum_size = Vector2(460, 120)
 	_look_button.position = Vector2(780, 560)

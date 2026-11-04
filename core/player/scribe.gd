@@ -1,12 +1,15 @@
 extends Node3D
-## The scribe: a simple low-poly figure that walks along the X axis (2.5D).
-## Keyboard (A/D) or on-screen buttons via move_dir. frozen stops movement during dialogue.
+## The scribe: a simple low-poly figure that walks freely on the ground plane (top-down 3D).
+## Move with WASD or the on-screen joystick (move_vec: x = right, y = down the screen / +Z).
+## frozen stops movement during dialogue; min_x/max_x and z limits keep the scribe in bounds.
 
-@export var speed := 3.6
-var move_dir := 0.0  # set by touch controls
+@export var speed := 4.0
+var move_vec := Vector2.ZERO  # set by the joystick
 var frozen := false
 var min_x := -2.0
 var max_x := 1e9
+var min_z := -14.0
+var max_z := 14.0
 var female := true
 
 var _visual: Node3D
@@ -35,15 +38,20 @@ func _ready() -> void:
 		_legs.append(leg)
 
 func _process(delta: float) -> void:
-	var dir := Input.get_axis("move_left", "move_right")
-	if dir == 0.0:
-		dir = move_dir
+	var v := Vector2(Input.get_axis("move_left", "move_right"), Input.get_axis("move_up", "move_down"))
+	if v == Vector2.ZERO:
+		v = move_vec
 	if frozen:
-		dir = 0.0
-	position.x = clampf(position.x + dir * speed * delta, min_x, max_x)
-	if dir != 0.0:
+		v = Vector2.ZERO
+	if v.length() > 1.0:
+		v = v.normalized()
+	position.x = clampf(position.x + v.x * speed * delta, min_x, max_x)
+	position.z = clampf(position.z + v.y * speed * delta, min_z, max_z)
+	if v.length() > 0.05:
 		_t += delta * 9.0
-		_visual.rotation.y = lerp_angle(_visual.rotation.y, 0.0 if dir > 0.0 else PI, 0.25)
+		# Face the direction of travel (the figure's front is +X).
+		var target := atan2(-v.y, v.x)
+		_visual.rotation.y = lerp_angle(_visual.rotation.y, target, 0.25)
 		_visual.position.y = absf(sin(_t)) * 0.07
 		_legs[0].rotation.z = sin(_t) * 0.6
 		_legs[1].rotation.z = -sin(_t) * 0.6
