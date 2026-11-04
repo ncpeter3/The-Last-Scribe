@@ -151,51 +151,124 @@
    "scenery": "eden",
    "figures": [
     "adam"
-   ]
+   ],
+   "challenge": {
+    "type": "tend_garden",
+    "x1": 78.0,
+    "scenery": "garden",
+    "intro": [
+     {
+      "speaker": "Codex",
+      "text": "God put the man in the garden to dress it and to keep it. A river waters this garden. Help tend it: fill your jar at the river, then water each thirsty plant."
+     }
+    ],
+    "done": [
+     {
+      "speaker": "Scripture",
+      "text": "And a river went out of Eden to water the garden; and from thence it was parted, and became into four heads.",
+      "verse": "Genesis 2:10"
+     },
+     {
+      "speaker": "Scribe",
+      "text": "Scribe's note: work was part of God's good plan from the very start. Adam was given the garden to care for."
+     }
+    ]
+   }
   },
   {
    "id": "naming",
-   "x": 75.0,
+   "x": 89.0,
    "tint": "#8fd18f",
    "title": "Adam Names the Animals",
    "lines": [
     {
      "speaker": "Scripture",
-     "text": "...and whatsoever Adam called every living creature, that was the name thereof.",
-     "verse": "Genesis 2:19"
+     "text": "And the LORD God said, It is not good that the man should be alone; I will make him an help meet for him.",
+     "verse": "Genesis 2:18"
     },
     {
      "speaker": "Scripture",
-     "text": "...but for Adam there was not found an help meet for him.",
-     "verse": "Genesis 2:20"
+     "text": "And out of the ground the LORD God formed every beast of the field, and every fowl of the air; and brought them unto Adam to see what he would call them: and whatsoever Adam called every living creature, that was the name thereof.",
+     "verse": "Genesis 2:19"
     }
    ],
    "scenery": "naming",
    "figures": [
     "adam"
+   ],
+   "challenge": {
+    "type": "name_animals",
+    "x1": 103.0,
+    "scenery": "garden",
+    "intro": [
+     {
+      "speaker": "Codex",
+      "text": "God is bringing each creature to Adam. As Adam names them, write each one in your scroll under the groups Scripture uses. Walk up gently, or they'll startle."
+     }
+    ],
+    "done": []
+   },
+   "after_lines": [
+    {
+     "speaker": "Scripture",
+     "text": "And Adam gave names to all cattle, and to the fowl of the air, and to every beast of the field; but for Adam there was not found an help meet for him.",
+     "verse": "Genesis 2:20"
+    }
    ]
   },
   {
    "id": "eve",
-   "x": 85.0,
+   "x": 114.0,
    "tint": "#c9e6a0",
    "title": "Eve",
    "lines": [
     {
      "speaker": "Scripture",
+     "text": "And the LORD God caused a deep sleep to fall upon Adam, and he slept: and he took one of his ribs, and closed up the flesh instead thereof;",
+     "verse": "Genesis 2:21"
+    },
+    {
+     "speaker": "Scripture",
+     "text": "And the rib, which the LORD God had taken from man, made he a woman, and brought her unto the man.",
+     "verse": "Genesis 2:22"
+    },
+    {
+     "speaker": "Scripture",
      "text": "And Adam said, This is now bone of my bones, and flesh of my flesh: she shall be called Woman, because she was taken out of Man.",
      "verse": "Genesis 2:23"
+    },
+    {
+     "speaker": "Scripture",
+     "text": "And they were both naked, the man and his wife, and were not ashamed.",
+     "verse": "Genesis 2:25"
     }
    ],
    "scenery": "flowers",
    "figures": [
     "adam",
     "eve"
-   ]
+   ],
+   "challenge": {
+    "type": "gather_fruit",
+    "x1": 128.0,
+    "scenery": "garden",
+    "intro": [
+     {
+      "speaker": "Codex",
+      "text": "Remember God's words: of every tree of the garden thou mayest freely eat. Gather fruit from the trees that sparkle. The one tree God forbade stands just ahead, and its fruit is not for gathering."
+     }
+    ],
+    "done": [
+     {
+      "speaker": "Scribe",
+      "text": "Scribe's note: so much was given freely. Only one tree was held back, and God told them why (Genesis 2:17)."
+     }
+    ]
+   }
   },
   {
    "id": "serpent",
-   "x": 96.0,
+   "x": 139.0,
    "tint": "#5a7a4a",
    "title": "The Serpent",
    "lines": [
@@ -224,7 +297,7 @@
   },
   {
    "id": "hiding",
-   "x": 106.0,
+   "x": 144.0,
    "tint": "#6b6a4a",
    "title": "Hiding from God",
    "lines": [
@@ -237,22 +310,58 @@
      "speaker": "Scripture",
      "text": "And the LORD God called unto Adam, and said unto him, Where art thou?",
      "verse": "Genesis 3:9"
+    }
+   ],
+   "scenery": "dark",
+   "figures": [],
+   "challenge": {
+    "type": "find_hiding",
+    "x1": 160.0,
+    "scenery": "dark",
+    "intro": [
+     {
+      "speaker": "Codex",
+      "text": "They are hiding somewhere among the trees. Look for the rustling leaves to see where they are."
+     }
+    ],
+    "done": []
+   },
+   "after_lines": [
+    {
+     "speaker": "Scripture",
+     "text": "And he said, I heard thy voice in the garden, and I was afraid, because I was naked; and I hid myself.",
+     "verse": "Genesis 3:10"
+    },
+    {
+     "speaker": "Scripture",
+     "text": "And he said, Who told thee that thou wast naked? Hast thou eaten of the tree, whereof I commanded thee that thou shouldest not eat?",
+     "verse": "Genesis 3:11"
+    },
+    {
+     "speaker": "Scripture",
+     "text": "And the man said, The woman whom thou gavest to be with me, she gave me of the tree, and I did eat.",
+     "verse": "Genesis 3:12"
+    },
+    {
+     "speaker": "Scripture",
+     "text": "And the LORD God said unto the woman, What is this that thou hast done? And the woman said, The serpent beguiled me, and I did eat.",
+     "verse": "Genesis 3:13"
     },
     {
      "speaker": "Scripture",
      "text": "And I will put enmity between thee and the woman, and between thy seed and her seed; it shall bruise thy head, and thou shalt bruise his heel.",
      "verse": "Genesis 3:15"
+    },
+    {
+     "speaker": "Scripture",
+     "text": "In the sweat of thy face shalt thou eat bread, till thou return unto the ground; for out of it wast thou taken: for dust thou art, and unto dust shalt thou return.",
+     "verse": "Genesis 3:19"
     }
-   ],
-   "scenery": "dark",
-   "figures": [
-    "adam",
-    "eve"
    ]
   },
   {
    "id": "gate",
-   "x": 116.0,
+   "x": 170.0,
    "tint": "#8a5a3a",
    "title": "Out of Eden",
    "lines": [
@@ -265,10 +374,6 @@
      "speaker": "Scripture",
      "text": "Therefore the LORD God sent him forth from the garden of Eden, to till the ground from whence he was taken.",
      "verse": "Genesis 3:23"
-    },
-    {
-     "speaker": "Codex",
-     "text": "You have recorded all of it. Chapter complete."
     }
    ],
    "scenery": "gate",
@@ -276,6 +381,79 @@
     "adam",
     "eve",
     "cherub"
+   ],
+   "challenge": {
+    "type": "scroll_quiz",
+    "intro": [
+     {
+      "speaker": "Codex",
+      "text": "Before you return to 2060, check your scroll. Fill in the missing words from what you recorded."
+     }
+    ],
+    "done": [],
+    "questions": [
+     {
+      "text": "And God said, Let there be ____: and there was ____.",
+      "options": [
+       "water ... water",
+       "light ... light",
+       "a garden ... a garden"
+      ],
+      "answer": 1,
+      "verse": "Genesis 1:3",
+      "full": "And God said, Let there be light: and there was light."
+     },
+     {
+      "text": "And on the ____ day God ended his work which he had made; and he rested.",
+      "options": [
+       "sixth",
+       "first",
+       "seventh"
+      ],
+      "answer": 2,
+      "verse": "Genesis 2:2",
+      "full": "And on the seventh day God ended his work which he had made; and he rested on the seventh day from all his work which he had made."
+     },
+     {
+      "text": "And the LORD God took the man, and put him into the garden of Eden to ____ it and to keep it.",
+      "options": [
+       "dress",
+       "leave",
+       "name"
+      ],
+      "answer": 0,
+      "verse": "Genesis 2:15",
+      "full": "And the LORD God took the man, and put him into the garden of Eden to dress it and to keep it."
+     },
+     {
+      "text": "And Adam gave names to all cattle, and to the fowl of the air, and to every ____ of the field.",
+      "options": [
+       "flower",
+       "beast",
+       "tree"
+      ],
+      "answer": 1,
+      "verse": "Genesis 2:20",
+      "full": "And Adam gave names to all cattle, and to the fowl of the air, and to every beast of the field; but for Adam there was not found an help meet for him."
+     },
+     {
+      "text": "And the LORD God called unto Adam, and said unto him, ____",
+      "options": [
+       "Who art thou?",
+       "What hast thou done?",
+       "Where art thou?"
+      ],
+      "answer": 2,
+      "verse": "Genesis 3:9",
+      "full": "And the LORD God called unto Adam, and said unto him, Where art thou?"
+     }
+    ]
+   },
+   "after_lines": [
+    {
+     "speaker": "Codex",
+     "text": "You have recorded all of it, word for word. Chapter complete."
+    }
    ]
   }
  ],
@@ -327,46 +505,52 @@
    "verse": "Genesis 2:3"
   },
   {
-   "x": 67.0,
-   "name": "The river of Eden",
-   "note": "Scribe's note: Genesis 2:10 describes a river going out of Eden to water the garden and then dividing into four heads.",
-   "verse": "Genesis 2:10"
-  },
-  {
-   "x": 69.0,
+   "x": 60.0,
    "name": "Tree of life",
    "note": "Scribe's note: two trees stand in the midst of the garden: the tree of life and the tree of knowledge of good and evil (Genesis 2:9).",
    "verse": "Genesis 2:9"
   },
   {
-   "x": 78.0,
+   "x": 66.0,
+   "name": "The river of Eden",
+   "note": "Scribe's note: Genesis 2:10 describes a river going out of Eden to water the garden and then dividing into four heads.",
+   "verse": "Genesis 2:10"
+  },
+  {
+   "x": 81.0,
+   "name": "Garden tools",
+   "note": "Scribe's note: Adam was put in the garden to dress it and to keep it (Genesis 2:15). Work existed before the fall."
+  },
+  {
+   "x": 105.0,
    "name": "Animals brought to Adam",
    "note": "Scribe's note: God brings the animals to Adam to see what he would call them. Adam names them all, but finds no companion like himself."
   },
   {
-   "x": 88.0,
+   "x": 116.5,
    "name": "Marriage",
    "note": "Scribe's note: Genesis 2:24 says a man shall leave his father and mother and cleave unto his wife, and they shall be one flesh.",
    "verse": "Genesis 2:24"
   },
   {
-   "x": 93.0,
-   "name": "Garden tools",
-   "note": "Scribe's note: Adam was put in the garden to dress it and to keep it (Genesis 2:15). Work existed before the fall."
+   "x": 134.0,
+   "name": "The forbidden tree",
+   "note": "Scribe's note: this is the tree of the knowledge of good and evil. Of every other tree they may freely eat, but of this one God said, thou shalt not eat of it (Genesis 2:17).",
+   "verse": "Genesis 2:17"
   },
   {
-   "x": 101.0,
+   "x": 141.0,
    "name": "Fig leaves",
    "note": "Scribe's note: after eating, Adam and Eve sew fig leaves into aprons (Genesis 3:7)."
   },
   {
-   "x": 111.0,
+   "x": 162.0,
    "name": "Eve named",
    "note": "Scribe's note: Adam calls his wife Eve, because she was the mother of all living (Genesis 3:20).",
    "verse": "Genesis 3:20"
   },
   {
-   "x": 114.5,
+   "x": 168.0,
    "name": "Cherubim and a flaming sword",
    "note": "Scribe's note: God places cherubim and a flaming sword at the east of Eden to keep the way of the tree of life (Genesis 3:24).",
    "verse": "Genesis 3:24"
