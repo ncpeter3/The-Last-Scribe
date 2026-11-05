@@ -1,13 +1,16 @@
 class_name CharacterFactory
 extends RefCounted
 ## Builds a character by id, in the game's low-poly style (core/lowpoly).
-## Ids: scribe_female, scribe_male, adam, eve, adam_skins, eve_skins, cherub, serpent, mom, dad, grandma, sibling.
+## Ids: scribe_female, scribe_male, adam, eve, adam_skins, eve_skins, cherub, serpent, cain, cain_marked,
+## abel, cain_young, abel_young, seth, mom, dad, grandma, sibling.
 ## Every character's front faces +X (like the rest of the game), so turning the node turns the character.
 
 const LOOKS := {
 	"scribe_female": LowPolyPerson.SCRIBE_F, "scribe_male": LowPolyPerson.SCRIBE_M,
 	"adam": LowPolyPerson.ADAM, "eve": LowPolyPerson.EVE, "adam_skins": LowPolyPerson.ADAM_SKINS,
 	"eve_skins": LowPolyPerson.EVE_SKINS, "cherub": LowPolyPerson.CHERUB,
+	"cain": LowPolyPerson.CAIN, "cain_marked": LowPolyPerson.CAIN_MARKED, "abel": LowPolyPerson.ABEL,
+	"cain_young": LowPolyPerson.CAIN_YOUNG, "abel_young": LowPolyPerson.ABEL_YOUNG, "seth": LowPolyPerson.SETH,
 	"mom": LowPolyPerson.MOM, "dad": LowPolyPerson.DAD, "grandma": LowPolyPerson.GRANDMA, "sibling": LowPolyPerson.SAM,
 }
 

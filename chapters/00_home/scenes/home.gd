@@ -4,7 +4,8 @@ extends Node3D
 ## "How to play" dialogue, then two tasks shown top-left by the task tracker: pack the satchel
 ## (three items to pick up around the house) and say goodbye to Mom, Dad, Sam and Lily (each talk asks
 ## the scribe a question). The time machine in the garage only works once both are done; then it
-## starts Chapter 1. Bumping into family makes them say something; bumping Biscuit makes him hop away.
+## starts the next chapter not yet finished (Chapter 1 the first time).
+## Bumping into family makes them say something; bumping Biscuit makes him hop away.
 ## All text lives in data/home.json. A dialogue line may have "pose" (talk, wave, cheer, hug).
 
 signal departing
@@ -15,7 +16,6 @@ const Scribe := preload("res://core/player/scribe.gd")
 const Joystick := preload("res://core/ui/joystick.gd")
 const HomeWorld := preload("res://chapters/00_home/scenes/home_world.gd")
 const DATA := "res://chapters/00_home/data/home.json"
-const CHAPTER_1 := "res://chapters/01_adam_and_eve/scenes/chapter.tscn"
 const TALK_RANGE := 1.9
 const LOOK_RANGE := 1.5
 const MACHINE_RANGE := 2.6
@@ -402,7 +402,7 @@ func _launch() -> void:
 	tw.tween_callback(func():
 		departing.emit()
 		if auto_change_scene:
-			get_tree().change_scene_to_file(CHAPTER_1))
+			get_tree().change_scene_to_file(GameState.next_chapter_scene()))
 
 # ---------- setup ----------
 

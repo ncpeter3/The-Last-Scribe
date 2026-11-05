@@ -457,7 +457,8 @@ static func butterfly(parent: Node3D, pos: Vector3, c: Color) -> Node3D:
 	parent.add_child(n)
 	return n
 
-## A glowing gem or nugget for things to find: "gold", "onyx", "bdellium", "seed", "herb", "feather".
+## Something small to find: "gold", "onyx", "bdellium", "seed", "herb", "flower", "thistle", "wool",
+## "stick", "stone", "grain".
 static func treasure(parent: Node3D, kind: String, pos: Vector3) -> Node3D:
 	var n := Node3D.new()
 	n.position = pos
@@ -486,6 +487,31 @@ static func treasure(parent: Node3D, kind: String, pos: Vector3) -> Node3D:
 				var a := TAU * k / 6.0
 				b.box(Vector3(cos(a) * 0.08, 0.4, sin(a) * 0.08), Vector3(0.1, 0.03, 0.1), L.ROSE)
 			b.ball(Vector3(0, 0.42, 0), 0.05, L.SUN, 0)
+		"thistle":  # "Thorns also and thistles shall it bring forth to thee" (Genesis 3:18)
+			for k in 4:
+				var a := TAU * k / 4.0 + 0.3
+				b.with(Transform3D(Basis(Vector3(cos(a), 0, sin(a)).cross(Vector3.UP).normalized(), 0.35), Vector3.ZERO), func():
+					b.prism(Vector3.ZERO, 0.025, 0.015, 0.45, 4, Color("6f8a52"))
+					b.ball(Vector3(0, 0.5, 0), 0.07, Color("8e6fb8"), 0, Vector3(1, 1.2, 1)))
+			for k in 6:
+				var a := TAU * k / 6.0
+				b.prism(Vector3(cos(a) * 0.12, 0, sin(a) * 0.12), 0.04, 0.0, 0.22, 3, Color("5d7a45"))
+		"wool":  # a tuft of fleece caught on a thorn bush
+			b.ball(Vector3(0, 0.12, 0), 0.13, L.CLOUD, 0, Vector3(1.3, 0.8, 1.0))
+			b.ball(Vector3(0.1, 0.18, 0.04), 0.09, L.shade(L.CLOUD, 0.05), 0)
+		"stick":
+			b.with(Transform3D(Basis(Vector3.FORWARD, PI / 2.0 - 0.15), Vector3(0, 0.06, 0)), func():
+				b.prism(Vector3(0, -0.35, 0), 0.04, 0.035, 0.7, 5, L.WOOD))
+			b.prism(Vector3(0.12, 0.02, 0.08), 0.03, 0.025, 0.5, 5, L.WOOD_DARK)
+		"stone":
+			b.ball(Vector3(0, 0.1, 0), 0.15, L.STONE, 0, Vector3(1.2, 0.75, 1.0))
+		"grain":  # a sheaf of ripe grain
+			for k in 7:
+				var a := TAU * k / 7.0
+				b.with(Transform3D(Basis(Vector3(cos(a), 0, sin(a)).cross(Vector3.UP).normalized(), 0.12), Vector3.ZERO), func():
+					b.prism(Vector3.ZERO, 0.015, 0.012, 0.55, 3, Color("c9a646"))
+					b.ball(Vector3(0, 0.6, 0), 0.04, Color("e3c25a"), 0, Vector3(1, 2.2, 1)))
+			b.box(Vector3(0, 0.2, 0), Vector3(0.12, 0.05, 0.12), L.WOOD_DARK)
 		_:
 			b.ball(Vector3(0, 0.15, 0), 0.15, L.glow(L.SUN, 0.5), 0)
 	n.add_child(b.instance(false))
@@ -515,5 +541,37 @@ static func quest_marker(parent: Node3D, pos: Vector3) -> Node3D:
 	l.light_energy = 1.0
 	l.omni_range = 3.5
 	l.position = Vector3(0, 1.4, 0)
+	n.add_child(l)
+	return n
+
+## The scribes' time gate: a glowing teal ring standing on a stone base, with light swirling inside.
+## It faces the camera (the ring stands across the path, open toward +Z).
+static func time_gate(parent: Node3D, pos: Vector3) -> Node3D:
+	var n := Node3D.new()
+	n.name = "TimeGate"
+	n.position = pos
+	parent.add_child(n)
+	var b := L.new()
+	b.prism(Vector3.ZERO, 1.25, 1.1, 0.18, 10, L.STONE, L.shade(L.STONE, 0.1))
+	b.ring(Vector3(0, 0.18, 0), 0.7, 1.0, 16, L.glow(L.TEAL, 0.8), 0.02)
+	b.hoop(Vector3(0, 1.45, 0), 1.15, 0.12, 20, L.glow(L.TEAL, 0.7), 5)
+	b.hoop(Vector3(0, 1.45, 0), 1.3, 0.05, 20, L.glow(L.GOLD, 0.5), 4)
+	n.add_child(b.instance(false))
+	# The light inside: a see-through disc that slowly pulses and turns.
+	var disc := add(n, cyl(1.05, 1.05, 0.04, 16), Color(0.6, 1.0, 0.95, 0.45), Vector3(0, 1.45, 0), 2.5)
+	disc.rotation.x = PI / 2.0
+	var tw := disc.create_tween().set_loops()
+	tw.tween_property(disc, "scale", Vector3(0.9, 1, 0.9), 0.9)
+	tw.tween_property(disc, "scale", Vector3.ONE, 0.9)
+	for k in 6:
+		var a := TAU * k / 6.0
+		var mote := add(n, sphere(0.06, 1.0, 5), Color(0.8, 1.0, 1.0), Vector3(cos(a) * 0.8, 1.45 + sin(a) * 0.8, 0.05), 3.0)
+		var mt := mote.create_tween().set_loops()
+		mt.tween_method(func(t: float): mote.position = Vector3(cos(a + t) * 0.8, 1.45 + sin(a + t) * 0.8, 0.05), 0.0, TAU, 3.0)
+	var l := OmniLight3D.new()
+	l.light_color = L.TEAL
+	l.light_energy = 2.0
+	l.omni_range = 6.0
+	l.position = Vector3(0, 1.5, 0.8)
 	n.add_child(l)
 	return n

@@ -1,0 +1,1242 @@
+{
+ "id": "02_cain_and_abel",
+ "title": "Cain and Abel",
+ "scripture": "Genesis 4 (KJV)",
+ "start_hint": "Follow the path east",
+ "end_scenery": "dawn",
+ "beats": [
+  {
+   "id": "arrive",
+   "x": 6.0,
+   "tint": "#c9b48a",
+   "title": "East of Eden",
+   "scenery": "outland",
+   "lines": [
+    {
+     "speaker": "Codex",
+     "text": "Time jump complete. You've arrived some years after Adam and Eve left the garden."
+    },
+    {
+     "speaker": "Scribe",
+     "text": "Behind me I can still see the flaming sword at the east of the garden. The way back to the tree of life is kept."
+    },
+    {
+     "speaker": "Codex",
+     "text": "Out here the ground grows thorns and thistles, just as the LORD said. Adam and Eve live just ahead. Follow the path."
+    }
+   ]
+  },
+  {
+   "id": "cain_born",
+   "x": 16.0,
+   "tint": "#e8c890",
+   "title": "Two Sons",
+   "scenery": "homestead",
+   "figures": [
+    "adam",
+    "eve",
+    "cain",
+    "abel"
+   ],
+   "lines": [
+    {
+     "speaker": "Scribe",
+     "text": "A tent of skins and a cooking fire. This is Adam and Eve's home now."
+    },
+    {
+     "speaker": "Scripture",
+     "text": "And Adam knew Eve his wife; and she conceived, and bare Cain, and said, I have gotten a man from the LORD.",
+     "verse": "Genesis 4:1"
+    },
+    {
+     "speaker": "Scripture",
+     "text": "And she again bare his brother Abel.",
+     "verse": "Genesis 4:2",
+     "cue": "abel_born"
+    },
+    {
+     "speaker": "Eve",
+     "text": "Two sons! The LORD has been good to us, even out here."
+    },
+    {
+     "speaker": "Scribe",
+     "text": "Scribe's note: the first children ever born. I'll write their names carefully: Cain, the older, and Abel, his brother."
+    }
+   ]
+  },
+  {
+   "id": "abel",
+   "x": 28.0,
+   "tint": "#b5d99c",
+   "title": "The Keeper of Sheep",
+   "scenery": "pasture",
+   "figures": [
+    "abel"
+   ],
+   "lines": [
+    {
+     "speaker": "Codex",
+     "text": "Years pass. The boys have grown into men."
+    },
+    {
+     "speaker": "Scripture",
+     "text": "And Abel was a keeper of sheep, but Cain was a tiller of the ground.",
+     "verse": "Genesis 4:2"
+    },
+    {
+     "speaker": "Abel",
+     "text": "Peace, scribe! The sheep have scattered across the hills. Wilt thou help me bring them into the fold before evening?"
+    }
+   ],
+   "challenge": {
+    "type": "herd_sheep",
+    "x1": 44.0,
+    "scenery": "pasture",
+    "fold": [
+     8.0,
+     -5.5
+    ],
+    "sheep": [
+     [
+      1.5,
+      5.0
+     ],
+     [
+      4.0,
+      7.5
+     ],
+     [
+      10.5,
+      4.5
+     ],
+     [
+      13.0,
+      -8.0
+     ],
+     [
+      14.5,
+      3.0
+     ]
+    ],
+    "intro": [
+     {
+      "speaker": "Codex",
+      "text": "Walk up to each sheep and call it. It will follow you. Lead the sheep in through the gap in the stone fold."
+     }
+    ],
+    "done": [
+     {
+      "speaker": "Abel",
+      "text": "Every one of them, safe in the fold. Thank thee, friend."
+     },
+     {
+      "speaker": "Scribe",
+      "text": "Scribe's note: a keeper of sheep watches over every one of his flock, day and night. Abel knows each of his sheep."
+     }
+    ]
+   }
+  },
+  {
+   "id": "cain",
+   "x": 54.0,
+   "tint": "#e0cf8a",
+   "title": "The Tiller of the Ground",
+   "scenery": "farm",
+   "figures": [
+    "cain"
+   ],
+   "lines": [
+    {
+     "speaker": "Scribe",
+     "text": "Rows of grain, gourds and melons. This must be Cain's field."
+    },
+    {
+     "speaker": "Cain",
+     "text": "Scribe! The grain is ripe and I have many hands' worth of work. Help me bring in the harvest."
+    },
+    {
+     "speaker": "Codex",
+     "text": "Remember what the LORD told Adam: the ground would be hard to work, and bread would come by the sweat of his face. Cain works hard for every crop."
+    }
+   ],
+   "challenge": {
+    "type": "harvest",
+    "x1": 68.0,
+    "scenery": "farm",
+    "crops": [
+     {
+      "at": [
+       2.0,
+       -3.6
+      ],
+      "kind": "wheat"
+     },
+     {
+      "at": [
+       4.0,
+       4.0
+      ],
+      "kind": "gourd"
+     },
+     {
+      "at": [
+       6.5,
+       -5.2
+      ],
+      "kind": "wheat"
+     },
+     {
+      "at": [
+       8.5,
+       3.4
+      ],
+      "kind": "melon"
+     },
+     {
+      "at": [
+       11.0,
+       -3.4
+      ],
+      "kind": "wheat"
+     },
+     {
+      "at": [
+       12.5,
+       5.2
+      ],
+      "kind": "gourd"
+     }
+    ],
+    "intro": [
+     {
+      "speaker": "Codex",
+      "text": "Gather the ripe crops that sparkle, then bring the harvest to Cain."
+     }
+    ],
+    "bring": [
+     {
+      "speaker": "Codex",
+      "text": "That's all of it. Now bring the harvest to Cain."
+     }
+    ],
+    "done": [
+     {
+      "speaker": "Cain",
+      "text": "A good harvest. The fruit of the ground, from my own hands."
+     },
+     {
+      "speaker": "Scribe",
+      "text": "Scribe's note: tilling the ground was good work, the same work God gave Adam. Both brothers worked hard."
+     }
+    ]
+   }
+  },
+  {
+   "id": "offerings",
+   "x": 78.0,
+   "tint": "#f2d98a",
+   "title": "Two Offerings",
+   "scenery": "offering",
+   "figures": [
+    "cain",
+    "abel"
+   ],
+   "lines": [
+    {
+     "speaker": "Scripture",
+     "text": "And in process of time it came to pass, that Cain brought of the fruit of the ground an offering unto the LORD.",
+     "verse": "Genesis 4:3"
+    },
+    {
+     "speaker": "Scripture",
+     "text": "And Abel, he also brought of the firstlings of his flock and of the fat thereof. And the LORD had respect unto Abel and to his offering:",
+     "verse": "Genesis 4:4",
+     "cue": "respect"
+    },
+    {
+     "speaker": "Scripture",
+     "text": "But unto Cain and to his offering he had not respect. And Cain was very wroth, and his countenance fell.",
+     "verse": "Genesis 4:5",
+     "cue": "wroth"
+    },
+    {
+     "speaker": "Scribe",
+     "text": "Look at Cain's face. He's angry, and he won't even look at his brother."
+    }
+   ]
+  },
+  {
+   "id": "warning",
+   "x": 88.0,
+   "tint": "#a08a6a",
+   "title": "Sin Lieth at the Door",
+   "scenery": "hill",
+   "figures": [
+    "cain"
+   ],
+   "lines": [
+    {
+     "speaker": "Scripture",
+     "text": "And the LORD said unto Cain, Why art thou wroth? and why is thy countenance fallen?",
+     "verse": "Genesis 4:6"
+    },
+    {
+     "speaker": "Scripture",
+     "text": "If thou doest well, shalt thou not be accepted? and if thou doest not well, sin lieth at the door. And unto thee shall be his desire, and thou shalt rule over him.",
+     "verse": "Genesis 4:7"
+    },
+    {
+     "speaker": "Scribe",
+     "text": "Scribe's note: the LORD warned Cain before anything happened. Cain could still choose to do well. Sin was waiting like something at the door, but Cain could rule over it."
+    }
+   ]
+  },
+  {
+   "id": "field",
+   "x": 98.0,
+   "tint": "#7a6a50",
+   "title": "In the Field",
+   "scenery": "field",
+   "figures": [
+    "cain",
+    "abel"
+   ],
+   "lines": [
+    {
+     "speaker": "Scribe",
+     "text": "Cain is talking with Abel. They're walking out into the field together, away from everyone."
+    },
+    {
+     "speaker": "Scripture",
+     "text": "And Cain talked with Abel his brother: and it came to pass, when they were in the field, that Cain rose up against Abel his brother, and slew him.",
+     "verse": "Genesis 4:8",
+     "cue": "field"
+    },
+    {
+     "speaker": "Scribe",
+     "text": "Abel is gone. I couldn't change it. Scripture tells what really happened, and a true record has to keep the hard parts too.",
+     "cue": "abel_gone"
+    },
+    {
+     "speaker": "Codex",
+     "text": "Cain did not listen to the LORD's warning. The first death in Scripture came from anger between brothers."
+    }
+   ]
+  },
+  {
+   "id": "question",
+   "x": 108.0,
+   "tint": "#4a4058",
+   "title": "Where Is Abel?",
+   "scenery": "dusk",
+   "figures": [
+    "cain"
+   ],
+   "lines": [
+    {
+     "speaker": "Scripture",
+     "text": "And the LORD said unto Cain, Where is Abel thy brother? And he said, I know not: Am I my brother's keeper?",
+     "verse": "Genesis 4:9"
+    },
+    {
+     "speaker": "Scripture",
+     "text": "And he said, What hast thou done? the voice of thy brother's blood crieth unto me from the ground.",
+     "verse": "Genesis 4:10"
+    },
+    {
+     "speaker": "Scribe",
+     "text": "Scribe's note: the LORD asked Cain a question, just like He asked Adam, \"Where art thou?\" He gave Cain the chance to tell the truth. Cain didn't."
+    }
+   ]
+  },
+  {
+   "id": "mark",
+   "x": 118.0,
+   "tint": "#6a5844",
+   "title": "The Mark of Cain",
+   "scenery": "barren",
+   "figures": [
+    "cain"
+   ],
+   "lines": [
+    {
+     "speaker": "Scripture",
+     "text": "And now art thou cursed from the earth, which hath opened her mouth to receive thy brother's blood from thy hand;",
+     "verse": "Genesis 4:11"
+    },
+    {
+     "speaker": "Scripture",
+     "text": "When thou tillest the ground, it shall not henceforth yield unto thee her strength; a fugitive and a vagabond shalt thou be in the earth.",
+     "verse": "Genesis 4:12"
+    },
+    {
+     "speaker": "Scripture",
+     "text": "And Cain said unto the LORD, My punishment is greater than I can bear.",
+     "verse": "Genesis 4:13"
+    },
+    {
+     "speaker": "Scripture",
+     "text": "Behold, thou hast driven me out this day from the face of the earth; and from thy face shall I be hid; and I shall be a fugitive and a vagabond in the earth; and it shall come to pass, that every one that findeth me shall slay me.",
+     "verse": "Genesis 4:14"
+    },
+    {
+     "speaker": "Scripture",
+     "text": "And the LORD said unto him, Therefore whosoever slayeth Cain, vengeance shall be taken on him sevenfold. And the LORD set a mark upon Cain, lest any finding him should kill him.",
+     "verse": "Genesis 4:15",
+     "cue": "mark"
+    },
+    {
+     "speaker": "Scribe",
+     "text": "Scribe's note: even while He judged Cain, the LORD protected him. The mark was a sign of mercy, so no one would harm him."
+    }
+   ]
+  },
+  {
+   "id": "nod",
+   "x": 128.0,
+   "tint": "#6a5a6a",
+   "title": "The Land of Nod",
+   "scenery": "nod",
+   "figures": [
+    "cain"
+   ],
+   "lines": [
+    {
+     "speaker": "Scripture",
+     "text": "And Cain went out from the presence of the LORD, and dwelt in the land of Nod, on the east of Eden.",
+     "verse": "Genesis 4:16",
+     "cue": "cain_leaves"
+    },
+    {
+     "speaker": "Scribe",
+     "text": "There he goes, walking east. The ground he worked so hard won't yield its strength for him anymore."
+    }
+   ]
+  },
+  {
+   "id": "city",
+   "x": 138.0,
+   "tint": "#9a7a5a",
+   "title": "Cain's Family",
+   "scenery": "city",
+   "lines": [
+    {
+     "speaker": "Scripture",
+     "text": "And Cain knew his wife; and she conceived, and bare Enoch: and he builded a city, and called the name of the city, after the name of his son, Enoch.",
+     "verse": "Genesis 4:17"
+    },
+    {
+     "speaker": "Scripture",
+     "text": "And unto Enoch was born Irad: and Irad begat Mehujael: and Mehujael begat Methusael: and Methusael begat Lamech.",
+     "verse": "Genesis 4:18"
+    },
+    {
+     "speaker": "Scripture",
+     "text": "And Lamech took unto him two wives: the name of the one was Adah, and the name of the other Zillah.",
+     "verse": "Genesis 4:19"
+    },
+    {
+     "speaker": "Scripture",
+     "text": "And Adah bare Jabal: he was the father of such as dwell in tents, and of such as have cattle.",
+     "verse": "Genesis 4:20"
+    },
+    {
+     "speaker": "Scripture",
+     "text": "And his brother's name was Jubal: he was the father of all such as handle the harp and organ.",
+     "verse": "Genesis 4:21"
+    },
+    {
+     "speaker": "Scripture",
+     "text": "And Zillah, she also bare Tubalcain, an instructer of every artificer in brass and iron: and the sister of Tubalcain was Naamah.",
+     "verse": "Genesis 4:22"
+    },
+    {
+     "speaker": "Codex",
+     "text": "Verses 23 and 24 record Lamech boasting to his wives that he had killed a man, and that he would be avenged \"seventy and sevenfold\". Cain's family grew clever with tents, music and metal, but not kinder."
+    },
+    {
+     "speaker": "Scribe",
+     "text": "Tents, a harp and a forge. The first city, the first musicians and the first metalworkers, all in my scroll now."
+    }
+   ]
+  },
+  {
+   "id": "seth",
+   "x": 150.0,
+   "tint": "#f0d8a8",
+   "title": "Another Seed",
+   "scenery": "dawn",
+   "figures": [
+    "adam",
+    "eve",
+    "seth"
+   ],
+   "lines": [
+    {
+     "speaker": "Scripture",
+     "text": "And Adam knew his wife again; and she bare a son, and called his name Seth: For God, said she, hath appointed me another seed instead of Abel, whom Cain slew.",
+     "verse": "Genesis 4:25"
+    },
+    {
+     "speaker": "Scripture",
+     "text": "And to Seth, to him also there was born a son; and he called his name Enos: then began men to call upon the name of the LORD.",
+     "verse": "Genesis 4:26"
+    },
+    {
+     "speaker": "Eve",
+     "text": "His name is Seth. We still grieve for Abel, but the LORD has not forgotten us."
+    },
+    {
+     "speaker": "Scribe",
+     "text": "Scribe's note: after so much sadness, the chapter ends with hope. People began to call upon the name of the LORD."
+    }
+   ],
+   "challenge": {
+    "type": "scroll_quiz",
+    "intro": [
+     {
+      "speaker": "Codex",
+      "text": "Before you travel on, check your scroll. Fill in the missing words from what you recorded."
+     }
+    ],
+    "done": [],
+    "questions": [
+     {
+      "text": "And Abel was a ____ of sheep, but Cain was a tiller of the ground.",
+      "options": [
+       "keeper",
+       "buyer",
+       "shearer"
+      ],
+      "answer": 0,
+      "verse": "Genesis 4:2",
+      "full": "And she again bare his brother Abel. And Abel was a keeper of sheep, but Cain was a tiller of the ground."
+     },
+     {
+      "text": "And the LORD had ____ unto Abel and to his offering.",
+      "options": [
+       "anger",
+       "respect",
+       "pity"
+      ],
+      "answer": 1,
+      "verse": "Genesis 4:4",
+      "full": "And Abel, he also brought of the firstlings of his flock and of the fat thereof. And the LORD had respect unto Abel and to his offering:"
+     },
+     {
+      "text": "If thou doest well, shalt thou not be ____?",
+      "options": [
+       "forgotten",
+       "punished",
+       "accepted"
+      ],
+      "answer": 2,
+      "verse": "Genesis 4:7",
+      "full": "If thou doest well, shalt thou not be accepted? and if thou doest not well, sin lieth at the door. And unto thee shall be his desire, and thou shalt rule over him."
+     },
+     {
+      "text": "And he said, I know not: Am I my brother's ____?",
+      "options": [
+       "keeper",
+       "master",
+       "servant"
+      ],
+      "answer": 0,
+      "verse": "Genesis 4:9",
+      "full": "And the LORD said unto Cain, Where is Abel thy brother? And he said, I know not: Am I my brother's keeper?"
+     },
+     {
+      "text": "And the LORD set a ____ upon Cain, lest any finding him should kill him.",
+      "options": [
+       "crown",
+       "mark",
+       "curse"
+      ],
+      "answer": 1,
+      "verse": "Genesis 4:15",
+      "full": "And the LORD said unto him, Therefore whosoever slayeth Cain, vengeance shall be taken on him sevenfold. And the LORD set a mark upon Cain, lest any finding him should kill him."
+     },
+     {
+      "text": "Then began men to call upon the ____ of the LORD.",
+      "options": [
+       "house",
+       "mountain",
+       "name"
+      ],
+      "answer": 2,
+      "verse": "Genesis 4:26",
+      "full": "And to Seth, to him also there was born a son; and he called his name Enos: then began men to call upon the name of the LORD."
+     }
+    ]
+   },
+   "after_lines": [
+    {
+     "speaker": "Codex",
+     "text": "You have recorded all of Genesis 4, word for word. Chapter complete."
+    }
+   ]
+  }
+ ],
+ "discoverables": [
+  {
+   "x": 10.0,
+   "name": "The flaming sword",
+   "note": "Scribe's note: the LORD placed cherubims at the east of the garden, and a flaming sword which turned every way, to keep the way of the tree of life.",
+   "verse": "Genesis 3:24"
+  },
+  {
+   "x": 22.0,
+   "name": "Two names",
+   "note": "Scribe's note: Cain's name sounds like the Hebrew word for \"gotten\", because Eve said \"I have gotten a man from the LORD.\" Abel's name means \"breath\" or \"vapor\"."
+  },
+  {
+   "x": 48.0,
+   "name": "Two kinds of work",
+   "note": "Scribe's note: Abel kept animals and Cain grew crops. People needed both kinds of work, and neither job was better than the other."
+  },
+  {
+   "x": 84.0,
+   "name": "A more excellent sacrifice",
+   "note": "Scribe's note: much later the book of Hebrews explains, \"By faith Abel offered unto God a more excellent sacrifice than Cain\" (Hebrews 11:4). What mattered was the heart behind the gift."
+  },
+  {
+   "x": 94.0,
+   "name": "Ruling over anger",
+   "note": "Scribe's note: anger itself was not the end of the story. The LORD told Cain he could rule over sin. The choice was still his."
+  },
+  {
+   "x": 104.0,
+   "name": "My brother's keeper",
+   "note": "Scribe's note: Cain asked, \"Am I my brother's keeper?\" The rest of Scripture answers yes. Centuries later John wrote \"that we should love one another. Not as Cain\" (1 John 3:11-12)."
+  },
+  {
+   "x": 124.0,
+   "name": "Mercy in judgment",
+   "note": "Scribe's note: Cain lost his home and his work, but the LORD still kept him alive and safe. Judgment and mercy came together."
+  },
+  {
+   "x": 134.0,
+   "name": "Nod",
+   "note": "Scribe's note: the name Nod sounds like the Hebrew word for \"wandering\". Cain the wanderer lived there, east of Eden."
+  },
+  {
+   "x": 145.0,
+   "name": "Enos",
+   "note": "Scribe's note: Seth's son Enos was born, and in his days people began to call upon the name of the LORD. Seth's family line leads all the way to Noah."
+  }
+ ],
+ "side_quests": [
+  {
+   "id": "thistles",
+   "type": "find",
+   "after": "arrive",
+   "title": "Thorns and thistles",
+   "marker": [
+    3.5,
+    2.4
+   ],
+   "task": "Pull up five thistles",
+   "verb": "Pull up the thistle",
+   "intro": [
+    {
+     "speaker": "Scribe",
+     "text": "Thistles everywhere, right across the way. I'll clear some so the path is easier to walk."
+    },
+    {
+     "speaker": "Codex",
+     "text": "Find five thistles near the path and pull them up. Look for the green sparkles."
+    }
+   ],
+   "items": [
+    {
+     "at": [
+      -1.5,
+      -3.8
+     ],
+     "kind": "thistle"
+    },
+    {
+     "at": [
+      1.0,
+      4.2
+     ],
+     "kind": "thistle"
+    },
+    {
+     "at": [
+      5.0,
+      -4.5
+     ],
+     "kind": "thistle"
+    },
+    {
+     "at": [
+      8.0,
+      3.8
+     ],
+     "kind": "thistle"
+    },
+    {
+     "at": [
+      12.5,
+      -7.5
+     ],
+     "kind": "thistle"
+    }
+   ],
+   "done": [
+    {
+     "speaker": "Scripture",
+     "text": "Thorns also and thistles shall it bring forth to thee; and thou shalt eat the herb of the field;",
+     "verse": "Genesis 3:18"
+    },
+    {
+     "speaker": "Scribe",
+     "text": "Scribe's note: outside the garden the ground fights back. Every field takes hard work now."
+    }
+   ]
+  },
+  {
+   "id": "firewood",
+   "type": "find",
+   "after": "cain_born",
+   "title": "Wood for the fire",
+   "marker": [
+    14.0,
+    2.6
+   ],
+   "task": "Gather four sticks of firewood",
+   "verb": "Pick up the stick",
+   "deliver": "adam",
+   "deliver_verb": "Give Adam the firewood",
+   "deliver_task": "Bring the firewood to Adam",
+   "deliver_count": 1,
+   "deliver_intro": [
+    {
+     "speaker": "Codex",
+     "text": "That's enough wood. Bring it to Adam by the fire."
+    }
+   ],
+   "intro": [
+    {
+     "speaker": "Adam",
+     "text": "The nights are cold out here, far from the garden. Couldst thou find some dry wood for the fire?"
+    },
+    {
+     "speaker": "Codex",
+     "text": "Find four sticks of firewood around the camp, then bring them to Adam."
+    }
+   ],
+   "items": [
+    {
+     "at": [
+      7.5,
+      6.5
+     ],
+     "kind": "stick"
+    },
+    {
+     "at": [
+      10.5,
+      -8.5
+     ],
+     "kind": "stick"
+    },
+    {
+     "at": [
+      14.5,
+      7.0
+     ],
+     "kind": "stick"
+    },
+    {
+     "at": [
+      5.5,
+      -7.0
+     ],
+     "kind": "stick"
+    }
+   ],
+   "done": [
+    {
+     "speaker": "Adam",
+     "text": "The fire will burn all night now. Thank thee."
+    },
+    {
+     "speaker": "Scribe",
+     "text": "Scribe's note: Adam and Eve had to learn to live out in the wide world, providing for their family by their own work."
+    }
+   ]
+  },
+  {
+   "id": "lamb",
+   "type": "lamb",
+   "after": "abel",
+   "title": "Abel's lost lamb",
+   "marker": [
+    30.5,
+    2.6
+   ],
+   "lamb": [
+    33.5,
+    8.5
+   ],
+   "flock": [
+    23.5,
+    -6.5
+   ],
+   "intro": [
+    {
+     "speaker": "Abel",
+     "text": "One of my lambs has strayed again. The little one always wanders."
+    },
+    {
+     "speaker": "Codex",
+     "text": "Find the lost lamb, call it, and lead it back to the sheep grazing by the hill."
+    }
+   ],
+   "done": [
+    {
+     "speaker": "Abel",
+     "text": "Thou hast found him! A good shepherd never stops looking for a lost lamb."
+    },
+    {
+     "speaker": "Scribe",
+     "text": "Scribe's note: much later, David the shepherd would write, \"The LORD is my shepherd; I shall not want\" (Psalm 23:1)."
+    }
+   ]
+  },
+  {
+   "id": "wool",
+   "type": "find",
+   "after": "abel",
+   "title": "Tufts of wool",
+   "marker": [
+    39.0,
+    2.6
+   ],
+   "task": "Gather five tufts of wool",
+   "verb": "Pick up the wool",
+   "deliver": "eve",
+   "deliver_verb": "Give Eve the wool",
+   "deliver_task": "Bring the wool to Eve at the camp",
+   "deliver_count": 1,
+   "deliver_intro": [
+    {
+     "speaker": "Codex",
+     "text": "That's all five. Bring the wool back to Eve at the camp."
+    }
+   ],
+   "intro": [
+    {
+     "speaker": "Scribe",
+     "text": "Bits of wool are caught on the thorn bushes where the sheep have rubbed past."
+    },
+    {
+     "speaker": "Codex",
+     "text": "Gather five tufts of wool, then bring them to Eve back at the camp."
+    }
+   ],
+   "items": [
+    {
+     "at": [
+      31.0,
+      -8.0
+     ],
+     "kind": "wool"
+    },
+    {
+     "at": [
+      35.0,
+      6.5
+     ],
+     "kind": "wool"
+    },
+    {
+     "at": [
+      40.0,
+      -8.5
+     ],
+     "kind": "wool"
+    },
+    {
+     "at": [
+      43.0,
+      7.5
+     ],
+     "kind": "wool"
+    },
+    {
+     "at": [
+      21.0,
+      -8.5
+     ],
+     "kind": "wool"
+    }
+   ],
+   "done": [
+    {
+     "speaker": "Eve",
+     "text": "Soft wool from Abel's flock. This will keep someone warm."
+    },
+    {
+     "speaker": "Scribe",
+     "text": "Scribe's note: sheep gave the family wool and milk. Abel's work helped everyone."
+    }
+   ]
+  },
+  {
+   "id": "springs",
+   "type": "find",
+   "after": "abel",
+   "title": "Water for the flock",
+   "marker": [
+    26.0,
+    -2.6
+   ],
+   "task": "Find three springs for the sheep",
+   "verb": "Mark the spring",
+   "intro": [
+    {
+     "speaker": "Abel",
+     "text": "Sheep need water every day. Help me find the springs in these hills, so I know where to lead them."
+    },
+    {
+     "speaker": "Codex",
+     "text": "Find three bubbling springs around the pasture."
+    }
+   ],
+   "items": [
+    {
+     "at": [
+      19.5,
+      9.0
+     ],
+     "kind": "spring"
+    },
+    {
+     "at": [
+      33.0,
+      -9.5
+     ],
+     "kind": "spring"
+    },
+    {
+     "at": [
+      42.0,
+      9.0
+     ],
+     "kind": "spring"
+    }
+   ],
+   "done": [
+    {
+     "speaker": "Abel",
+     "text": "Three good springs. The flock will never go thirsty."
+    },
+    {
+     "speaker": "Scribe",
+     "text": "Scribe's note: a shepherd leads his sheep to food and water. It's a picture Scripture uses again and again."
+    }
+   ]
+  },
+  {
+   "id": "seeds",
+   "type": "find",
+   "after": "cain",
+   "title": "Seed for next year",
+   "marker": [
+    51.0,
+    -2.6
+   ],
+   "task": "Gather four seed heads",
+   "verb": "Gather the seed",
+   "intro": [
+    {
+     "speaker": "Scribe",
+     "text": "Some of the grain has dropped its seed. Cain will need seed to plant next year."
+    },
+    {
+     "speaker": "Codex",
+     "text": "Gather four seed heads from around the field."
+    }
+   ],
+   "items": [
+    {
+     "at": [
+      46.0,
+      6.5
+     ],
+     "kind": "grain"
+    },
+    {
+     "at": [
+      49.0,
+      -7.5
+     ],
+     "kind": "grain"
+    },
+    {
+     "at": [
+      59.0,
+      -8.0
+     ],
+     "kind": "grain"
+    },
+    {
+     "at": [
+      63.5,
+      7.5
+     ],
+     "kind": "grain"
+    }
+   ],
+   "done": [
+    {
+     "speaker": "Scribe",
+     "text": "Scribe's note: seed after his kind, just as on the third day of creation. Every harvest holds the seed for the next one."
+    }
+   ]
+  },
+  {
+   "id": "stones",
+   "type": "find",
+   "after": "cain",
+   "title": "Stones in the furrows",
+   "marker": [
+    57.0,
+    2.6
+   ],
+   "task": "Clear four stones from the field",
+   "verb": "Carry the stone away",
+   "intro": [
+    {
+     "speaker": "Cain",
+     "text": "Stones! Every year the ground pushes up more stones. Help me clear them from the rows."
+    },
+    {
+     "speaker": "Codex",
+     "text": "Find four stones in Cain's field and carry them away."
+    }
+   ],
+   "items": [
+    {
+     "at": [
+      55.5,
+      -6.0
+     ],
+     "kind": "stone"
+    },
+    {
+     "at": [
+      60.0,
+      6.0
+     ],
+     "kind": "stone"
+    },
+    {
+     "at": [
+      64.0,
+      -5.0
+     ],
+     "kind": "stone"
+    },
+    {
+     "at": [
+      67.0,
+      4.5
+     ],
+     "kind": "stone"
+    }
+   ],
+   "done": [
+    {
+     "speaker": "Cain",
+     "text": "Clear rows. Now the plough can go straight."
+    },
+    {
+     "speaker": "Scribe",
+     "text": "Scribe's note: tilling the ground was hard, honest work. Cain was a hard worker."
+    }
+   ]
+  },
+  {
+   "id": "think",
+   "type": "rest",
+   "after": "warning",
+   "title": "A quiet stone",
+   "marker": [
+    86.0,
+    -2.6
+   ],
+   "seat": [
+    90.0,
+    -3.6
+   ],
+   "seconds": 6,
+   "intro": [
+    {
+     "speaker": "Scribe",
+     "text": "A quiet place to sit. I want to think about what the LORD said to Cain."
+    },
+    {
+     "speaker": "Codex",
+     "text": "Sit on the stone and think for a few moments."
+    }
+   ],
+   "done": [
+    {
+     "speaker": "Scribe",
+     "text": "\"If thou doest well, shalt thou not be accepted?\" God didn't give up on Cain. He told him the way to do well, before it was too late."
+    },
+    {
+     "speaker": "Scribe",
+     "text": "Scribe's note: when I'm angry, I can stop and listen too."
+    }
+   ]
+  },
+  {
+   "id": "herbs",
+   "type": "find",
+   "after": "mark",
+   "title": "Herbs of the field",
+   "marker": [
+    115.0,
+    2.6
+   ],
+   "task": "Find four green herbs",
+   "verb": "Pick the herb",
+   "intro": [
+    {
+     "speaker": "Scribe",
+     "text": "Even in this dry land, a few green herbs are growing."
+    },
+    {
+     "speaker": "Codex",
+     "text": "Find four green herbs in the dry land."
+    }
+   ],
+   "items": [
+    {
+     "at": [
+      111.0,
+      -6.0
+     ],
+     "kind": "herb"
+    },
+    {
+     "at": [
+      116.5,
+      6.0
+     ],
+     "kind": "herb"
+    },
+    {
+     "at": [
+      121.0,
+      -7.0
+     ],
+     "kind": "herb"
+    },
+    {
+     "at": [
+      125.5,
+      6.0
+     ],
+     "kind": "herb"
+    }
+   ],
+   "done": [
+    {
+     "speaker": "Scribe",
+     "text": "Scribe's note: even in a hard place, God still makes things grow. The herb of the field fed Adam's family."
+    }
+   ]
+  },
+  {
+   "id": "flowers",
+   "type": "find",
+   "after": "seth",
+   "title": "Flowers for Seth",
+   "marker": [
+    148.0,
+    2.6
+   ],
+   "task": "Pick four flowers",
+   "verb": "Pick the flower",
+   "deliver": "eve",
+   "deliver_verb": "Give Eve the flowers",
+   "deliver_task": "Bring the flowers to Eve",
+   "deliver_count": 1,
+   "deliver_intro": [
+    {
+     "speaker": "Codex",
+     "text": "Lovely. Now give the flowers to Eve."
+    }
+   ],
+   "intro": [
+    {
+     "speaker": "Scribe",
+     "text": "Wildflowers in the morning light. I'd like to bring some to Eve, to welcome baby Seth."
+    },
+    {
+     "speaker": "Codex",
+     "text": "Pick four flowers, then give them to Eve."
+    }
+   ],
+   "items": [
+    {
+     "at": [
+      142.0,
+      -6.5
+     ],
+     "kind": "flower"
+    },
+    {
+     "at": [
+      146.0,
+      6.5
+     ],
+     "kind": "flower"
+    },
+    {
+     "at": [
+      153.0,
+      -6.0
+     ],
+     "kind": "flower"
+    },
+    {
+     "at": [
+      157.0,
+      5.5
+     ],
+     "kind": "flower"
+    }
+   ],
+   "done": [
+    {
+     "speaker": "Eve",
+     "text": "For Seth? Thank thee, scribe. A new morning for our family."
+    },
+    {
+     "speaker": "Scripture",
+     "text": "And Adam lived an hundred and thirty years, and begat a son in his own likeness, after his image; and called his name Seth:",
+     "verse": "Genesis 5:3"
+    }
+   ]
+  }
+ ],
+ "next": {
+  "lines": [
+   {
+    "speaker": "Codex",
+    "text": "Genesis 4 is safe in your scroll. The next story on the timeline is Noah and the ark. That time jump is still being prepared."
+   },
+   {
+    "speaker": "Scribe",
+    "text": "I'll be ready. Until then, there's still time to explore here."
+   }
+  ]
+ }
+}

@@ -14,6 +14,13 @@ jobs:
           timeout 300 godot --headless res://tools/test/playtest.tscn 2>&1 | grep -v 'mesh_get_surface_count\|Parameter "m" is null' | tee playtest.log
           if grep -q "SCRIPT ERROR" playtest.log; then echo "Script errors during playthrough"; exit 1; fi
         shell: bash
+      - name: Play through chapter 2 (Cain and Abel)
+        run: |
+          set -o pipefail
+          timeout 400 godot --headless res://tools/test/cain_playtest.tscn 2>&1 | grep -v 'mesh_get_surface_count\|Parameter "m" is null' | tee cain.log
+          if grep -q "SCRIPT ERROR" cain.log; then echo "Script errors during playthrough"; exit 1; fi
+          grep -q "CAIN PLAYTEST PASSED" cain.log
+        shell: bash
       - name: Play through the opening home scene (family talks and time machine)
         run: |
           set -o pipefail

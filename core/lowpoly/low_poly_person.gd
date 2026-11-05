@@ -42,6 +42,23 @@ const EVE_SKINS := {"skin": L.SKIN_SHADE, "hair": L.HAIR_BROWN, "hair_style": "l
 const CHERUB := {"skin": Color("f0d2b0"), "hair": L.GOLD, "hair_style": "short", "top": L.CLOUD, "bottom": L.CLOUD,
 	"robe": true, "trim": L.GOLD, "sash": L.GOLD, "wings": true, "height": 1.3}
 
+# Genesis 4. Cain tills the ground (earthy ochre and brown); Abel keeps sheep (undyed wool, a
+# shepherd's staff). As boys they wear the same, smaller. After Genesis 4:15 Cain bears the LORD's mark.
+# Seth is born after Abel (Genesis 4:25), a little boy in soft tan.
+const CAIN := {"skin": L.SKIN_SHADE, "hair": L.HAIR_DARK, "hair_style": "short", "beard": true, "top": Color("b5803f"),
+	"stripes": Color("7a5233"), "bottom": Color("8f6438"), "tunic": true, "legs": L.SKIN_SHADE, "shoes": L.WOOD_DARK, "height": 1.06}
+const CAIN_MARKED := {"skin": L.SKIN_SHADE, "hair": L.HAIR_DARK, "hair_style": "short", "beard": true, "top": Color("b5803f"),
+	"stripes": Color("7a5233"), "bottom": Color("8f6438"), "tunic": true, "legs": L.SKIN_SHADE, "shoes": L.WOOD_DARK, "height": 1.06,
+	"mark": true}
+const ABEL := {"skin": L.SKIN_SHADE, "hair": L.HAIR_BROWN, "hair_style": "messy", "top": Color("e9e0c9"),
+	"stripes": Color("8fb0c8"), "bottom": Color("d2c5a4"), "tunic": true, "legs": L.SKIN_SHADE, "shoes": L.WOOD_DARK, "staff": true}
+const CAIN_YOUNG := {"skin": L.SKIN_SHADE, "hair": L.HAIR_DARK, "hair_style": "short", "top": Color("b5803f"),
+	"bottom": Color("8f6438"), "tunic": true, "legs": L.SKIN_SHADE, "shoes": L.WOOD_DARK, "kid": true, "cheeks": true}
+const ABEL_YOUNG := {"skin": L.SKIN_SHADE, "hair": L.HAIR_BROWN, "hair_style": "messy", "top": Color("e9e0c9"),
+	"bottom": Color("d2c5a4"), "tunic": true, "legs": L.SKIN_SHADE, "shoes": L.WOOD_DARK, "kid": true, "cheeks": true}
+const SETH := {"skin": L.SKIN_SHADE, "hair": L.HAIR_DARK, "hair_style": "messy", "top": Color("c9a46a"),
+	"bottom": Color("a8865a"), "tunic": true, "legs": L.SKIN_SHADE, "shoes": L.WOOD_DARK, "kid": true, "cheeks": true, "height": 0.85}
+
 const HIP := 0.84
 const KNEE := 0.44
 const SHOULDER := 1.34
@@ -178,6 +195,11 @@ func _build() -> void:
 				a.prism(Vector3(0, -0.13, 0), 0.04, 0.04, 0.26, 6, L.BONE)
 				a.prism(Vector3(0, -0.15, 0), 0.025, 0.025, 0.02, 6, L.WOOD_DARK)
 				a.prism(Vector3(0, 0.13, 0), 0.025, 0.025, 0.02, 6, L.WOOD_DARK))
+		if side < 0 and look.get("staff", false):
+			# A shepherd's staff with a crook at the top, held upright.
+			a.prism(Vector3(0, -1.32, 0.06), 0.025, 0.025, 1.75, 5, L.WOOD)
+			a.box(Vector3(0.05, 0.45, 0.06), Vector3(0.14, 0.04, 0.04), L.WOOD)
+			a.box(Vector3(0.115, 0.39, 0.06), Vector3(0.04, 0.12, 0.04), L.WOOD)
 		pivot.add_child(a.instance())
 		_arms.append(pivot)
 
@@ -230,6 +252,9 @@ func _build_head(skin: Color, kid: bool) -> MeshInstance3D:
 			h.box(g + Vector3(-0.05, 0, 0), Vector3(0.014, 0.1, 0.012), L.INK)
 			h.box(c + Vector3(r * 0.95 * s, 0.03, 0.03), Vector3(0.012, 0.014, r * 1.1), L.INK)
 		h.box(c + Vector3(0, 0.0, r * 0.98), Vector3(0.05, 0.012, 0.012), L.INK)
+	if look.get("mark", false):
+		# The mark the LORD set upon Cain (Genesis 4:15): a small golden sign on the brow.
+		h.box(c + Vector3(0, 0.115, r * 0.99), Vector3(0.05, 0.05, 0.025), L.glow(L.GOLD, 0.9))
 	if look.get("beard", false):
 		h.ball(c + Vector3(0, -0.1, r * 0.55), r * 0.62, hair, 1, Vector3(1.15, 0.7, 0.8))
 		h.box(c + Vector3(0, -0.07, r * 0.95), Vector3(0.12, 0.03, 0.03), hair)
