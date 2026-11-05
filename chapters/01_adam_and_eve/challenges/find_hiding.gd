@@ -20,11 +20,14 @@ func build() -> void:
 		Props.add(_bush, Props.sphere(0.8, 0.8), Color(0.12, 0.3, 0.16), Vector3(0, 0.5, 0))
 	for i in 3:
 		Props.tree(self, _spot + Vector3(-2.2 + i * 2.2, 0, -1.6 - (i % 2) * 0.6), 1.4, Color(0.1, 0.25, 0.15))
-	_people.append(CharacterFactory.make("adam", self, _spot + Vector3(-0.45, 0, 0), true))
-	_people.append(CharacterFactory.make("eve", self, _spot + Vector3(0.45, 0, 0), true))
-	# They face away, hidden in the trees.
-	for p in _people:
-		p.rotation.y = PI / 2.0
+
+## The chapter's one Adam and one Eve hide here (the chapter sends them while the verses are told).
+func spot() -> Vector3:
+	return _spot
+
+func start() -> void:
+	_people = [host.get_actor("adam"), host.get_actor("eve")]
+	host.hide_actors(_spot, true)
 
 func update(delta: float) -> void:
 	_time += delta
@@ -33,8 +36,9 @@ func update(delta: float) -> void:
 	_bush.rotation = Vector3(shake, 0, shake * 0.6)
 	if flat_dist(_spot) < FOUND:
 		for p in _people:
-			var to: Vector3 = scribe.position - (p as Node3D).position
-			p.rotation.y = atan2(-to.z, to.x)
+			if p:
+				var to: Vector3 = scribe.position - (p as Node3D).position
+				p.rotation.y = atan2(-to.z, to.x)
 		finish()
 
 func status() -> String:

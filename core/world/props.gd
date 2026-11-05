@@ -156,6 +156,12 @@ static func _crown(kind: String) -> Array:
 			return [Vector3(0, 2.2, 0), Vector3(1.0, 0.9, 1.0)]
 		"twisted_tree":
 			return [Vector3(0, 2.6, 0), Vector3(1.5, 0.8, 1.5)]
+		"blossom":
+			return [Vector3(0, 2.3, 0), Vector3(1.3, 0.7, 1.3)]
+		"palm":
+			return [Vector3(0.5, 2.6, 0), Vector3(0.5, 0.3, 0.5)]
+		"cypress":
+			return [Vector3(0, 2.0, 0), Vector3(0.6, 1.2, 0.6)]
 		"tree_2":
 			return [Vector3(0, 3.1, 0), Vector3(1.6, 1.0, 1.6)]
 	return [Vector3(0, 2.6, 0), Vector3(1.3, 0.9, 1.3)]
@@ -191,6 +197,33 @@ static func _build_tree(b: LowPoly, kind: String, leaf: Color, v: int) -> void:
 				var a := TAU * k / 4.0 + v
 				b.with(Transform3D(Basis(Vector3(cos(a), 0, sin(a)).cross(Vector3.UP).normalized(), 0.9), Vector3(0, 1.2 + k * 0.35, 0)), func():
 					b.prism(Vector3.ZERO, 0.07, 0.02, 0.9 - k * 0.1, 4, L.shade(bark, 0.1)))
+		"blossom":
+			# A flowering tree: a slim trunk under a soft cloud of pink or white blossom.
+			b.prism(Vector3(0, -0.1, 0), 0.2, 0.12, 1.7, 6, bark)
+			for k in 3:
+				var a := TAU * k / 3.0 + v
+				b.with(Transform3D(Basis(Vector3(cos(a), 0, sin(a)).cross(Vector3.UP).normalized(), 0.7), Vector3(0, 1.3, 0)), func():
+					b.prism(Vector3.ZERO, 0.07, 0.04, 0.8, 5, bark))
+			b.ball(Vector3(0, 2.35, 0), 1.0, leaf, 1, Vector3(1.25, 0.8, 1.25))
+			b.ball(Vector3(0.75, 2.2, 0.3), 0.6, L.shade(leaf, 0.08), 1)
+			b.ball(Vector3(-0.7, 2.25, -0.35), 0.62, L.shade(leaf, -0.06), 1)
+			b.ball(Vector3(0.1, 2.85, -0.2), 0.55, L.shade(leaf, 0.12), 0)
+		"palm":
+			# A leaning trunk of stacked rings with long fronds drooping from the top.
+			for i in 7:
+				b.prism(Vector3(i * 0.07, -0.1 + i * 0.42, 0), 0.17 - i * 0.012, 0.15 - i * 0.012, 0.44, 6, L.shade(L.WOOD, -0.06 * (i % 2)))
+			var top := Vector3(0.5, 2.85, 0)
+			for k in 7:
+				var a := TAU * k / 7.0 + v * 0.4
+				var d := Vector3(cos(a), 0, sin(a))
+				b.with(Transform3D(Basis(d.cross(Vector3.UP).normalized(), -1.1), top), func():
+					b.box(Vector3(0, 0.62, 0), Vector3(0.34, 1.25, 0.05), L.shade(leaf, 0.04 * (k % 3))))
+			b.ball(top, 0.22, L.WOOD_DARK, 0)
+		"cypress":
+			# A tall, narrow evergreen.
+			b.prism(Vector3(0, -0.1, 0), 0.13, 0.08, 0.6, 6, bark)
+			b.ball(Vector3(0, 2.0, 0), 0.65, leaf, 1, Vector3(0.75, 2.4, 0.75))
+			b.ball(Vector3(0.15, 2.9, 0.05), 0.35, L.shade(leaf, 0.08), 0, Vector3(0.8, 1.6, 0.8))
 		_:  # round leafy tree, and the tree of life
 			b.prism(Vector3(0, -0.1, 0), 0.24, 0.15, 1.9, 6, bark)
 			b.with(Transform3D(Basis(Vector3.FORWARD, 0.6), Vector3(0, 1.3, 0)), func():
@@ -311,3 +344,175 @@ static func flame(parent: Node3D, pos: Vector3) -> void:
 	l.omni_range = 9.0
 	l.position = Vector3(0, 1.2, 0.5)
 	f.add_child(l)
+
+# ---------- garden details ----------
+
+## A round pond: a low-poly disc of water ringed with stones, reeds and lily pads. The ground dips
+## under the square inside it, and fish put in it stay in that square.
+static func pond(parent: Node3D, center: Vector3, r: float) -> Rect2:
+	var inner := r * 0.72
+	var rect := Rect2(center.x - inner, center.z - inner, inner * 2.0, inner * 2.0)
+	water_rects.append(rect)
+	var m := ShaderMaterial.new()
+	m.shader = preload("res://core/lowpoly/water.gdshader")
+	var b := L.new()
+	var seg := 14
+	for i in seg:
+		var a0 := TAU * i / seg
+		var a1 := TAU * (i + 1) / seg
+		var w0 := 1.0 + 0.12 * sin(a0 * 3.0 + center.x)
+		var w1 := 1.0 + 0.12 * sin(a1 * 3.0 + center.x)
+		for ring in 2:
+			var f0 := 0.5 * ring
+			var f1 := 0.5 * (ring + 1)
+			var p00 := Vector3(cos(a0) * r * w0 * f0, 0, sin(a0) * r * w0 * f0)
+			var p01 := Vector3(cos(a1) * r * w1 * f0, 0, sin(a1) * r * w1 * f0)
+			var p10 := Vector3(cos(a0) * r * w0 * f1, 0, sin(a0) * r * w0 * f1)
+			var p11 := Vector3(cos(a1) * r * w1 * f1, 0, sin(a1) * r * w1 * f1)
+			if ring == 0:
+				b.tri(Vector3.ZERO, p11, p10, Color.WHITE)
+			else:
+				b.tri(p00, p11, p10, Color.WHITE)
+				b.tri(p00, p01, p11, Color.WHITE)
+	var mi := MeshInstance3D.new()
+	mi.mesh = b.mesh()
+	mi.material_override = m
+	mi.position = Vector3(center.x, SURFACE, center.z)
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(mi)
+	# A muddy bank under the edge, so the disc never shows bare ground through it.
+	add(parent, cyl(r * 1.08, r * 1.08, 0.02, 14), Color(0.45, 0.4, 0.28), Vector3(center.x, -0.02, center.z))
+	for i in 16:
+		var a := TAU * i / 16.0 + 0.3
+		var e := Vector3(cos(a), 0, sin(a)) * r * (1.05 + 0.1 * sin(a * 3.0 + center.x))
+		if i % 3 == 0:
+			_reeds(parent, center + e * 0.98)
+		else:
+			rock(parent, center + e, 0.35 + 0.15 * float(i % 2), Color(0.55, 0.53, 0.5))
+	for i in 5:
+		var a := i * 2.2 + center.z
+		lily_pad(parent, center + Vector3(cos(a), 0, sin(a)) * r * (0.3 + 0.12 * i), i % 2 == 0)
+	return rect
+
+static func _reeds(parent: Node3D, pos: Vector3) -> void:
+	var mesh := _cached("reeds", func(b: LowPoly):
+		for i in 6:
+			var a := i * 2.4
+			var o := Vector3(cos(a) * 0.12, 0, sin(a) * 0.12)
+			b.prism(o, 0.025, 0.0, 0.7 + 0.15 * (i % 3), 3, L.shade(L.LEAF, -0.1 + 0.04 * (i % 3)))
+			if i % 2 == 0:
+				b.prism(o + Vector3(0, 0.55, 0), 0.04, 0.035, 0.16, 5, L.WOOD_DARK))
+	_place(parent, mesh, pos, 1.0, _yaw(pos))
+
+static func lily_pad(parent: Node3D, pos: Vector3, bloom: bool) -> void:
+	var mesh := _cached("lily_%s" % bloom, func(b: LowPoly):
+		b.prism(Vector3.ZERO, 0.32, 0.32, 0.02, 9, L.shade(L.LEAF, 0.05))
+		if bloom:
+			for k in 6:
+				var a := TAU * k / 6.0
+				b.box(Vector3(cos(a) * 0.08, 0.06, sin(a) * 0.08), Vector3(0.1, 0.05, 0.06), Color(1.0, 0.85, 0.9))
+			b.ball(Vector3(0, 0.08, 0), 0.04, L.SUN, 0))
+	_place(parent, mesh, Vector3(pos.x, SURFACE + 0.02, pos.z), 1.0, _yaw(pos))
+
+## A small winding stream through `points` (x, z on the ground), `width` meters wide. Made of short
+## straight pieces, each remembered as water so the ground dips and animals keep out.
+static func stream(parent: Node3D, points: Array, width: float = 1.1) -> void:
+	var m := ShaderMaterial.new()
+	m.shader = preload("res://core/lowpoly/water.gdshader")
+	m.set_shader_parameter("deep", Color(0.16, 0.42, 0.56))
+	for i in points.size() - 1:
+		var a: Vector2 = points[i]
+		var c: Vector2 = points[i + 1]
+		var d := c - a
+		var n := int(ceil(d.length() / 0.9))
+		for k in n:
+			var p0 := a + d * (float(k) / n)
+			var p1 := a + d * (float(k + 1) / n)
+			var mid := (p0 + p1) / 2.0
+			var len := p0.distance_to(p1) + width * 0.5
+			water_rects.append(Rect2(mid - Vector2(width, width) * 0.45, Vector2(width, width) * 0.9))
+			var pm := PlaneMesh.new()
+			pm.size = Vector2(len, width)
+			pm.subdivide_width = 1
+			var mi := MeshInstance3D.new()
+			mi.mesh = pm
+			mi.material_override = m
+			mi.position = Vector3(mid.x, SURFACE, mid.y)
+			mi.rotation.y = -d.angle()
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			parent.add_child(mi)
+		# Pebbles on the banks.
+		var side := Vector2(-d.y, d.x).normalized() * width * 0.65
+		for s in [-1.0, 1.0]:
+			var q: Vector2 = a + d * 0.5 + side * float(s)
+			rock(parent, Vector3(q.x, 0, q.y), 0.22, Color(0.6, 0.57, 0.52))
+
+## A butterfly that flutters in lazy loops around where it is put.
+static func butterfly(parent: Node3D, pos: Vector3, c: Color) -> Node3D:
+	var n := Node3D.new()
+	n.set_script(preload("res://core/world/butterfly.gd"))
+	n.position = pos
+	n.set("color", c)
+	parent.add_child(n)
+	return n
+
+## A glowing gem or nugget for things to find: "gold", "onyx", "bdellium", "seed", "herb", "feather".
+static func treasure(parent: Node3D, kind: String, pos: Vector3) -> Node3D:
+	var n := Node3D.new()
+	n.position = pos
+	parent.add_child(n)
+	var b := L.new()
+	match kind:
+		"gold":
+			b.ball(Vector3(0, 0.1, 0), 0.14, L.glow(L.GOLD, 0.5), 0, Vector3(1.2, 0.8, 1.0))
+			b.ball(Vector3(0.12, 0.07, 0.05), 0.08, L.glow(L.SUN, 0.5), 0)
+		"onyx":
+			b.prism(Vector3(0, 0, 0), 0.12, 0.0, 0.32, 5, L.glow(Color(0.2, 0.18, 0.25), 0.3))
+			b.box(Vector3(0, 0.08, 0), Vector3(0.18, 0.04, 0.18), L.glow(L.CLOUD, 0.3))
+		"bdellium":
+			b.ball(Vector3(0, 0.12, 0), 0.13, L.glow(Color(0.95, 0.85, 0.6), 0.4), 0, Vector3(1.0, 1.3, 1.0))
+		"seed":
+			b.ball(Vector3(0, 0.12, 0), 0.12, L.WOOD, 0, Vector3(0.8, 1.3, 0.8))
+			b.prism(Vector3(0, 0.25, 0), 0.03, 0.0, 0.2, 3, L.LEAF)
+		"herb":
+			for k in 5:
+				var a := TAU * k / 5.0
+				b.with(Transform3D(Basis(Vector3(cos(a), 0, sin(a)).cross(Vector3.UP).normalized(), 0.5), Vector3.ZERO), func():
+					b.box(Vector3(0, 0.18, 0), Vector3(0.1, 0.36, 0.03), L.shade(L.LEAF, 0.1)))
+		"flower":
+			b.prism(Vector3.ZERO, 0.02, 0.02, 0.4, 3, L.LEAF_DARK)
+			for k in 6:
+				var a := TAU * k / 6.0
+				b.box(Vector3(cos(a) * 0.08, 0.4, sin(a) * 0.08), Vector3(0.1, 0.03, 0.1), L.ROSE)
+			b.ball(Vector3(0, 0.42, 0), 0.05, L.SUN, 0)
+		_:
+			b.ball(Vector3(0, 0.15, 0), 0.15, L.glow(L.SUN, 0.5), 0)
+	n.add_child(b.instance(false))
+	return n
+
+## A side-quest marker: a golden scroll turning slowly over a soft teal ring.
+static func quest_marker(parent: Node3D, pos: Vector3) -> Node3D:
+	var n := Node3D.new()
+	n.position = pos
+	parent.add_child(n)
+	var b := L.new()
+	b.with(Transform3D(Basis(Vector3.FORWARD, PI / 2.0), Vector3(0, 0, 0)), func():
+		b.prism(Vector3(0, -0.28, 0), 0.11, 0.11, 0.56, 8, L.glow(L.BONE, 0.3))
+		b.prism(Vector3(0, -0.36, 0), 0.05, 0.05, 0.72, 6, L.glow(L.GOLD, 0.5)))
+	b.box(Vector3(0, -0.02, 0.12), Vector3(0.4, 0.22, 0.02), L.glow(L.BONE, 0.3))
+	var s := b.instance(false)
+	s.name = "Scroll"
+	s.position = Vector3(0, 1.5, 0)
+	n.add_child(s)
+	var spin := s.create_tween().set_loops()
+	spin.tween_property(s, "rotation:y", TAU, 4.0).from(0.0)
+	var r := L.new()
+	r.ring(Vector3.ZERO, 0.55, 0.7, 16, L.glow(L.TEAL, 0.7), 0.03)
+	n.add_child(r.instance(false))
+	var l := OmniLight3D.new()
+	l.light_color = L.TEAL
+	l.light_energy = 1.0
+	l.omni_range = 3.5
+	l.position = Vector3(0, 1.4, 0)
+	n.add_child(l)
+	return n

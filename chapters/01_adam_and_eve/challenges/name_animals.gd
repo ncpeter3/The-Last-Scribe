@@ -1,16 +1,20 @@
 extends Challenge
 ## "Whatsoever Adam called every living creature, that was the name thereof" (Genesis 2:19).
 ## The scribe records each creature brought to Adam under the groups Genesis 2:20 names:
-## cattle, fowl of the air, and beast of the field. Walk up slowly or the animal startles.
+## cattle, fowl of the air, and beast of the field. First the creature's name, then its group.
+## Walk up slowly or the animal startles.
 
 const GROUPS := ["Cattle", "Fowl of the air", "Beast of the field"]
-const HINT := "Not quite. In the King James words, cattle are the animals that live alongside people, like oxen, sheep, and horses. Fowl of the air are birds. Beasts of the field are the wild animals."
-# [model id, group index, position in the area (x from start, z), scale]
+const HINT := "Not quite. In the King James words, cattle are the herd animals that live alongside people, like oxen and sheep. Fowl of the air are birds. Beasts of the field are the other animals that roam free, like horses, zebras, foxes, and wolves."
+const NAME_HINT := "Look again. Adam is giving a name to the creature right in front of you."
+# [model id, group index, position in the area (x from start, z), scale, name]
 const ANIMALS := [
-	["cow", 0, Vector2(2.5, -2.5), 1.0], ["sheep", 0, Vector2(5.0, 3.0), 1.0], ["horse", 0, Vector2(9.0, -3.5), 1.0],
-	["bird", 1, Vector2(4.0, -5.0), 1.6], ["eagle", 1, Vector2(11.0, 3.5), 0.9],
-	["fox", 2, Vector2(7.0, 0.5), 1.0], ["wolf", 2, Vector2(12.0, -1.5), 1.0], ["zebra", 2, Vector2(3.0, 5.5), 1.0],
+	["cow", 0, Vector2(2.5, -2.5), 1.0, "Ox"], ["sheep", 0, Vector2(5.0, 3.0), 1.0, "Sheep"], ["horse", 2, Vector2(9.0, -3.5), 1.0, "Horse"],
+	["bird", 1, Vector2(4.0, -5.0), 1.6, "Dove"], ["eagle", 1, Vector2(11.0, 3.5), 0.9, "Eagle"],
+	["fox", 2, Vector2(7.0, 0.5), 1.0, "Fox"], ["wolf", 2, Vector2(12.0, -1.5), 1.0, "Wolf"], ["zebra", 2, Vector2(3.0, 5.5), 1.0, "Zebra"],
 ]
+## Other names offered next to the right one (never the right one twice).
+const DECOYS := ["Lion", "Camel", "Goat", "Bear", "Owl", "Ox", "Horse", "Sheep", "Fox", "Eagle", "Raven", "Deer"]
 const RANGE := 2.0
 const STARTLE := 3.2
 
@@ -26,7 +30,7 @@ func build() -> void:
 		var n := Props.creature(self, a[0], pos + Vector3(0, 0.45 if a[0] == "eagle" else 0.0, 0), a[3])
 		# Animals brought to Adam stay close by so they can be approached, but still move about.
 		(n as LowPolyAnimal).radius = 1.4
-		_animals.append({"node": n, "group": a[1], "done": false, "rest": 0.0})
+		_animals.append({"node": n, "group": a[1], "done": false, "rest": 0.0, "name": a[4], "named": false})
 
 func _count() -> int:
 	var n := 0
@@ -76,7 +80,38 @@ func act() -> void:
 	if _near < 0:
 		return
 	var i := _near
-	host.ask("[b]Adam names this creature.[/b]\nWhich group from Genesis 2:20 should the scribe write it under?", GROUPS,
+	var a: Dictionary = _animals[i]
+	if not a["named"]:
+		var opts := name_options(i)
+		host.ask("[b]Adam names this creature.[/b]\nWhat name does the scribe write in the scroll?", opts,
+				func(choice: int): _named(i, opts[choice]))
+		return
+	_ask_group(i)
+
+## The right name and two others, in an order that depends on the animal (so it isn't always first).
+func name_options(i: int) -> Array:
+	var right: String = _animals[i]["name"]
+	var others := []
+	for k in DECOYS.size():
+		var d: String = DECOYS[(k * 5 + i * 3) % DECOYS.size()]
+		if d != right and d not in others:
+			others.append(d)
+		if others.size() == 2:
+			break
+	var opts := others.duplicate()
+	opts.insert(i % 3, right)
+	return opts
+
+func _named(i: int, picked: String) -> void:
+	var a: Dictionary = _animals[i]
+	if picked != a["name"]:
+		host.say([{"speaker": "Codex", "text": NAME_HINT}], Callable())
+		return
+	a["named"] = true
+	_ask_group(i)
+
+func _ask_group(i: int) -> void:
+	host.ask("[b]%s[/b]\nWhich group from Genesis 2:20 should the scribe write it under?" % _animals[i]["name"], GROUPS,
 			func(choice: int): _answer(i, choice))
 
 func _answer(i: int, choice: int) -> void:

@@ -18,7 +18,15 @@ const CHALLENGES := {
 	"find_hiding": preload("res://chapters/01_adam_and_eve/challenges/find_hiding.gd"),
 	"scroll_quiz": preload("res://chapters/01_adam_and_eve/challenges/scroll_quiz.gd"),
 }
+const QUESTS := {
+	"find": preload("res://chapters/01_adam_and_eve/quests/find.gd"),
+	"lamb": preload("res://chapters/01_adam_and_eve/quests/lamb.gd"),
+	"rest": preload("res://chapters/01_adam_and_eve/quests/rest.gd"),
+}
 const DATA := "res://chapters/01_adam_and_eve/data/beats.json"
+const PLUCK_RANGE := 2.6
+## Where each person stands at a story station, relative to the station.
+const STATION := {"adam": Vector3(1.8, 0, -1.4), "eve": Vector3(3.0, 0, -1.4)}
 const NOTE_RANGE := 1.4
 ## What Adam and Eve say when the scribe bumps into them (in the garden, and at the gate).
 const BUMP_LINES := {
@@ -70,6 +78,20 @@ var _mood_tween: Tween
 var _mood := Color(0.1, 0.1, 0.18)
 var _rng := RandomNumberGenerator.new()
 var _time := 0.0
+var _world: Node3D
+## The chapter's one Adam and one Eve: {id: {node (holder), fig (LowPolyPerson), roam (Roamer)}}.
+## They appear when Scripture tells of them, then walk from scene to scene and wander freely.
+var _actors: Dictionary = {}
+var _told := -1  # the last beat whose verses have started
+var _quests: Array = []  # SideQuest
+var _action_target: Object  # what the action button does now (a challenge, a side quest, or self)
+var _forbidden_pos := Vector3.INF  # the tree of the knowledge of good and evil
+var _plucking := false
+var _plucks := 0
+var _adam_lines: Array = []
+var _side_data: Array = []
+var _done_flash: Dictionary = {}  # a just-finished story task, shown full for a moment
+var _done_until := 0.0
 
 func _ready() -> void:
 	_rng.seed = 1031
@@ -77,6 +99,8 @@ func _ready() -> void:
 	var data = JSON.parse_string(FileAccess.get_file_as_string(DATA))
 	_beats = data["beats"]
 	_discoverables = data["discoverables"]
+	_side_data = data.get("side_quests", [])
+	_adam_lines = data.get("forbidden_fruit", [])
 	_compute_regions()
 	_bumper = Bumper.new()
 	add_child(_bumper)
@@ -84,6 +108,9 @@ func _ready() -> void:
 	_build_world()
 	_build_scribe()
 	_bumper.scribe = _scribe
+	for a in _actors.values():
+		(a["roam"] as Roamer).watcher = _scribe
+	_bumper.bumped.connect(_on_bumped)
 	_build_hud()
 	_dialogue = DialogueBox.new()
 	add_child(_dialogue)
@@ -108,24 +135,39 @@ func _process(delta: float) -> void:
 	for i in _orbs.size():
 		var o: Node3D = _orbs[i]
 		o.position.y = 1.3 + sin(_time * 2.0 + i) * 0.12
-	if _challenge and _challenge.running:
-		_set_tasks([_challenge.task()])
-	_bumper.enabled = not (_dialogue.active or _choice.active)
+	_update_tasks()
+	_bumper.enabled = not (_dialogue.active or _choice.active or _plucking)
 	_hint.visible = not (_dialogue.active or _choice.active)
-	if _dialogue.active or _choice.active:
+	if _dialogue.active or _choice.active or _plucking:
 		_look_button.hide()
 		_action_button.hide()
 		return
+	for q in _quests:
+		q.tick(delta)
+	var label := ""
+	_action_target = null
 	if _challenge:
 		_challenge.tick(delta)
 		if _challenge == null:  # finished during tick
 			return
-		var label := _challenge.action()
-		_action_button.visible = label != ""
-		_action_button.text = label
+		label = _challenge.action()
+		if label != "":
+			_action_target = _challenge
 	elif _beat_index < _beats.size() and _scribe.position.x >= float(_beats[_beat_index]["x"]) - 0.05:
 		_start_beat()
 		return
+	if label == "":
+		for q in _quests:
+			var l: String = q.action()
+			if l != "":
+				label = l
+				_action_target = q
+				break
+	if label == "" and _can_pluck():
+		label = "Pluck a fruit"
+		_action_target = self
+	_action_button.visible = label != ""
+	_action_button.text = label
 	_near = {}
 	for d in _discoverables:
 		if absf(_scribe.position.x - float(d["x"])) < NOTE_RANGE:
@@ -141,6 +183,11 @@ func _start_beat() -> void:
 	var beat: Dictionary = _beats[_beat_index]
 	_title_label.text = "%s  (%d/%d)" % [beat["title"], _beat_index + 1, _beats.size()]
 	_apply_mood(Color(beat["tint"]), 2.0)
+	_told = _beat_index
+	_actors_at_beat_start(beat)
+	for q in _quests:
+		if String(q.cfg.get("after", "arrive")) == String(beat["id"]):
+			q.unlock()
 	say(beat["lines"], _after_beat_lines)
 
 func _after_beat_lines() -> void:
@@ -150,8 +197,8 @@ func _after_beat_lines() -> void:
 		return
 	_challenge = ch
 	ch.completed.connect(_on_challenge_done, CONNECT_ONE_SHOT)
+	_actors_roam_challenge(_beats[_beat_index], ch)
 	_scribe.max_x = maxf(ch.x1, float(_beats[_beat_index]["x"]))
-	_set_tasks([])
 	var intro: Array = ch.cfg.get("intro", [])
 	if intro.is_empty():
 		ch.begin()
@@ -168,10 +215,8 @@ func _on_challenge_done() -> void:
 	done.erase("total")
 	done.erase("hint")
 	done["progress"] = 1.0
-	_set_tasks([done])
-	get_tree().create_timer(2.0).timeout.connect(func():
-		if _challenge == null:
-			_set_tasks([]))
+	_done_flash = done
+	_done_until = _time + 2.0
 	var lines: Array = ch.cfg.get("done", []) + _beats[_beat_index].get("after_lines", [])
 	if lines.is_empty():
 		_finish_beat()
@@ -182,8 +227,16 @@ func _finish_beat() -> void:
 	_beat_index += 1
 	if _beat_index >= _beats.size():
 		GameState.complete_chapter("01_adam_and_eve")
-		_title_label.text = "Chapter complete: %d verses recorded" % GameState.unlocked_verses.size()
+		_title_label.text = "Chapter complete: %d verses, %d/%d side quests" % [GameState.unlocked_verses.size(), _quests_done(), _quests.size()]
+	else:
+		_actors_approach(_beats[_beat_index])
 	_update_limit()
+
+func freeze() -> void:
+	_freeze()
+
+func unfreeze() -> void:
+	_unfreeze()
 
 func _freeze() -> void:
 	_scribe.frozen = true
@@ -213,6 +266,10 @@ func _set_tasks(list: Array) -> void:
 
 func get_scribe() -> Node3D:
 	return _scribe
+
+## The chapter's Adam or Eve ("adam", "eve"), or null.
+func get_actor(id: String) -> Node3D:
+	return _actors[id]["node"] if _actors.has(id) else null
 
 func _on_dialogue_finished() -> void:
 	_unfreeze()
@@ -251,8 +308,16 @@ func _unhandled_input(event: InputEvent) -> void:
 			_on_look()
 
 func _on_action() -> void:
-	if _challenge and not _dialogue.active and not _choice.active:
+	if _dialogue.active or _choice.active or _plucking:
+		return
+	if _action_target == null:
+		return
+	if _action_target == self:
+		_pluck()
+	elif _action_target == _challenge:
 		_challenge.act()
+	elif _action_target is SideQuest:
+		(_action_target as SideQuest).act()
 
 # ---------- environment and mood ----------
 
@@ -317,14 +382,13 @@ func _build_world() -> void:
 	var root := Node3D.new()
 	root.name = "World"
 	add_child(root)
+	_world = root
 	for r in _regions:
 		_build_section(root, String(r["kind"]), float(r["x0"]), float(r["x1"]))
 	for i in _beats.size():
 		var b: Dictionary = _beats[i]
 		var x := float(b["x"])
 		_marker(root, x)
-		for f in b.get("figures", []):
-			_figure(root, String(f), x, String(b["id"]))
 		if b.has("challenge"):
 			var ch: Challenge = CHALLENGES[String(b["challenge"]["type"])].new()
 			ch.setup(self, b["challenge"], x)
@@ -334,6 +398,13 @@ func _build_world() -> void:
 	_build_ground(root)
 	for d in _discoverables:
 		_orb(root, float(d["x"]))
+	_build_actors(root)
+	for qd in _side_data:
+		var q: SideQuest = QUESTS[String(qd["type"])].new()
+		q.setup(self, qd)
+		root.add_child(q)
+		q.build()
+		_quests.append(q)
 
 func _scenery_at(x: float) -> Dictionary:
 	var prev := "void"
@@ -494,31 +565,78 @@ func _scatter_plants(root: Node3D, x0: float, x1: float, density: float, trees: 
 		else:
 			Props.grass(root, p, Color(0.25, 0.6, 0.25))
 
+const BLOSSOM := [Color(1.0, 0.72, 0.82), Color(0.98, 0.95, 0.97), Color(1.0, 0.82, 0.62), Color(0.86, 0.72, 1.0)]
+const FLOWERS := [Color(1, 0.5, 0.6), Color(1, 0.9, 0.4), Color(0.7, 0.6, 1.0), Color(1, 1, 1), Color(1, 0.6, 0.3), Color(0.5, 0.75, 1.0)]
+const FRUIT := [Color(1.0, 0.55, 0.15), Color(0.95, 0.3, 0.45), Color(1.0, 0.85, 0.25), Color(0.55, 0.25, 0.55), Color(0.6, 0.85, 0.3)]
+
+## The garden of Eden: lush and full of life. Many kinds of trees (fruit trees, flowering trees,
+## palms and tall cypresses), beds of flowers, butterflies, birds, a pond fed by a little stream,
+## and the river that waters the garden (Genesis 2:8-10).
 func _build_garden(root: Node3D, kind: String, x0: float, x1: float) -> void:
-	var leaf := Color(0.18, 0.5, 0.22)
-	var dense := 0.9
-	if kind == "dark":
-		leaf = Color(0.1, 0.25, 0.15)
-		dense = 1.3
 	var len := x1 - x0
+	if kind == "dark":
+		# After the fall: the same garden, dim and still.
+		for i in int(len * 1.3):
+			var p := Vector3(_rng.randf_range(x0, x1), 0, _side_z(2.8, 16.0))
+			if Props.in_water(p, 0.8):
+				continue
+			Props.tree(root, p, _rng.randf_range(0.9, 1.7), Color(0.1, 0.25, 0.15).lightened(_rng.randf_range(-0.05, 0.1)), Color(0, 0, 0, 0),
+					"dead_tree" if _rng.randf() < 0.35 else "")
+		for i in int(len * 0.8):
+			Props.flower(root, Vector3(_rng.randf_range(x0, x1), 0, _rng.randf_range(-6, 6)), Color(0.55, 0.5, 0.6))
+		return
+	if kind == "eden":
+		# A spring high in the garden runs down as a little stream into a round pond, and the pond
+		# flows on into the river that waters the garden.
+		Props.stream(root, [Vector2(x0 + 0.5, -13.5), Vector2(x0 + 1.5, -12.0), Vector2(x0 + 1.0, -10.8), Vector2(x0 + 2.2, -9.6)], 1.0)
+		var pond := Props.pond(root, Vector3(x0 + 3.6, 0, -7.6), 2.4)
+		Props.stream(root, [Vector2(x0 + 5.9, -7.4), Vector2(x0 + 7.4, -6.9), Vector2(x0 + 9.0, -6.6), Vector2(x0 + 10.4, -6.3)], 1.0)
+		for i in 4:
+			Props.creature(root, "fish", Vector3(pond.get_center().x + _rng.randf_range(-1, 1), 0, pond.get_center().y + _rng.randf_range(-1, 1)), 0.8)
+		Props.add(root, Props.box(Vector3(2.2, 0.08, 0.35)), Color(0.5, 0.36, 0.24), Vector3(x0 + 1.0, 0.05, -5.0))  # a fallen log by the pond
+	if kind == "flowers":
+		# A lily pond among the flowers, where Eve is brought to Adam.
+		var lily := Props.pond(root, Vector3(x0 + 5.0, 0, 6.6), 2.1)
+		for i in 3:
+			Props.creature(root, "fish", Vector3(lily.get_center().x, 0, lily.get_center().y), 0.7)
+		Props.stream(root, [Vector2(x0 + 7.0, 7.4), Vector2(x0 + 8.5, 9.0), Vector2(x0 + 8.0, 10.6), Vector2(x0 + 9.4, 12.5)], 0.9)
 	# Challenge areas ("garden") keep trees back so the play space stays open and in view.
 	var near := 8.0 if kind == "garden" else 2.8
-	if kind == "eden":
-		Props.water(root, x0, x1, -9.5, -6.0)
-	for i in int(len * dense):
+	for i in int(len * 1.1):
 		var p := Vector3(_rng.randf_range(x0, x1), 0, _side_z(near, 16.0))
-		if Props.in_water(p, 0.8):
+		if Props.in_water(p, 1.0):
 			continue
-		Props.tree(root, p, _rng.randf_range(0.9, 1.7), leaf.lightened(_rng.randf_range(-0.05, 0.1)), Color(0.9, 0.75, 0.2) if _rng.randf() < 0.3 else Color(0, 0, 0, 0),
-				"dead_tree" if kind == "dark" and _rng.randf() < 0.35 else "")
+		_eden_tree(root, p)
+	# A back row of tall trees along the hills, so the garden feels enclosed and full.
+	for i in int(len * 0.5):
+		var p := Vector3(_rng.randf_range(x0, x1), 0, _side_z(13.0, 18.0))
+		if not Props.in_water(p, 1.0):
+			Props.tree(root, p, _rng.randf_range(1.3, 1.9), Color(0.16, 0.45, 0.2).lightened(_rng.randf_range(-0.05, 0.1)), Color(0, 0, 0, 0), "cypress" if _rng.randf() < 0.4 else "")
+	# Beds of flowers: patches of one color, plus single flowers everywhere.
+	for i in int(len * 0.45):
+		var c: Vector3 = Vector3(_rng.randf_range(x0, x1), 0, _side_z(1.7, 9.0))
+		var col: Color = FLOWERS[_rng.randi() % FLOWERS.size()]
+		for k in _rng.randi_range(5, 9):
+			var p := c + Vector3(_rng.randf_range(-0.9, 0.9), 0, _rng.randf_range(-0.6, 0.6))
+			if not Props.in_water(p, 0.2) and absf(p.z) > 1.3:
+				Props.flower(root, p, col)
+	for i in int(len * 1.2):
+		var p := Vector3(_rng.randf_range(x0, x1), 0, _rng.randf_range(-9, 9))
+		if Props.in_water(p, 0.2) or absf(p.z) < 1.2:
+			continue
+		if _rng.randf() < 0.5:
+			Props.flower(root, p, FLOWERS[_rng.randi() % FLOWERS.size()])
+		elif _rng.randf() < 0.3:
+			Props.nature(root, "bush_flowers" if _rng.randf() < 0.6 else "bush", p, _rng.randf_range(0.5, 0.85))
+		else:
+			Props.grass(root, p, Color(0.25, 0.6, 0.25))
+	# Butterflies over the flowers, and birds in the air.
+	for i in int(len * 0.35):
+		Props.butterfly(root, Vector3(_rng.randf_range(x0, x1), 0, _side_z(1.8, 7.0)), FLOWERS[_rng.randi() % FLOWERS.size()])
 	if kind in ["eden", "flowers", "naming"]:
 		for i in 3:
 			Props.bird(root, Vector3(_rng.randf_range(x0, x1), _rng.randf_range(3.5, 5.5), _rng.randf_range(-6, 6)), Color.WHITE)
-	for i in int(len * 1.5):
-		Props.flower(root, Vector3(_rng.randf_range(x0, x1), 0, _rng.randf_range(-6, 6)), [Color(1, 0.5, 0.6), Color(1, 0.9, 0.4), Color(0.7, 0.6, 1.0), Color(1, 1, 1)][_rng.randi() % 4])
 	if kind == "eden":
-		for i in 6:
-			Props.creature(root, "fish", Vector3(_rng.randf_range(x0 + 1, x1 - 1), 0, _rng.randf_range(-9.0, -6.5)), 1.0)
 		# The tree of life in the midst of the garden (Genesis 2:9).
 		Props.tree(root, Vector3(x1 - 4.0, 0, -3.6), 1.6, Color(0.3, 0.7, 0.3), Color(1.0, 0.85, 0.3), "tree_2")
 	if kind == "naming":
@@ -526,8 +644,24 @@ func _build_garden(root: Node3D, kind: String, x0: float, x1: float) -> void:
 			_land_animal(root, Vector3(_rng.randf_range(x0, x1), 0, _side_z(1.6, 6.0)))
 	if kind == "tree":
 		# The tree of the knowledge of good and evil: a twisted tree with red-gold leaves.
-		Props.tree(root, Vector3(x1 - 3.0, 0, -3.4), 0.55, Color(0.2, 0.5, 0.25), Color(0.85, 0.15, 0.15), "twisted_tree")
+		_forbidden_pos = Vector3(x1 - 3.0, 0, -3.4)
+		Props.tree(root, _forbidden_pos, 0.55, Color(0.2, 0.5, 0.25), Color(0.85, 0.15, 0.15), "twisted_tree")
 		Props.serpent(root, Vector3(x1 - 3.7, 0, -1.8))
+
+## One of Eden's many trees, "pleasant to the sight, and good for food" (Genesis 2:9).
+func _eden_tree(root: Node3D, p: Vector3) -> void:
+	var roll := _rng.randf()
+	var s := _rng.randf_range(0.9, 1.6)
+	if roll < 0.28:
+		Props.tree(root, p, s, BLOSSOM[_rng.randi() % BLOSSOM.size()], Color(0, 0, 0, 0), "blossom")
+	elif roll < 0.38:
+		Props.tree(root, p, s * 0.9, Color(0.3, 0.62, 0.25), Color(0, 0, 0, 0), "palm")
+	elif roll < 0.48:
+		Props.tree(root, p, s, Color(0.15, 0.42, 0.22), Color(0, 0, 0, 0), "cypress")
+	elif roll < 0.8:
+		Props.tree(root, p, s, Color(0.2, 0.55, 0.24).lightened(_rng.randf_range(-0.05, 0.12)), FRUIT[_rng.randi() % FRUIT.size()], "round")
+	else:
+		Props.tree(root, p, s, Color(0.18, 0.5, 0.22).lightened(_rng.randf_range(-0.05, 0.1)))
 
 func _land_animal(root: Node3D, pos: Vector3) -> void:
 	if Props.in_water(pos, 0.8):
@@ -551,21 +685,6 @@ func _orb(root: Node3D, x: float) -> void:
 	o.add_child(l)
 	_orbs.append(o)
 
-func _figure(root: Node3D, kind: String, x: float, beat_id: String) -> void:
-	# At the gate they wear the coats of skins God made for them (Genesis 3:21).
-	var suffix := "_skins" if beat_id == "gate" else ""
-	match kind:
-		"adam":
-			var adam := CharacterFactory.make("adam" + suffix, root, Vector3(x + 1.8, 0, -1.4), true)
-			_bumper.add_person(adam, BUMP_LINES["adam" + suffix])
-		"eve":
-			var eve := CharacterFactory.make("eve" + suffix, root, Vector3(x + 3.0, 0, -1.4), true)
-			_bumper.add_person(eve, BUMP_LINES["eve" + suffix])
-		"serpent":
-			pass  # drawn with the tree
-		"cherub":
-			pass  # drawn at the gate
-
 func _build_scribe() -> void:
 	_scribe = Scribe.new()
 	_scribe.female = GameState.scribe_gender == "female"
@@ -573,6 +692,240 @@ func _build_scribe() -> void:
 	add_child(_scribe)
 	# Pollen and dust drifting in the light around the scribe (stars in the dark at the start).
 	Look.motes(_scribe)
+
+# ---------- Adam and Eve ----------
+
+func _build_actors(root: Node3D) -> void:
+	for id in ["adam", "eve"]:
+		var holder := Node3D.new()
+		holder.name = id.capitalize()
+		root.add_child(holder)
+		var fig := CharacterFactory.make(id, holder, Vector3.ZERO) as LowPolyPerson
+		var roam := Roamer.attach(holder, fig)
+		roam.avoid = func(p: Vector3) -> bool: return Props.in_water(p, 0.4)
+		holder.hide()
+		_actors[id] = {"node": holder, "fig": fig, "roam": roam}
+		_bumper.add_person(holder, BUMP_LINES[id])
+
+## Someone bumped into stops for a moment to talk, then carries on.
+func _on_bumped(n: Node3D) -> void:
+	for id in _actors:
+		if _actors[id]["node"] == n:
+			var r := _roam(id)
+			if r.radius <= 0.0 or r.busy():
+				return
+			r.paused = true
+			get_tree().create_timer(2.8).timeout.connect(func():
+				if r.radius > 0.0:
+					r.paused = false)
+
+func _roam(id: String) -> Roamer:
+	return _actors[id]["roam"]
+
+func _station(beat: Dictionary, id: String) -> Vector3:
+	return Vector3(float(beat["x"]), 0, 0) + STATION[id]
+
+## Change what someone wears (at the gate they wear the coats of skins, Genesis 3:21).
+func _dress(id: String, look_id: String) -> void:
+	var a: Dictionary = _actors[id]
+	(a["fig"] as Node3D).queue_free()
+	var fig := CharacterFactory.make(look_id, a["node"], Vector3.ZERO) as LowPolyPerson
+	a["fig"] = fig
+	(a["roam"] as Roamer).person = fig
+	_bumper.remove(a["node"])
+	_bumper.add_person(a["node"], BUMP_LINES.get(look_id, []))
+
+## Someone appears as Scripture tells of them being made: they rise out of a swirl of light.
+func _appear(id: String, at: Vector3) -> void:
+	var n: Node3D = _actors[id]["node"]
+	_roam(id).place(at)
+	n.rotation.y = PI / 2.0  # facing the camera
+	n.show()
+	n.scale = Vector3.ONE * 0.05
+	var tw := n.create_tween()
+	tw.tween_interval(0.4)
+	tw.tween_property(n, "scale", Vector3.ONE, 1.4).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	for k in 10:
+		var a := TAU * k / 10.0
+		var mote := Props.add(_world, Props.sphere(0.07, 1.0, 5), Color(1.0, 0.92, 0.6), at + Vector3(cos(a) * 0.9, 0.1, sin(a) * 0.9), 3.0)
+		var mt := mote.create_tween()
+		mt.tween_property(mote, "position", at + Vector3(cos(a + 2.0) * 0.2, 1.6, sin(a + 2.0) * 0.2), 1.6)
+		mt.tween_callback(mote.queue_free)
+
+func _actors_at_beat_start(beat: Dictionary) -> void:
+	var id := String(beat["id"])
+	var figs: Array = beat.get("figures", [])
+	match id:
+		"adam":
+			# "Formed man of the dust of the ground" (Genesis 2:7).
+			_appear("adam", _station(beat, "adam"))
+			_roam("adam").radius = 1.2
+		"eve":
+			_appear("eve", _station(beat, "eve"))
+			_roam("eve").radius = 1.2
+		"gate":
+			for a in ["adam", "eve"]:
+				_dress(a, a + "_skins")
+				_roam(a).paused = false
+				_roam(a).place(_station(beat, a))
+				_roam(a).radius = 0.8
+		"hiding":
+			var ch: Challenge = _challenges.get(_beat_index)
+			if ch and ch.has_method("spot"):
+				hide_actors(ch.spot(), false)
+	for f in figs:
+		if not _actors.has(f) or not _actors[f]["node"].visible or id == "hiding":
+			continue
+		# Already there, or on the way: if they're still far off, they arrive now.
+		var n: Node3D = _actors[f]["node"]
+		if n.position.distance_to(_station(beat, f)) > 6.0:
+			_roam(f).place(_station(beat, f))
+		elif not _roam(f).busy():
+			_roam(f).anchor = _station(beat, f)
+
+## Send Adam and Eve to hide at `spot` (Genesis 3:8). `now` puts them there at once.
+func hide_actors(spot: Vector3, now: bool) -> void:
+	var offs := {"adam": Vector3(-0.45, 0, 0), "eve": Vector3(0.45, 0, 0)}
+	for id in offs:
+		var r := _roam(id)
+		var n: Node3D = _actors[id]["node"]
+		if not n.visible:
+			continue
+		var at: Vector3 = spot + offs[id]
+		r.radius = 0.0
+		var crouch := func():
+			r.paused = true
+			n.rotation.y = PI / 2.0  # facing away, hidden in the trees
+		if now:
+			if r.busy() or n.position.distance_to(at) > 0.2:
+				r.place(at)
+			crouch.call()
+		else:
+			r.go_to(at, true, crouch)
+
+## While a challenge runs, the people in its scene wander about its area.
+func _actors_roam_challenge(beat: Dictionary, ch: Challenge) -> void:
+	if String(beat["id"]) == "hiding":
+		return
+	for f in beat.get("figures", []):
+		if not _actors.has(f) or not _actors[f]["node"].visible:
+			continue
+		var r := _roam(f)
+		var mid := Vector3((ch.x0 + maxf(ch.x1, ch.x0 + 6.0)) / 2.0, 0, -1.0 if f == "adam" else 1.5)
+		r.go_to(mid, true)
+		r.radius = 4.0
+
+## When the next scene comes up, the people in it walk there ahead of the scribe.
+func _actors_approach(beat: Dictionary) -> void:
+	for f in beat.get("figures", []):
+		if not _actors.has(f) or not _actors[f]["node"].visible:
+			continue
+		var r := _roam(f)
+		r.paused = false
+		r.radius = 1.2
+		r.go_to(_station(beat, f), true)
+
+# ---------- the forbidden tree ----------
+
+func _can_pluck() -> bool:
+	if _forbidden_pos == Vector3.INF or _challenge != null:
+		return false
+	# Only before the serpent's scene: after that, the fruit has been eaten (Genesis 3:6).
+	var serpent := _beat_index_of("serpent")
+	if serpent < 0 or _told >= serpent:
+		return false
+	return Vector2(_scribe.position.x - _forbidden_pos.x, _scribe.position.z - _forbidden_pos.z).length() < PLUCK_RANGE
+
+func _beat_index_of(id: String) -> int:
+	for i in _beats.size():
+		if String(_beats[i]["id"]) == id:
+			return i
+	return -1
+
+## The scribe reaches for the forbidden fruit, and Adam comes running to knock it away. Every time.
+var _pluck_fruit: Node3D
+var _adam_home := Vector3.ZERO
+
+func _pluck() -> void:
+	_plucking = true
+	_freeze()
+	var hand := _scribe.position + Vector3(0.35, 1.0, 0.25)
+	_pluck_fruit = Props.add(_world, Props.sphere(0.14, 1.0, 6), Color(0.85, 0.15, 0.15), _forbidden_pos + Vector3(0, 2.3, 0.6))
+	var tw := _pluck_fruit.create_tween()
+	tw.tween_property(_pluck_fruit, "position", hand, 0.45).set_ease(Tween.EASE_OUT)
+	tw.tween_callback(_adam_runs_over)
+
+func _adam_runs_over() -> void:
+	var adam := get_actor("adam")
+	if adam == null or not adam.visible:
+		_smack()
+		return
+	var r := _roam("adam")
+	_adam_home = r.anchor
+	var side := Vector3(0.9, 0, 0.5) if adam.position.x >= _scribe.position.x else Vector3(-0.9, 0, 0.5)
+	# If he's far off, he's just out of sight, already on his way.
+	var gap := Vector3(adam.position.x - _scribe.position.x, 0, adam.position.z - _scribe.position.z)
+	if gap.length() > 7.0:
+		r.place(_scribe.position + gap.normalized() * 7.0)
+		r.anchor = _adam_home
+	r.paused = false
+	r.go_to(_scribe.position + side, true, _smack)
+
+func _smack() -> void:
+	var adam := get_actor("adam")
+	var fig: LowPolyPerson = _actors["adam"]["fig"]
+	if adam and adam.visible:
+		_roam("adam").face(_scribe.position)
+		fig.gesture = "talk"
+	# The fruit goes flying out of the scribe's hands and rolls away under the tree.
+	var from := adam.position if adam and adam.visible else _scribe.position + Vector3.LEFT
+	var away := Vector3(_scribe.position.x - from.x, 0, _scribe.position.z - from.z).normalized()
+	var land := _scribe.position + away * 2.2 + Vector3(0, 0.14, 0)
+	var fruit := _pluck_fruit
+	var tw := fruit.create_tween()
+	tw.tween_property(fruit, "position", (fruit.position + land) / 2.0 + Vector3(0, 0.9, 0), 0.22).set_ease(Tween.EASE_OUT)
+	tw.tween_property(fruit, "position", land, 0.25).set_ease(Tween.EASE_IN)
+	tw.tween_interval(0.6)
+	tw.tween_property(fruit, "scale", Vector3.ONE * 0.01, 0.3)
+	tw.tween_callback(fruit.queue_free)
+	var line: Dictionary = {"speaker": "Adam", "text": "Don't you know you are not to eat from that tree?"}
+	if not _adam_lines.is_empty():
+		line = _adam_lines[_plucks % _adam_lines.size()]
+	_plucks += 1
+	_plucking = false
+	say([line], _adam_goes_back)
+
+func _adam_goes_back() -> void:
+	var fig: LowPolyPerson = _actors["adam"]["fig"]
+	fig.gesture = ""
+	if not get_actor("adam").visible:
+		return
+	var r := _roam("adam")
+	r.radius = 1.2
+	r.go_to(_adam_home)
+
+# ---------- side quests and the task list ----------
+
+func _quests_done() -> int:
+	var n := 0
+	for q in _quests:
+		if q.state == "done":
+			n += 1
+	return n
+
+## The task list at the top left: the story task (while a challenge runs), then each side quest
+## that has been started, each with its progress bar.
+func _update_tasks() -> void:
+	var tasks := []
+	if _challenge and _challenge.running:
+		tasks.append(_challenge.task())
+	elif not _done_flash.is_empty() and _time < _done_until:
+		tasks.append(_done_flash)
+	for q in _quests:
+		if q.state == "active":
+			var p: Vector2i = q.progress()
+			tasks.append({"title": q.task_text(), "done": p.x, "total": p.y, "side": true})
+	_set_tasks(tasks)
 
 # ---------- HUD ----------
 
