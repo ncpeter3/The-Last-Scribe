@@ -91,7 +91,7 @@ func _ready() -> void:
 	say(_data["intro"])
 
 func _cam_target() -> Vector3:
-	return _scribe.position + Vector3(1.0, 9.5, 6.5)
+	return _scribe.position + Look.CAM_OFFSET
 
 func _process(delta: float) -> void:
 	_time += delta
@@ -265,16 +265,10 @@ func _animate_machine(delta: float) -> void:
 # ---------- world ----------
 
 func _build_environment() -> void:
-	_env = Environment.new()
-	_env.background_mode = Environment.BG_COLOR
-	_env.background_color = Color(0.03, 0.04, 0.08)
-	_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	# The shared look (core/world/look.gd), indoors: no sky, a night-blue backdrop, no fog.
+	_env = Look.environment(null, Color(0.03, 0.04, 0.08))
 	_env.ambient_light_color = Color(0.62, 0.66, 0.78)
-	_env.ambient_light_energy = 0.55
-	_env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	_env.glow_enabled = true
-	_env.glow_intensity = 0.4
-	_env.glow_bloom = 0.0
+	_env.fog_enabled = false
 	_env.glow_hdr_threshold = 1.3
 	var we := WorldEnvironment.new()
 	we.environment = _env
@@ -292,10 +286,7 @@ func _build_environment() -> void:
 	_lamp(Vector3(-7.0, 2.4, 2.0), Color(1.0, 0.88, 0.72), 1.8, 7.0)
 	_lamp(Vector3(1.5, 2.6, -2.0), Color(1.0, 0.82, 0.62), 1.6, 10.0)
 	_lamp(Vector3(10.5, 2.6, 0.0), Color(0.6, 0.9, 1.0), 1.4, 10.0)
-	_cam = Camera3D.new()
-	_cam.fov = 46.0
-	_cam.rotation_degrees = Vector3(-58, 0, 0)
-	_cam.far = 120.0
+	_cam = Look.camera()
 	add_child(_cam)
 
 func _lamp(pos: Vector3, c: Color, energy: float, reach: float) -> void:
@@ -591,9 +582,7 @@ func _build_hud() -> void:
 	add_child(layer)
 	_title_label = Label.new()
 	_title_label.position = Vector2(30, 20)
-	_title_label.add_theme_font_size_override("font_size", 34)
-	_title_label.add_theme_color_override("font_outline_color", Color.BLACK)
-	_title_label.add_theme_constant_override("outline_size", 8)
+	_title_label.theme_type_variation = &"HeaderLabel"
 	layer.add_child(_title_label)
 	_update_title()
 	_joystick = Joystick.new()
