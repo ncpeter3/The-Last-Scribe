@@ -43,20 +43,34 @@ func ask(question: String, options: Array) -> void:
 		c.queue_free()
 	_label.text = question
 	for i in options.size():
-		var b := Button.new()
-		b.text = String(options[i])
+		# Each answer is a card holding a wrapping label, so long answers grow taller instead of wider.
+		var b := PanelContainer.new()
 		b.custom_minimum_size = Vector2(0, 78)
-		b.add_theme_font_size_override("font_size", 28)
-		b.add_theme_font_override("font", UiStyle.font(750))
-		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		for st in ["normal", "hover", "pressed", "focus"]:
-			b.add_theme_stylebox_override(st, _option_style(st))
-		b.add_theme_color_override("font_color", UiStyle.TEXT)
-		b.add_theme_color_override("font_hover_color", Color(0.08, 0.08, 0.12))
-		b.add_theme_color_override("font_pressed_color", Color(0.08, 0.08, 0.12))
-		b.add_theme_color_override("font_focus_color", UiStyle.TEXT)
-		b.pressed.connect(_pick.bind(i))
+		b.mouse_filter = Control.MOUSE_FILTER_STOP
+		b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		var normal := _option_style("normal")
+		var hover := _option_style("hover")
+		b.add_theme_stylebox_override("panel", normal)
+		var l := UiStyle.label(String(options[i]), 28, UiStyle.TEXT, 750)
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		l.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		b.add_child(l)
+		b.mouse_entered.connect(func():
+			b.add_theme_stylebox_override("panel", hover)
+			l.add_theme_color_override("font_color", Color(0.08, 0.08, 0.12)))
+		b.mouse_exited.connect(func():
+			b.add_theme_stylebox_override("panel", normal)
+			l.add_theme_color_override("font_color", UiStyle.TEXT))
+		# A pick needs both the press and the release on this card, so the tap that closed the
+		# dialogue before the question can't choose an answer by accident.
+		var down := [false]
+		b.gui_input.connect(func(e: InputEvent):
+			if e is InputEventMouseButton and e.button_index == MOUSE_BUTTON_LEFT:
+				if e.pressed:
+					down[0] = true
+				elif down[0]:
+					_pick(i))
 		_buttons.add_child(b)
 	active = true
 	_panel.show()
