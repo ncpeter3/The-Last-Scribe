@@ -1,100 +1,104 @@
 {
+  "tutorial": [
+    {"speaker": "How to play", "text": "Welcome, Scribe! This first level is your home. It's also where you'll learn how to play."},
+    {"speaker": "How to play", "text": "To walk, press and drag anywhere on the left side of the screen. A little joystick appears under your thumb. (On a keyboard, use WASD or the arrow keys.)"},
+    {"speaker": "How to play", "text": "When you're close to someone or something, a gold button appears on the right. Tap it to talk, look or pick things up. (Keyboard: press E.)"},
+    {"speaker": "How to play", "text": "Your current task is always at the top left, with a bar that fills up as you get closer to finishing it."},
+    {"speaker": "How to play", "text": "Gold gems float over people you still need to talk to, and sparkles mark things you can pick up. Bump into people and pets too. They'll have something to say!"}
+  ],
   "intro": [
-    {"speaker": "You", "text": "Tonight's the night. The time machine in the garage is finally ready."},
+    {"speaker": "You", "text": "Tonight's the night. Dad says the time machine in the garage is finally ready."},
     {"speaker": "You", "text": "Every Bible left in 2060 is a digital copy, and nobody can tell anymore which words have been changed."},
-    {"speaker": "You", "text": "So I'm going back to the very beginning, to see it with my own eyes and write it down true."},
-    {"speaker": "You", "text": "My family is home. I should talk to them before I go. The garage is through the living room."}
+    {"speaker": "You", "text": "So I'm going back to the very beginning, to see it with my own eyes and write it down true, on real paper, where nobody can change it."},
+    {"speaker": "You", "text": "First, I need to pack my satchel: a blank scroll, my reed pen, and the ink Dad mixed. Then I have to say goodbye to everyone."}
+  ],
+  "tasks": {
+    "pack": "Pack your satchel",
+    "talk": "Say goodbye to your family",
+    "go": "Go to the time machine in the garage",
+    "explore": "Explore your home",
+    "explore_hint": "Look around every room one last time."
+  },
+  "items": [
+    {"id": "scroll", "name": "Blank scroll", "x": -12.9, "z": -11.45, "y": 0.85,
+      "text": "A blank scroll, rolled tight. By the time I come home, it'll hold the very first story ever written down."},
+    {"id": "pen", "name": "Reed pen", "x": -4.0, "z": -9.0, "y": 0.5,
+      "text": "My reed pen! Lily borrowed it for her drawings again. There's a tiny purple horse on the end of it now."},
+    {"id": "ink", "name": "Bottle of ink", "x": 19.4, "z": -1.0, "y": 0.95,
+      "text": "Dad's homemade ink: soot, gum and water, the way scribes made it thousands of years ago. Nobody can edit ink from far away."}
+  ],
+  "packed": [
+    {"speaker": "You", "text": "Scroll, pen and ink. My satchel's packed."}
   ],
   "family": [
     {
-      "id": "mom", "name": "Mom", "x": -9.6, "z": 1.4, "face": 180, "question": "What do you tell Mom?", "look": "mom", "busy": "stir",
+      "id": "mom", "name": "Mom", "x": -16.6, "z": 0.0, "face": 180, "question": "What do you tell Mom?", "look": "mom", "busy": "stir",
       "talk": [
-        {"speaker": "Mom", "text": "There you are. I made your favorite tonight, just in case it's the last real dinner you get for a while."},
-        {"speaker": "Mom", "text": "Are you sure you want to do this, sweetheart? The beginning of the world is a long way from our kitchen."}
+        {"speaker": "Mom", "text": "There you are. I made your favorite tonight. I keep stirring the pot so I don't have to think about tomorrow."},
+        {"speaker": "Mom", "text": "Your room is going to be so quiet. I know you have to go. I just don't want to let go of you yet."}
       ],
-      "options": ["I'm sure. Someone has to see it with their own eyes.", "Honestly? I'm a little scared."],
+      "options": ["I'll miss you too, Mom. Every single day.", "Someone has to write it down before it's lost forever."],
       "replies": [
         [
-          {"speaker": "Mom", "text": "You always did want to see things for yourself. Even when you were little, you'd never believe a story until you'd checked it."},
-          {"speaker": "Mom", "text": "Just promise me you'll be careful. Watch, and write, and don't wander too far."}
+          {"speaker": "Mom", "text": "Oh, sweetheart. Missing each other just means we love each other. That part never gets lost."},
+          {"speaker": "Mom", "text": "\"The LORD watch between me and thee, when we are absent one from another.\" I'll be praying that every night.", "verse": "Genesis 31:49"}
         ],
         [
-          {"speaker": "Mom", "text": "Scared is all right. It means you know this matters."},
-          {"speaker": "Mom", "text": "\"Be strong and of a good courage; be not afraid... for the LORD thy God is with thee whithersoever thou goest.\" I'll be praying that over you every day.", "verse": "Joshua 1:9"}
+          {"speaker": "Mom", "text": "I know. Everyone else just complained that the words kept changing. You're the one who decided to do something about it."},
+          {"speaker": "Mom", "text": "\"Be strong and of a good courage; be not afraid... for the LORD thy God is with thee whithersoever thou goest.\"", "verse": "Joshua 1:9"}
         ]
       ],
       "after": [
-        {"speaker": "Mom", "text": "Now come here and give me a hug before you go. I love you, my {child}.", "pose": "hug"}
+        {"speaker": "Mom", "text": "I'm sad to see you go. But I have never been prouder of anyone in my whole life. Come here, my {child}.", "pose": "hug"}
       ],
       "again": [
         {"speaker": "Mom", "text": "Go on. We'll be right here when you get back. I'll keep your plate warm."}
-      ]
+      ],
+      "bumps": ["Careful, the pot's hot!", "Watch out, sweetheart!", "Are you hungry? There's plenty.", "Oh! You startled me.", "Did you pack your toothbrush?"]
     },
     {
-      "id": "dad", "name": "Dad", "x": 2.2, "z": -5.9, "face": 90, "question": "What do you tell Dad?", "look": "dad",
+      "id": "dad", "name": "Dad", "x": 16.3, "z": 0.4, "face": 0, "question": "What do you tell Dad?", "look": "dad", "busy": "write",
       "talk": [
-        {"speaker": "Dad", "text": "Hey, kiddo. I keep looking at that machine in the garage. It hums even when nobody's touching it."},
-        {"speaker": "Dad", "text": "Help me understand something. Why go all the way back to the very beginning? Why not start somewhere closer to us?"}
+        {"speaker": "Dad", "text": "Hey, kiddo. Just tightening the last bolts. I've built that machine for two years, and now I almost wish it didn't work."},
+        {"speaker": "Dad", "text": "Every night I worked on it, I knew it was taking you somewhere I can't follow. Is this really what you want?"}
       ],
-      "options": ["If the beginning is wrong, everything after it is too.", "I want to see every story in order, as it happened."],
+      "options": ["Yes. The truth is worth it, Dad.", "You built it. Doesn't that mean you believe in this too?"],
       "replies": [
         [
-          {"speaker": "Dad", "text": "Huh. Like pouring the foundation before you build the walls."},
-          {"speaker": "Dad", "text": "That makes sense. You can't build a straight house on a crooked foundation."}
+          {"speaker": "Dad", "text": "Ha. You sound just like me when I was your age. Stubborn about the right things."},
+          {"speaker": "Dad", "text": "\"And ye shall know the truth, and the truth shall make you free.\" Go and find it.", "verse": "John 8:32"}
         ],
         [
-          {"speaker": "Dad", "text": "One story at a time, in order. That's how your grandma read them to me every night when I was a boy."},
-          {"speaker": "Dad", "text": "Start with \"In the beginning\" and keep going. I like that."}
+          {"speaker": "Dad", "text": "Yeah. I guess it does. I built it so that somebody could bring back what we lost."},
+          {"speaker": "Dad", "text": "I just didn't know that somebody would be my own kid."}
         ]
       ],
       "after": [
-        {"speaker": "Dad", "text": "I'm proud of you. Not just because it's brave, though it is. Because you care about the truth enough to go and find it.", "pose": "hug"}
+        {"speaker": "Dad", "text": "I'm going to miss you something awful. But I'm so proud of you. You're brave enough to go and get the truth back for all of us.", "pose": "hug"},
+        {"speaker": "Dad", "text": "Your ink's on the workbench, by the way. Don't leave without it."}
       ],
       "again": [
-        {"speaker": "Dad", "text": "Garage door's unlocked. Don't forget your satchel. And your scroll!"}
-      ]
+        {"speaker": "Dad", "text": "Machine's warmed up and ready. Whenever you are."}
+      ],
+      "bumps": ["Whoa, watch the wrench!", "Easy there, I'm holding a power cell.", "Hey! Mind the engine grease.", "Ha! Almost knocked me over.", "Don't touch the blue wire. Trust me."]
     },
     {
-      "id": "grandma", "name": "Grandma", "x": -2.8, "z": -3.4, "face": -50, "sit": true, "question": "What do you tell Grandma?", "look": "grandma",
+      "id": "sam", "name": "Sam", "x": 5.0, "z": 2.6, "face": -110, "question": "How do you explain it to Sam?", "look": "sam", "busy": "play", "sit_floor": true,
       "talk": [
-        {"speaker": "Grandma", "text": "Come sit by me a minute. My knees aren't going anywhere, but you are.", "pose": "wave"},
-        {"speaker": "Grandma", "text": "When I was young, I had a Bible made of paper. I could hold it in my hands, and nobody could change a single word without me seeing."},
-        {"speaker": "Grandma", "text": "Then the books went away, and the screens started saying whatever someone wanted them to say."},
-        {"speaker": "Grandma", "text": "So tell me, dear. Why does it have to be you?"}
+        {"speaker": "Sam", "text": "Mom says you're going back in time. Like, way back. Before dinosaurs back?"},
+        {"speaker": "Sam", "text": "But why? The Bible's already on the tablet. I can just ask it to read me a story. Why do YOU have to go?"}
       ],
-      "options": ["Because I can't stop thinking about it, Grandma.", "Because you taught me those words were worth keeping."],
+      "options": ["The tablet copies got changed, like someone scribbling in your favorite book.", "Somebody has to see it for real and write it down so it never gets lost."],
       "replies": [
         [
-          {"speaker": "Grandma", "text": "Maybe that's how you know you're called to it."},
-          {"speaker": "Grandma", "text": "Young Samuel heard his name in the night and answered, \"Speak; for thy servant heareth.\" Sounds like you're listening too.", "verse": "1 Samuel 3:10"}
+          {"speaker": "Sam", "text": "Someone scribbled in it? That's so mean! Like when I colored in your book, but on purpose?"},
+          {"speaker": "You", "text": "Kind of like that. So nobody knows which parts are true anymore. I'm going to go see, and write it down right."},
+          {"speaker": "Sam", "text": "Okay... I think I get it. You're going to fix the book."}
         ],
         [
-          {"speaker": "Grandma", "text": "Oh, sweetheart. Then all my old stories did their job."},
-          {"speaker": "Grandma", "text": "\"The grass withereth, the flower fadeth: but the word of our God shall stand for ever.\" Go and find it standing.", "verse": "Isaiah 40:8"}
-        ]
-      ],
-      "after": [
-        {"speaker": "Grandma", "text": "Bring me back a page I can hold, will you? I've saved a spot on my shelf for it."}
-      ],
-      "again": [
-        {"speaker": "Grandma", "text": "Go on, now. I'll be right here in my chair, waiting for that page."}
-      ]
-    },
-    {
-      "id": "sam", "name": "Sam", "x": 2.9, "z": 2.6, "face": -110, "question": "What do you tell Sam?", "look": "sam", "busy": "play", "sit_floor": true,
-      "talk": [
-        {"speaker": "Sam", "text": "Is it true? You're going back to before there were even people?"},
-        {"speaker": "Sam", "text": "Will you see the very first animals? Like, the very first dog ever?"}
-      ],
-      "options": ["I'll write down every animal I see, just for you.", "I'll bring the whole story back for you to read."],
-      "replies": [
-        [
-          {"speaker": "Sam", "text": "Every single one? Even the bugs?"},
-          {"speaker": "Sam", "text": "Okay. But if you see Biscuit's great-great-great... a LOT of greats... grandpa, say hi for me."}
-        ],
-        [
-          {"speaker": "Sam", "text": "A real one? Nobody at my school has ever even seen a real one."},
-          {"speaker": "Sam", "text": "Then I can read it to Biscuit. He likes stories."}
+          {"speaker": "Sam", "text": "Like a real paper book? Nobody at my school has ever even seen one."},
+          {"speaker": "You", "text": "Exactly. Real ink on real paper. Then nobody can change it from far away, and you'll be able to read it yourself."},
+          {"speaker": "Sam", "text": "Whoa. Then I'll be the first kid with a real one."}
         ]
       ],
       "after": [
@@ -103,29 +107,74 @@
         {"speaker": "Sam", "text": "Okay. Pinky promise counts double. You're the best {big} ever.", "pose": "cheer"}
       ],
       "again": [
-        {"speaker": "Sam", "text": "Biscuit and me are gonna guard your room till you get back."}
-      ]
+        {"speaker": "Sam", "text": "I'm building a time machine too. Out of blocks. It doesn't work yet."}
+      ],
+      "bumps": ["Hey! You knocked my tower!", "Vrrrmmm! Rocket launch!", "Watch it, that's the moon base!", "Tag! You're it!", "Wanna play blocks?"]
+    },
+    {
+      "id": "lily", "name": "Lily", "x": -4.0, "z": -8.1, "face": 90, "question": "How do you explain it to Lily?", "look": "lily", "busy": "write", "sit_floor": true,
+      "talk": [
+        {"speaker": "Lily", "text": "I'm drawing you a picture to take with you. It's you, in the time machine, and that's a horse. Probably."},
+        {"speaker": "Lily", "text": "But I don't get it. If the old stories are so important, why didn't anyone keep them? And why does it have to be you?"}
+      ],
+      "options": ["People trusted screens, and bad people changed the words over time.", "Because I can't stop thinking about it. I think God wants me to go."],
+      "replies": [
+        [
+          {"speaker": "Lily", "text": "Changed them? Why would anybody do that?"},
+          {"speaker": "You", "text": "Some people want the words to say what THEY want. A few people tried to save the old paper pages, but there are pieces missing."},
+          {"speaker": "Lily", "text": "So you're going to find the missing pieces. Like a puzzle."}
+        ],
+        [
+          {"speaker": "Lily", "text": "Like when Samuel heard his name at night, and he said \"Here am I\"? Mom told me that one.", "verse": "1 Samuel 3:4"},
+          {"speaker": "You", "text": "Kind of like that. And this time, I'm going to write it down so nobody forgets."},
+          {"speaker": "Lily", "text": "Okay. Then you'd better go. But you have to come back."}
+        ]
+      ],
+      "after": [
+        {"speaker": "Lily", "text": "Here. Take my picture. Now you won't forget what we look like.", "pose": "hug"},
+        {"speaker": "Lily", "text": "And I'm keeping your room clean. Mostly."}
+      ],
+      "again": [
+        {"speaker": "Lily", "text": "I'm adding Biscuit to the picture. He's the blob with ears."}
+      ],
+      "bumps": ["Hey! You made me scribble!", "Shhh, I'm concentrating.", "Don't look! It's a surprise.", "That tickles!", "Can I come too? Pleeease?"]
     }
   ],
+  "biscuit_bumps": ["Woof!", "*happy wiggle*", "*sniff sniff*", "Arf!"],
   "looks": [
-    {"id": "tablet", "name": "Your tablet", "x": -5.5, "z": -6.6, "note": "Three digital copies of Genesis 1:1, and all three say something different. One has a whole verse missing. Which one is true? Nobody can say anymore."},
-    {"id": "satchel", "name": "Your satchel", "x": -10.7, "z": -4.2, "note": "Your satchel, packed and ready: a blank scroll, a reed pen, and the ink Dad mixed by hand. Real ink on real paper. Nobody can edit that from far away."},
-    {"id": "shelf", "name": "Grandma's shelf", "x": -2.6, "z": -6.6, "note": "Grandma's old bookshelf. It once held real paper books. Now it holds photos, and one empty spot she calls \"saved for the Book.\""},
-    {"id": "biscuit", "name": "Pet Biscuit", "x": 1.4, "z": 3.6, "note": "Biscuit thumps his tail. He doesn't know where you're going, but he's sure you'll come back."},
-    {"id": "bench", "name": "Dad's workbench", "x": 11.3, "z": 0.4, "note": "Dad's workbench. Half the time machine came from an old hover car, and the other half from late nights and a lot of prayer."}
+    {"id": "tablet", "name": "Your tablet", "x": -12.2, "z": -10.9, "note": "Three digital copies of Genesis 1:1, and all three say something different. One has a whole verse missing. Which one is true? Nobody can say anymore."},
+    {"id": "bed", "name": "Your bed", "x": -16.7, "z": -9.0, "note": "You won't sleep here for a long time. You smooth the quilt flat, just the way Mom likes it."},
+    {"id": "mirror1", "name": "Mirror", "x": -10.3, "z": -8.4, "note": "You check the mirror. Traveling robe, sash, satchel. You look like a real scribe. A slightly nervous one."},
+    {"id": "bunk", "name": "Bunk bed", "x": -6.9, "z": -9.3, "note": "Sam sleeps on top so he can be \"closer to space.\" Lily has six stuffed animals on hers, all lined up by size."},
+    {"id": "mirror2", "name": "Mirror", "x": -0.3, "z": -8.4, "note": "Someone drew a smiley face in the steam on the mirror. You're pretty sure it was Sam."},
+    {"id": "photo", "name": "Wedding photo", "x": 3.3, "z": -7.7, "note": "Mom and Dad on their wedding day, laughing at something. Dad still has that tie."},
+    {"id": "mirror3", "name": "Mirror", "x": 7.7, "z": -8.4, "note": "Mom and Dad's bathroom. Dad's toothbrush is shaped like a rocket. It was a gift from Sam."},
+    {"id": "shelf", "name": "Family bookshelf", "x": -7.4, "z": -3.3, "note": "This shelf once held real paper books. Now it holds photos, and one empty spot Mom calls \"saved for the Book.\""},
+    {"id": "fire", "name": "Holo-fireplace", "x": -4.0, "z": -3.2, "note": "The fire isn't real, but it's warm. Every Christmas the whole family squeezes onto the sofa in front of it."},
+    {"id": "fridge", "name": "Fridge", "x": -16.9, "z": 5.0, "note": "Lily's drawing of the family is stuck to the fridge. You're the tall one holding a scroll."},
+    {"id": "screen", "name": "Holo-screen", "x": 9.0, "z": -2.6, "note": "The news says another library archive was \"updated\" overnight. Nobody seems to know who did it, or what was changed."},
+    {"id": "game", "name": "Board game", "x": 7.0, "z": -1.2, "note": "A family game, half finished. Sam is winning. Sam is always winning."},
+    {"id": "car", "name": "Hover car", "x": 12.8, "z": 0.0, "note": "The family hover car. Dad says it's the second most important machine in the garage now."},
+    {"id": "engine", "name": "Engine block", "x": 17.4, "z": 2.0, "note": "An old fusion engine on a stand, half taken apart. Dad pulled the main coil out of it for the time machine."},
+    {"id": "toolchest", "name": "Tool chest", "x": 16.0, "z": 4.3, "note": "Every drawer is labeled in Dad's handwriting. The bottom one just says \"MISC (DO NOT OPEN).\""},
+    {"id": "bike", "name": "Old hover bike", "x": 12.8, "z": -6.2, "note": "Dad's old hover bike. Half the time machine came from it, and the other half from late nights and a lot of prayer."}
   ],
   "machine": {
-    "x": 8.6, "z": -4.6, "nobody_question": "Go back inside first?",
-    "nobody": [
-      {"speaker": "You", "text": "My family is just inside, and I haven't said goodbye to anyone yet."}
+    "x": 15.5, "z": -9.4,
+    "not_ready": [
+      {"speaker": "You", "text": "I can't leave yet."}
     ],
-    "nobody_options": ["Go say goodbye first", "I'm ready. Go now."],
+    "need_pack": {"speaker": "You", "text": "My satchel isn't packed. I still need: {items}."},
+    "need_talk": {"speaker": "You", "text": "And I haven't said goodbye to {people}. I'm not leaving without that."},
+    "need_talk_only": {"speaker": "You", "text": "I haven't said goodbye to {people} yet. I'm not leaving without that."},
     "depart": [
-      {"speaker": "Codex", "text": "Time machine online. Destination: In the beginning. Genesis, chapter 1."},
+      {"speaker": "Time machine", "text": "Time machine online. Destination: In the beginning. Genesis, chapter 1."},
       {"speaker": "You", "text": "Satchel. Scroll. Everyone I love, right here in my heart. Here we go."}
     ],
     "send_off": [
-      {"speaker": "Mom", "text": "We love you! Be careful!"},
+      {"speaker": "Dad", "text": "Hands inside the ring, kiddo. We love you."},
+      {"speaker": "Mom", "text": "We're so proud of you! Be careful!"},
+      {"speaker": "Lily", "text": "Don't forget my picture!"},
       {"speaker": "Sam", "text": "Pinky promise counts double!"}
     ]
   }

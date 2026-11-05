@@ -25,6 +25,9 @@ const GRANDMA := {"skin": L.SKIN, "hair": L.HAIR_GRAY, "hair_style": "bun", "top
 	"bottom": L.BERRY, "skirt": true, "glasses": true, "height": 0.93, "lashes": true}
 const SAM := {"skin": L.SKIN, "hair": L.HAIR_BROWN, "hair_style": "messy", "top": L.SUN, "hood": true,
 	"bottom": L.SKY, "kid": true, "cheeks": true}
+## Lily, the scribe's younger sister: pigtails, a lavender dress over leggings.
+const LILY := {"skin": L.SKIN, "hair": L.HAIR_DARK, "hair_style": "pigtails", "top": L.LAVENDER, "bottom": L.ROSE,
+	"skirt": true, "legs": Color("b06f78"), "kid": true, "cheeks": true, "lashes": true, "flower": L.SUN}
 
 # Genesis 1-3. In Eden, simple garments of leaves; at the gate, the coats of skins (Genesis 3:21).
 const ADAM := {"skin": L.SKIN_SHADE, "hair": L.HAIR_DARK, "hair_style": "short", "beard": true, "top": L.LEAF,
@@ -251,6 +254,11 @@ func _build_head(skin: Color, kid: bool) -> MeshInstance3D:
 				var a := -0.9 + i * 0.45
 				h.with(Transform3D(Basis(Vector3(cos(a), 0.2, sin(a) * 0.4).normalized(), 0.5), c + Vector3(sin(a) * r * 0.6, r * 0.88, -r * 0.1 + cos(a) * 0.04)), func():
 					h.prism(Vector3.ZERO, r * 0.22, 0.0, r * 0.45, 4, hair))
+		"pigtails":
+			for s in [-1.0, 1.0]:
+				h.ball(c + Vector3(r * 1.0 * s, r * 0.25, -r * 0.35), r * 0.26, hair, 0)
+				h.prism(c + Vector3(r * 1.12 * s, -r * 0.85, -r * 0.4), r * 0.12, r * 0.24, r * 1.05, 5, hair)
+				h.box(c + Vector3(r * 1.02 * s, r * 0.22, -r * 0.35), Vector3(r * 0.16, r * 0.2, r * 0.2), L.SUN)
 		"short":
 			h.box(c + Vector3(0, r * 0.75, -r * 0.1), Vector3(r * 1.6, r * 0.35, r * 1.4), hair, Color(), 0.04)
 	if look.has("flower"):

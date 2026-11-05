@@ -1,10 +1,11 @@
 extends Node3D
-## Opening scene: the scribe's home in the year 2060, the evening they leave.
-## A top-down 3D house in the game's low-poly style (bedroom, kitchen, living room, garage; built by
-## home_world.gd). The family is home: talking to them is optional, and each talk asks the scribe a
-## question. The time machine in the garage starts Chapter 1. If the scribe hasn't talked to anyone
-## yet, the garage gently asks first. All text lives in data/home.json.
-## In home.json, a dialogue line may have "pose" (talk, wave, cheer, hug) for how the speaker moves.
+## Opening scene and tutorial: the scribe's home in the year 2060, the evening they leave.
+## A big top-down 3D house in the game's low-poly style (built by home_world.gd). It opens with a
+## "How to play" dialogue, then two tasks shown top-left by the task tracker: pack the satchel
+## (three items to pick up around the house) and say goodbye to Mom, Dad, Sam and Lily (each talk asks
+## the scribe a question). The time machine in the garage only works once both are done; then it
+## starts Chapter 1. Bumping into family makes them say something; bumping Biscuit makes him hop away.
+## All text lives in data/home.json. A dialogue line may have "pose" (talk, wave, cheer, hug).
 
 signal departing
 
@@ -18,10 +19,12 @@ const CHAPTER_1 := "res://chapters/01_adam_and_eve/scenes/chapter.tscn"
 const TALK_RANGE := 1.9
 const LOOK_RANGE := 1.5
 const MACHINE_RANGE := 2.6
-const LOOKS := {"mom": LowPolyPerson.MOM, "dad": LowPolyPerson.DAD, "grandma": LowPolyPerson.GRANDMA, "sam": LowPolyPerson.SAM}
+const ITEM_RANGE := 1.4
+const LOOKS := {"mom": LowPolyPerson.MOM, "dad": LowPolyPerson.DAD, "sam": LowPolyPerson.SAM, "lily": LowPolyPerson.LILY}
+const START := Vector3(-14.4, 0, -8.8)
 ## The camera follows the scribe but stays over the house.
-const CAM_MIN := Vector2(-8.6, -5.6)
-const CAM_MAX := Vector2(8.8, 2.6)
+const CAM_MIN := Vector2(-16.4, -10.6)
+const CAM_MAX := Vector2(16.8, 2.6)
 
 var _data: Dictionary
 var _world: Node3D
@@ -32,12 +35,17 @@ var _choice: CanvasLayer
 var _joystick: Control
 var _action_button: Button
 var _title_label: Label
-var _goal_label: Label
+var _tasks: TaskTracker
+var _seen: Array = []  # ids of things looked at (the "explore" side quest)
+var _bumper: Bumper
 var _fade: ColorRect
 var _hint: Label
 var _family: Dictionary = {}  # id -> {cfg, node, marker, tag}
 var _biscuit: LowPolyDog
 var _talked: Array = []  # ids of family members talked to (any order)
+var _packed: Array = []  # ids of satchel items picked up
+var _items: Dictionary = {}  # id -> sparkle node
+var _pet_target: Dictionary
 var _targets: Array = []  # {kind, pos, range, label, cfg}
 var _near: Dictionary = {}
 var _talking_to := ""  # id of the family member in the current conversation
@@ -57,6 +65,7 @@ func _ready() -> void:
 	_build_looks()
 	_build_scribe()
 	_build_hud()
+	_build_bumper()
 	_dialogue = DialogueBox.new()
 	add_child(_dialogue)
 	_dialogue.finished.connect(_on_dialogue_finished)
@@ -65,7 +74,7 @@ func _ready() -> void:
 	add_child(_choice)
 	_choice.chosen.connect(_on_choice)
 	_cam.position = _cam_target()
-	say(_data["intro"])
+	say(_data["tutorial"] + _data["intro"])
 
 # ---------- camera ----------
 
@@ -84,13 +93,14 @@ func _process(delta: float) -> void:
 	_time += delta
 	_cam.position = _cam.position.lerp(_cam_target(), minf(1.0, delta * 3.5))
 	_scribe.move_vec = _joystick.value
-	if _scribe.position.distance_to(Vector3(-7.6, 0, -3.6)) > 0.6:
+	if _scribe.position.distance_to(START) > 0.6:
 		_moved = true
 	_animate_markers()
 	_update_biscuit()
 	var busy: bool = _dialogue.active or _choice.active or gone
 	_hint.visible = not busy and not _moved
-	_goal_label.visible = not busy
+	_tasks.visible = not gone
+	_bumper.enabled = not busy
 	if busy:
 		_action_button.hide()
 		for id in _family:
@@ -117,10 +127,15 @@ func _animate_markers() -> void:
 		if m.visible:
 			m.position.y = float(m.get_meta("y")) + sin(_time * 2.5 + m.get_meta("y")) * 0.08
 			m.rotation.y += 0.03
+	for id in _items:
+		var n: Node3D = _items[id]
+		n.rotation.y += 0.04
+		n.position.y = float(n.get_meta("y")) + sin(_time * 3.0) * 0.04
 
 func _update_biscuit() -> void:
 	if gone:
 		return
+	_pet_target["pos"] = _biscuit.position
 	var d := _biscuit.position.distance_to(_scribe.position)
 	_biscuit.pose = "sit" if d < 2.6 else "lie"
 	_biscuit.wag = 1.0 if d < 2.6 else 0.25
@@ -216,7 +231,17 @@ func _on_action() -> void:
 		"talk":
 			_talk(String(_near["cfg"]["id"]))
 		"look":
+			if not String(_near["cfg"]["id"]) in _seen:
+				_seen.append(String(_near["cfg"]["id"]))
+				_update_title()
 			say([{"speaker": _near["cfg"]["name"], "text": _near["cfg"]["note"]}])
+		"item":
+			_pick_up(_near)
+		"pet":
+			_biscuit.pose = "stand"
+			_biscuit.wag = 1.0
+			say([{"speaker": "Biscuit", "text": String(_data["biscuit_bumps"][randi() % 2])},
+				{"speaker": "You", "text": "Good boy, Biscuit. Look after everyone while I'm gone, okay?"}])
 		"machine":
 			_use_machine()
 
@@ -225,7 +250,7 @@ func _talk(id: String) -> void:
 	var cfg: Dictionary = f["cfg"]
 	var person: LowPolyPerson = f["node"]
 	_talking_to = id
-	# Sam hops up from his blocks to talk; Grandma stays in her chair.
+	# Sam and Lily hop up from the floor to talk.
 	if cfg.get("sit_floor", false):
 		person.sitting = false
 	_face_each_other(person, not person.sitting)
@@ -241,44 +266,98 @@ func _talk(id: String) -> void:
 				_talking_to = ""
 				_update_title())))
 
+func _pick_up(t: Dictionary) -> void:
+	var cfg: Dictionary = t["cfg"]
+	var id := String(cfg["id"])
+	_targets.erase(t)
+	_near = {}
+	_packed.append(id)
+	(_items[id] as Node3D).queue_free()
+	_items.erase(id)
+	var lines: Array = [{"speaker": "You", "text": cfg["text"]}]
+	if _packed.size() == (_data["items"] as Array).size():
+		lines += _data["packed"]
+	say(lines)
+	_update_title()
+
 func _face_each_other(person: Node3D, turn_person: bool = true) -> void:
 	var d := _scribe.position - person.position
 	if turn_person:
 		person.rotation.y = atan2(-d.z, d.x)
 	(_scribe._visual as Node3D).rotation.y = atan2(d.z, -d.x)
 
+## The task card: packing and goodbyes side by side (do them in any order), then the machine.
+## Exploring the house is a side quest.
 func _update_title() -> void:
-	var total := _family.size()
-	var left := total - _talked.size()
-	if left == 0:
-		_goal_label.text = "Everyone has said goodbye. The time machine is ready in the garage."
-	elif _talked.is_empty():
-		_goal_label.text = "Say goodbye to your family (0 of %d), then head to the garage." % total
+	var t: Dictionary = _data["tasks"]
+	var list := []
+	if ready_to_leave():
+		list.append({"title": String(t["go"]), "done": 1 if gone else 0, "total": 1})
 	else:
-		_goal_label.text = "Said goodbye: %d of %d. The time machine is in the garage." % [_talked.size(), total]
+		var items: Array = _data["items"]
+		var left_items := []
+		for it in items:
+			if not String(it["id"]) in _packed:
+				left_items.append(String(it["name"]))
+		list.append({"title": String(t["pack"]), "done": _packed.size(), "total": items.size(),
+			"hint": ("Still need: " + _list(left_items)) if not left_items.is_empty() else "All packed!"})
+		var left_people := []
+		for f in _data["family"]:
+			if not String(f["id"]) in _talked:
+				left_people.append(String(f["name"]))
+		list.append({"title": String(t["talk"]), "done": _talked.size(), "total": _family.size(),
+			"hint": ("Still to see: " + _list(left_people)) if not left_people.is_empty() else "Everyone's said goodbye."})
+	var looks: Array = _data["looks"]
+	list.append({"title": String(t["explore"]), "done": _seen.size(), "total": looks.size(), "side": true,
+		"hint": String(t["explore_hint"])})
+	_tasks.set_tasks(list)
+
+func ready_to_leave() -> bool:
+	return _packed.size() == (_data["items"] as Array).size() and _talked.size() == _family.size()
+
+## "a, b and c"
+func _list(names: Array) -> String:
+	if names.size() <= 1:
+		return "".join(names)
+	return ", ".join(names.slice(0, names.size() - 1)) + " and " + String(names[-1])
 
 # ---------- the time machine ----------
 
 func _use_machine() -> void:
-	if _talked.is_empty():
-		var m: Dictionary = _data["machine"]
-		say(m["nobody"], func():
-			ask(String(m["nobody_question"]), m["nobody_options"], func(i: int):
-				if i == 1:
-					_depart()))
+	if ready_to_leave():
+		_depart()
 		return
-	_depart()
+	# Not yet: say exactly what's still missing. There's no way around it.
+	var m: Dictionary = _data["machine"]
+	var lines: Array = m["not_ready"].duplicate()
+	var missing_items := []
+	for it in _data["items"]:
+		if not String(it["id"]) in _packed:
+			missing_items.append(String(it["name"]).to_lower())
+	var missing_people := []
+	for f in _data["family"]:
+		if not String(f["id"]) in _talked:
+			missing_people.append(String(f["name"]))
+	if not missing_items.is_empty():
+		var l: Dictionary = (m["need_pack"] as Dictionary).duplicate()
+		l["text"] = String(l["text"]).replace("{items}", _list(missing_items))
+		lines.append(l)
+	if not missing_people.is_empty():
+		var l: Dictionary = (m["need_talk" if not missing_items.is_empty() else "need_talk_only"] as Dictionary).duplicate()
+		l["text"] = String(l["text"]).replace("{people}", _list(missing_people))
+		lines.append(l)
+	say(lines)
 
 func _depart() -> void:
 	gone = true
 	_freeze()
-	_goal_label.hide()
+	_update_title()
 	var m: Dictionary = _data["machine"]
 	# A quick blink while whoever the scribe talked to gathers at the garage door to see them off.
 	var tw := create_tween()
 	tw.tween_property(_fade, "color", Color(0, 0, 0, 1), 0.35)
 	tw.tween_callback(func():
-		var spots := [Vector3(6.3, 0, -1.0), Vector3(7.2, 0, -0.3), Vector3(10.2, 0, -0.3), Vector3(11.0, 0, -1.0)]
+		var spots := [Vector3(13.2, 0, -6.2), Vector3(14.2, 0, -5.5), Vector3(16.8, 0, -5.5), Vector3(17.8, 0, -6.2)]
 		var n := 0
 		for id in _talked:
 			var person: LowPolyPerson = _family[id]["node"]
@@ -288,7 +367,7 @@ func _depart() -> void:
 			person.gesture = "wave"
 			(_family[id]["marker"] as Node3D).hide()
 			n += 1
-		_biscuit.position = Vector3(8.0, 0, 0.2)
+		_biscuit.position = Vector3(15.5, 0, -5.2)
 		_biscuit.rotation.y = PI / 2.0
 		_biscuit.pose = "sit"
 		_biscuit.wag = 1.0
@@ -300,7 +379,10 @@ func _depart() -> void:
 	tw.tween_callback(func():
 		var lines: Array = m["depart"].duplicate()
 		if not _talked.is_empty():
-			lines += m["send_off"]
+			for l in m["send_off"]:
+				for id in _talked:
+					if String(_family[id]["cfg"]["name"]) == String(l["speaker"]):
+						lines.append(l)
 		_dialogue_cb = _launch
 		_dialogue.play(_words(lines)))
 
@@ -366,7 +448,7 @@ func _build_family() -> void:
 		add_child(person)
 		# A gold gem floats over everyone you haven't said goodbye to yet.
 		var top := 2.3 if not f.get("sit", false) and not f.get("sit_floor", false) else 1.8
-		if String(f.get("look", "")) == "sam":
+		if String(f.get("look", "")) in ["sam", "lily"]:
 			top = 1.7
 		var g := LowPoly.new()
 		g.ball(Vector3.ZERO, 0.13, LowPoly.glow(LowPoly.GOLD, 0.55), 0, Vector3(0.7, 1.3, 0.7))
@@ -390,9 +472,9 @@ func _build_family() -> void:
 		_family[String(f["id"])] = {"cfg": f, "node": person, "marker": marker, "tag": tag}
 		_targets.append({"kind": "talk", "pos": pos, "range": TALK_RANGE, "label": "Talk to %s" % f["name"], "cfg": f})
 		_world.blockers.append(Rect2(pos.x - 0.25, pos.z - 0.25, 0.5, 0.5))
-	# Biscuit, asleep in his bed by Sam until you come close.
+	# Biscuit, asleep in his bed in the family room until you come close.
 	_biscuit = LowPolyDog.new()
-	_biscuit.position = Vector3(1.4, 0.1, 3.65)
+	_biscuit.position = Vector3(2.4, 0.1, 4.6)
 	_biscuit.rotation.y = -2.2
 	add_child(_biscuit)
 
@@ -400,6 +482,23 @@ func _build_looks() -> void:
 	for l in _data["looks"]:
 		var pos := Vector3(float(l["x"]), 0, float(l["z"]))
 		_targets.append({"kind": "look", "pos": pos, "range": LOOK_RANGE, "label": "Look: %s" % l["name"], "cfg": l})
+	# Satchel items: each sits where it was left, with a slowly turning sparkle over it.
+	for it in _data["items"]:
+		var pos := Vector3(float(it["x"]), 0, float(it["z"]))
+		var y := float(it.get("y", 0.5)) + 0.35
+		var g := LowPoly.new()
+		g.ball(Vector3.ZERO, 0.09, LowPoly.glow(LowPoly.TEAL, 0.9), 0, Vector3(0.8, 1.4, 0.8))
+		for k in 4:
+			var a := TAU * k / 4.0
+			g.ball(Vector3(cos(a) * 0.22, 0.0, sin(a) * 0.22), 0.035, LowPoly.glow(LowPoly.SUN, 1.0), 0)
+		var n := g.instance(false)
+		n.position = pos + Vector3(0, y, 0)
+		n.set_meta("y", y)
+		add_child(n)
+		_items[String(it["id"])] = n
+		_targets.append({"kind": "item", "pos": pos, "range": ITEM_RANGE, "label": "Pick up: %s" % it["name"], "cfg": it})
+	_pet_target = {"kind": "pet", "pos": _biscuit.position, "range": LOOK_RANGE, "label": "Pat Biscuit", "cfg": {}}
+	_targets.append(_pet_target)
 	var m: Dictionary = _data["machine"]
 	_targets.append({"kind": "machine", "pos": Vector3(float(m["x"]), 0, float(m["z"]) + 1.2), "range": MACHINE_RANGE,
 		"label": "Step into the time machine", "cfg": m})
@@ -408,7 +507,7 @@ func _build_scribe() -> void:
 	_scribe = Scribe.new()
 	_scribe.female = GameState.scribe_gender == "female"
 	_scribe.low_poly = true
-	_scribe.position = Vector3(-7.6, 0, -3.6)
+	_scribe.position = START
 	var h: Rect2 = HomeWorld.HOUSE
 	_scribe.min_x = h.position.x + 0.1
 	_scribe.max_x = h.end.x - 0.1
@@ -428,17 +527,14 @@ func _build_hud() -> void:
 	_title_label.position = Vector2(30, 16)
 	_title_label.theme_type_variation = &"HeaderLabel"
 	layer.add_child(_title_label)
-	_goal_label = Label.new()
-	_goal_label.position = Vector2(32, 66)
-	_goal_label.add_theme_font_size_override("font_size", 24)
-	_goal_label.add_theme_color_override("font_color", Color(0.92, 0.95, 1.0))
-	layer.add_child(_goal_label)
+	_tasks = TaskTracker.new()
+	add_child(_tasks)
 	_update_title()
 	_joystick = Joystick.new()
 	_joystick.set_anchors_preset(Control.PRESET_FULL_RECT)
 	layer.add_child(_joystick)
 	_hint = Label.new()
-	_hint.text = "Drag on the left side to walk"
+	_hint.text = "Drag on the left side of the screen to walk"
 	_hint.position = Vector2(40, 640)
 	_hint.add_theme_font_size_override("font_size", 26)
 	layer.add_child(_hint)
@@ -467,3 +563,11 @@ func _build_hud() -> void:
 	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_fade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	fade_layer.add_child(_fade)
+
+func _build_bumper() -> void:
+	_bumper = Bumper.new()
+	_bumper.scribe = _scribe
+	add_child(_bumper)
+	for id in _family:
+		_bumper.add_person(_family[id]["node"], _family[id]["cfg"].get("bumps", []))
+	_bumper.add_animal(_biscuit)
