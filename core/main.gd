@@ -1,7 +1,7 @@
 extends Control
-## Start screen: pick a female or male scribe, then begin chapter 1.
+## Start screen: pick a female or male scribe, then start at home in 2060 (the garage time machine leads to chapter 1).
 
-const CHAPTER_1 := "res://chapters/01_adam_and_eve/scenes/chapter.tscn"
+const HOME := "res://chapters/00_home/scenes/home.tscn"
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -88,5 +88,5 @@ func _button(text: String, gender: String) -> Button:
 	b.pressed.connect(func():
 		GameState.scribe_gender = gender
 		GameState.save_game()
-		get_tree().change_scene_to_file(CHAPTER_1))
+		get_tree().change_scene_to_file(HOME))
 	return b

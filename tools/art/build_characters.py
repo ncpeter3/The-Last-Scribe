@@ -172,7 +172,50 @@ def cherub():
     return b
 
 
+# ---- The scribe's family at home in 2060: clean, soft-colored clothes with glowing teal trim. ----
+TRIM = "#3fe0cf"
+
+
+def mom():
+    b = base("Casual_Female")
+    recolor({"Skin": hexc("#c48b62"), "Shirt": hexc("#e9edf2"), "Pants": hexc("#34506b"), "Hair": hexc("#3a2214")})
+    recolor({"Belt": hexc(TRIM)}, emission={"Belt": 0.6})
+    eyes()
+    set_height(1.66)
+    return b
+
+
+def dad():
+    b = base("Casual_Male")
+    recolor({"Skin": hexc("#a8724c"), "Shirt": hexc("#5b7ea3"), "Pants": hexc("#2a3442"), "Hair": hexc("#2b1a10")})
+    recolor({"Belt": hexc(TRIM)}, emission={"Belt": 0.6})
+    eyes()
+    set_height(1.8)
+    return b
+
+
+def grandma():
+    b = base("OldClassy_Female")
+    delete_faces(b, "Hat")
+    recolor({"Skin": hexc("#c9966f"), "Shirt": hexc("#b48ab8"), "Pants": hexc("#5a4466"), "Hair": hexc("#dcdad6"),
+             "Detail": hexc("#f1e4bd"), "Belt": hexc("#7a4b26")})
+    eyes()
+    set_height(1.58)
+    return b
+
+
+def sibling():
+    # The scribe's little brother, about ten years old.
+    b = base("Casual2_Male")
+    recolor({"Skin": hexc("#b98159"), "Shirt": hexc("#f2b33d"), "Pants": hexc("#3b4a5c"), "Hair": hexc("#2b1a10")})
+    recolor({"Belt": hexc(TRIM)}, emission={"Belt": 0.6})
+    eyes()
+    set_height(1.3)
+    return b
+
+
 BUILDERS = {
+    "mom": mom, "dad": dad, "grandma": grandma, "sibling": sibling,
     "scribe_female": scribe_female, "scribe_male": scribe_male, "adam": adam, "eve": eve,
     "adam_skins": adam_skins, "eve_skins": eve_skins, "cherub": cherub,
 }
