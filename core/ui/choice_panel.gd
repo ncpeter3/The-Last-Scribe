@@ -16,15 +16,7 @@ func _ready() -> void:
 	_panel.anchor_right = 0.86
 	_panel.anchor_top = 0.18
 	_panel.anchor_bottom = 0.96
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.08, 0.06, 0.04, 0.9)
-	style.set_corner_radius_all(18)
-	style.set_content_margin_all(24)
-	style.border_color = Color(0.95, 0.82, 0.5, 0.45)
-	style.set_border_width_all(2)
-	style.shadow_color = Color(0, 0, 0, 0.35)
-	style.shadow_size = 8
-	_panel.add_theme_stylebox_override("panel", style)
+	_panel.add_theme_stylebox_override("panel", UiStyle.card(UiStyle.GLASS, 26, 30))
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 14)
 	_panel.add_child(box)
@@ -32,9 +24,13 @@ func _ready() -> void:
 	_label.bbcode_enabled = true
 	_label.fit_content = true
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_label.add_theme_font_override("normal_font", UiStyle.font(600))
+	_label.add_theme_font_override("bold_font", UiStyle.font(850))
+	_label.add_theme_font_override("italics_font", UiStyle.font(500))
 	_label.add_theme_font_size_override("normal_font_size", 28)
-	_label.add_theme_font_size_override("bold_font_size", 28)
-	_label.add_theme_font_size_override("italics_font_size", 28)
+	_label.add_theme_font_size_override("bold_font_size", 30)
+	_label.add_theme_font_size_override("italics_font_size", 27)
+	_label.add_theme_color_override("default_color", UiStyle.TEXT)
 	box.add_child(_label)
 	_buttons = VBoxContainer.new()
 	_buttons.add_theme_constant_override("separation", 12)
@@ -50,11 +46,39 @@ func ask(question: String, options: Array) -> void:
 		var b := Button.new()
 		b.text = String(options[i])
 		b.custom_minimum_size = Vector2(0, 78)
-		b.add_theme_font_size_override("font_size", 30)
+		b.add_theme_font_size_override("font_size", 28)
+		b.add_theme_font_override("font", UiStyle.font(750))
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		for st in ["normal", "hover", "pressed", "focus"]:
+			b.add_theme_stylebox_override(st, _option_style(st))
+		b.add_theme_color_override("font_color", UiStyle.TEXT)
+		b.add_theme_color_override("font_hover_color", Color(0.08, 0.08, 0.12))
+		b.add_theme_color_override("font_pressed_color", Color(0.08, 0.08, 0.12))
+		b.add_theme_color_override("font_focus_color", UiStyle.TEXT)
 		b.pressed.connect(_pick.bind(i))
 		_buttons.add_child(b)
 	active = true
 	_panel.show()
+	_panel.modulate.a = 0.0
+	create_tween().tween_property(_panel, "modulate:a", 1.0, 0.2)
+
+func _option_style(state: String) -> StyleBoxFlat:
+	var s := UiStyle.pill(UiStyle.GLASS_LIGHT, 18)
+	s.content_margin_left = 26
+	s.content_margin_right = 22
+	s.content_margin_top = 10
+	s.content_margin_bottom = 12
+	s.border_color = Color(UiStyle.GOLD, 0.45)
+	s.set_border_width_all(2)
+	match state:
+		"hover", "pressed":
+			s.bg_color = UiStyle.GOLD
+			s.border_color = UiStyle.GOLD.lightened(0.3)
+		"focus":
+			s.draw_center = false
+			s.border_color = Color(UiStyle.GOLD, 0.8)
+	return s
 
 func _pick(i: int) -> void:
 	if not active:

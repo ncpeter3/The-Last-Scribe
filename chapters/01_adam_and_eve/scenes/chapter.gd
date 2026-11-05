@@ -20,6 +20,13 @@ const CHALLENGES := {
 }
 const DATA := "res://chapters/01_adam_and_eve/data/beats.json"
 const NOTE_RANGE := 1.4
+## What Adam and Eve say when the scribe bumps into them (in the garden, and at the gate).
+const BUMP_LINES := {
+	"adam": ["Peace be with thee, friend.", "Mind the animals. I have given each one a name!", "The LORD God made all of this. Is it not very good?"],
+	"eve": ["Hello! Hast thou seen the flowers by the river?", "Walk gently. The garden is full of life.", "Every tree here is a gift."],
+	"adam_skins": ["Now I must till the ground.", "Write it down true, scribe. All of it."],
+	"eve_skins": ["The LORD made us coats of skins. He has not forgotten us.", "We go out from the garden together."],
+}
 
 const GROUND := {
 	"void": Color(0.06, 0.06, 0.1), "light": Color(0.8, 0.72, 0.48), "sea": Color(0.16, 0.36, 0.5),
@@ -45,7 +52,9 @@ var _beat_index := 0
 var _world_end := 0.0
 var _look_button: Button
 var _action_button: Button
-var _status_label: Label
+var _tracker: TaskTracker
+var _hint: Label
+var _bumper: Bumper
 var _choice: CanvasLayer
 var _regions: Array = []  # {kind, x0, x1}: the scenery of each stretch of the world, in order
 var _challenges: Dictionary = {}  # beat index -> Challenge
@@ -69,9 +78,12 @@ func _ready() -> void:
 	_beats = data["beats"]
 	_discoverables = data["discoverables"]
 	_compute_regions()
+	_bumper = Bumper.new()
+	add_child(_bumper)
 	_build_environment()
 	_build_world()
 	_build_scribe()
+	_bumper.scribe = _scribe
 	_build_hud()
 	_dialogue = DialogueBox.new()
 	add_child(_dialogue)
@@ -97,7 +109,9 @@ func _process(delta: float) -> void:
 		var o: Node3D = _orbs[i]
 		o.position.y = 1.3 + sin(_time * 2.0 + i) * 0.12
 	if _challenge and _challenge.running:
-		_status_label.text = _challenge.status()
+		_set_tasks([_challenge.task()])
+	_bumper.enabled = not (_dialogue.active or _choice.active)
+	_hint.visible = not (_dialogue.active or _choice.active)
 	if _dialogue.active or _choice.active:
 		_look_button.hide()
 		_action_button.hide()
@@ -137,8 +151,7 @@ func _after_beat_lines() -> void:
 	_challenge = ch
 	ch.completed.connect(_on_challenge_done, CONNECT_ONE_SHOT)
 	_scribe.max_x = maxf(ch.x1, float(_beats[_beat_index]["x"]))
-	_status_label.text = ""
-	_status_label.show()
+	_set_tasks([])
 	var intro: Array = ch.cfg.get("intro", [])
 	if intro.is_empty():
 		ch.begin()
@@ -149,7 +162,16 @@ func _on_challenge_done() -> void:
 	var ch := _challenge
 	_challenge = null
 	_action_button.hide()
-	_status_label.hide()
+	# Show the finished task full and green for a moment, then clear it.
+	var done := ch.task()
+	done.erase("done")
+	done.erase("total")
+	done.erase("hint")
+	done["progress"] = 1.0
+	_set_tasks([done])
+	get_tree().create_timer(2.0).timeout.connect(func():
+		if _challenge == null:
+			_set_tasks([]))
 	var lines: Array = ch.cfg.get("done", []) + _beats[_beat_index].get("after_lines", [])
 	if lines.is_empty():
 		_finish_beat()
@@ -184,6 +206,10 @@ func ask(question: String, options: Array, then: Callable) -> void:
 	_freeze()
 	_choice_cb = then
 	_choice.ask(question, options)
+
+## The task cards in the top-left corner: [{title, hint?, done + total or progress 0..1, side?}].
+func _set_tasks(list: Array) -> void:
+	_tracker.set_tasks(list)
 
 func get_scribe() -> Node3D:
 	return _scribe
@@ -507,7 +533,7 @@ func _land_animal(root: Node3D, pos: Vector3) -> void:
 	if Props.in_water(pos, 0.8):
 		return
 	var a: Array = LAND_ANIMALS[_rng.randi() % LAND_ANIMALS.size()]
-	Props.creature(root, a[0], pos, float(a[1]) * _rng.randf_range(0.9, 1.1))
+	_bumper.add_animal(Props.creature(root, a[0], pos, float(a[1]) * _rng.randf_range(0.9, 1.1)))
 
 func _marker(root: Node3D, x: float) -> void:
 	Props.add(root, Props.box(Vector3(0.5, 2.0, 0.5)), Color(0.85, 0.8, 0.65), Vector3(x, 1.0, -1.6))
@@ -530,9 +556,11 @@ func _figure(root: Node3D, kind: String, x: float, beat_id: String) -> void:
 	var suffix := "_skins" if beat_id == "gate" else ""
 	match kind:
 		"adam":
-			CharacterFactory.make("adam" + suffix, root, Vector3(x + 1.8, 0, -1.4), true)
+			var adam := CharacterFactory.make("adam" + suffix, root, Vector3(x + 1.8, 0, -1.4), true)
+			_bumper.add_person(adam, BUMP_LINES["adam" + suffix])
 		"eve":
-			CharacterFactory.make("eve" + suffix, root, Vector3(x + 3.0, 0, -1.4), true)
+			var eve := CharacterFactory.make("eve" + suffix, root, Vector3(x + 3.0, 0, -1.4), true)
+			_bumper.add_person(eve, BUMP_LINES["eve" + suffix])
 		"serpent":
 			pass  # drawn with the tree
 		"cherub":
@@ -559,7 +587,8 @@ func _build_hud() -> void:
 	_joystick = Joystick.new()
 	_joystick.set_anchors_preset(Control.PRESET_FULL_RECT)
 	layer.add_child(_joystick)
-	var hint := Label.new()
+	_hint = Label.new()
+	var hint := _hint
 	hint.text = "Drag on the left side to walk"
 	hint.position = Vector2(40, 640)
 	hint.add_theme_font_size_override("font_size", 26)
@@ -588,16 +617,8 @@ func _build_hud() -> void:
 	_action_button.pressed.connect(_on_action)
 	_action_button.hide()
 	layer.add_child(_action_button)
-	_status_label = Label.new()
-	_status_label.position = Vector2(30, 70)
-	_status_label.size = Vector2(1040, 0)
-	_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_status_label.add_theme_font_size_override("font_size", 26)
-	_status_label.add_theme_color_override("font_color", Color(1.0, 0.92, 0.6))
-	_status_label.add_theme_color_override("font_outline_color", Color.BLACK)
-	_status_label.add_theme_constant_override("outline_size", 7)
-	_status_label.hide()
-	layer.add_child(_status_label)
+	_tracker = TaskTracker.new()
+	add_child(_tracker)
 	var journal_btn := Button.new()
 	journal_btn.text = "Journal"
 	journal_btn.position = Vector2(1090, 20)

@@ -74,3 +74,7 @@ func act() -> void:
 
 func status() -> String:
 	return "Of every tree thou mayest freely eat: %d/%d fruit gathered." % [_count(), _trees.size()]
+
+func task() -> Dictionary:
+	return {"title": "Gather fruit from the trees of the garden", "hint": "Of every tree thou mayest freely eat.",
+		"done": _count(), "total": _trees.size()}

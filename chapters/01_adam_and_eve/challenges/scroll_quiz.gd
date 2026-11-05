@@ -32,3 +32,6 @@ func status() -> String:
 	if _qs.is_empty():
 		return "Scroll check"
 	return "Scroll check: %d/%d" % [mini(_i + 1, _qs.size()), _qs.size()]
+
+func task() -> Dictionary:
+	return {"title": "Scroll check: fill in the missing words", "done": _i, "total": maxi(1, _qs.size())}
