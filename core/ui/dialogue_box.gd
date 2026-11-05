@@ -4,6 +4,7 @@ extends CanvasLayer
 ## Taps are read in _input (before the UI) so the text panel can never swallow them.
 
 signal finished
+signal line_shown(line: Dictionary)  ## each time a new line appears (scenes use it to animate the speaker)
 
 var active := false
 var _lines: Array = []
@@ -54,6 +55,7 @@ func _show_line() -> void:
 		GameState.unlock_verse(line["verse"])
 	out += "\n\n[color=#9a9a9a](tap to continue)[/color]"
 	_label.text = out
+	line_shown.emit(line)
 
 func _input(event: InputEvent) -> void:
 	if not active:

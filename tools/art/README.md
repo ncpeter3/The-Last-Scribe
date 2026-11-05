@@ -31,3 +31,15 @@ Each script takes `-- <sources dir> <output dir> [ids...]`, so you can rebuild o
 Add a function to `build_characters.py` that starts from one of the pack's 50 characters
 (`base("Kimono_Male")`), recolors materials, grafts hair or clothing from another character
 (`graft(...)`), and adds props bound to a bone (`prop(...)`). Then add it to `BUILDERS`.
+
+## Low-poly kit (the 2060 home)
+
+The opening home uses a different, flat-shaded low-poly style built entirely in code, no Blender needed:
+
+- `core/lowpoly/low_poly.gd` (`LowPoly`): the palette and a mesh builder (box, prism, ball, dome,
+  wedge, ring, hoop) that merges many shapes into one mesh with one shared material. Colors with alpha
+  below 1 glow (`LowPoly.glow(color, strength)`).
+- `core/lowpoly/low_poly_person.gd` (`LowPolyPerson`): people from a look Dictionary (presets for the
+  scribes and the family), animated in code: walk, sit, and gestures (talk, wave, cheer, hug, ...).
+- `core/lowpoly/low_poly_dog.gd` (`LowPolyDog`): Biscuit.
+- `tools/test/lowpoly_lineup.tscn` saves a lineup screenshot of every character for checking the art.

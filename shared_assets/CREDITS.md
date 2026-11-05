@@ -23,3 +23,7 @@ The serpent (`characters/serpent.glb`) was made from scratch in `tools/art/build
 | --- | --- | --- |
 | `fonts/Nunito.ttf` | Nunito by Vernon Adams, Cyreal and Jacques Le Bailly (from Google Fonts) | SIL Open Font License 1.1 (`fonts/OFL-Nunito.txt`) |
 | `fonts/Cinzel.ttf` | Cinzel by Natanael Gama (from Google Fonts) | SIL Open Font License 1.1 (`fonts/OFL-Cinzel.txt`) |
+
+## Low-poly home (2060)
+The opening home scene, its people, Biscuit the dog and the time machine are built in code by the
+game's own low-poly kit (`core/lowpoly/`), with no outside art. Original to this project.

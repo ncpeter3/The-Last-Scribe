@@ -73,11 +73,11 @@ func _run() -> void:
 	await _shot("intro")
 	await _tap_through()
 	# Walls: walking right from the bedroom into the wall must stop before it.
-	await _put(Vector3(-4.0, 0, -6.0))
+	await _put(Vector3(-5.0, 0, -5.6))
 	h._scribe.move_vec = Vector2(1, 0)
 	await get_tree().create_timer(1.0).timeout
 	h._scribe.move_vec = Vector2.ZERO
-	if h._scribe.position.x > -3.15:
+	if h._scribe.position.x > -4.15:
 		return _fail("walked through the bedroom wall (x %.2f)" % h._scribe.position.x)
 	# Garage first, before talking to anyone: it should ask, and "go say goodbye" keeps us home.
 	var m: Dictionary = h._data["machine"]
@@ -124,6 +124,7 @@ func _run() -> void:
 		if not await _act("Look: %s" % l["name"]):
 			return
 		await _tap_through()
+	await _put(Vector3(1.2, 0, 1.4))
 	await _shot("living_room")
 	# Leave: no question this time, the family sees the scribe off, then the scene ends.
 	await _put(Vector3(float(m["x"]), 0, float(m["z"]) + 2.0))
@@ -131,6 +132,13 @@ func _run() -> void:
 		return
 	if h._choice.active:
 		return _fail("garage asked again after talking to family")
+	# The family gathers during a short fade, then the send-off lines start.
+	var wait := 0.0
+	while not h._dialogue.active and wait < 3.0:
+		await get_tree().create_timer(0.1).timeout
+		wait += 0.1
+	if not h._dialogue.active:
+		return _fail("send-off never started")
 	await _shot("send_off")
 	await _tap_through()
 	var t := 0.0
