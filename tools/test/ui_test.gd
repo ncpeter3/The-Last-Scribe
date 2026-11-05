@@ -84,6 +84,28 @@ func _run() -> void:
 		return _fail("dialogue never finished")
 	if not "Genesis 1:1" in GameState.unlocked_verses:
 		return _fail("verse not recorded")
+	# ---- choice panel: long answers wrap and every answer stays on screen ----
+	var cp := preload("res://core/ui/choice_panel.gd").new()
+	add_child(cp)
+	cp.ask("What do you tell Sam?", ["The tablet copies got changed, like someone scribbling in your favorite book, so nobody knows what is true.",
+		"I'm going to find the real words and write them down where nobody can change them."])
+	await _frames(4)
+	if shots != "":
+		await _wait(0.5)
+		get_viewport().get_texture().get_image().save_png(shots + "/ui_choice.png")
+	var screen := get_viewport().get_visible_rect().size
+	for c in cp._buttons.get_children():
+		var r: Rect2 = (c as Control).get_global_rect()
+		if r.end.y > screen.y or r.size.y > 200.0 or r.size.x > screen.x:
+			return _fail("a long answer did not fit on screen (%s)" % r)
+		var l: Label = (c as Control).get_child(0) as Label
+		if l == null or not r.grow(1.0).encloses(l.get_global_rect()):
+			return _fail("an answer's text spills out of its button")
+	var picked := [-1]
+	cp.chosen.connect(func(i): picked[0] = i)
+	cp._pick(1)
+	if picked[0] != 1:
+		return _fail("choice panel did not report the answer")
 	# ---- task tracker ----
 	var t := TaskTracker.new()
 	add_child(t)
