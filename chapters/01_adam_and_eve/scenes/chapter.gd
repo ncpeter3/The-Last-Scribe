@@ -22,11 +22,11 @@ const DATA := "res://chapters/01_adam_and_eve/data/beats.json"
 const NOTE_RANGE := 1.4
 
 const GROUND := {
-	"void": Color(0.06, 0.06, 0.1), "light": Color(0.85, 0.75, 0.45), "sea": Color(0.16, 0.4, 0.58),
-	"sky": Color(0.4, 0.62, 0.35), "animals": Color(0.45, 0.68, 0.35), "rest": Color(0.68, 0.74, 0.4),
-	"eden": Color(0.3, 0.65, 0.3), "naming": Color(0.35, 0.7, 0.32), "flowers": Color(0.38, 0.72, 0.4),
-	"tree": Color(0.3, 0.55, 0.28), "dark": Color(0.2, 0.3, 0.2), "gate": Color(0.55, 0.4, 0.25),
-	"garden": Color(0.33, 0.67, 0.31),
+	"void": Color(0.06, 0.06, 0.1), "light": Color(0.8, 0.72, 0.48), "sea": Color(0.16, 0.36, 0.5),
+	"sky": Color(0.38, 0.56, 0.3), "animals": Color(0.42, 0.58, 0.3), "rest": Color(0.6, 0.62, 0.36),
+	"eden": Color(0.31, 0.55, 0.26), "naming": Color(0.34, 0.57, 0.27), "flowers": Color(0.37, 0.6, 0.31),
+	"tree": Color(0.28, 0.47, 0.24), "dark": Color(0.19, 0.27, 0.18), "gate": Color(0.52, 0.4, 0.26),
+	"garden": Color(0.32, 0.56, 0.27),
 }
 # Land animals made on day six and named by Adam: [model id, scale].
 const LAND_ANIMALS := [["cow", 1.0], ["horse", 1.0], ["sheep", 1.0], ["pig", 1.0], ["llama", 1.0], ["zebra", 1.0],
@@ -85,7 +85,7 @@ func _ready() -> void:
 func _cam_target() -> Vector3:
 	# Angled bird's-eye view. The scribe sits in the upper half of the screen so the
 	# dialogue box at the bottom never covers them.
-	return _scribe.position + Vector3(1.0, 9.5, 6.5)
+	return _scribe.position + Look.CAM_OFFSET
 
 func _process(delta: float) -> void:
 	_time += delta
@@ -231,29 +231,16 @@ func _on_action() -> void:
 
 func _build_environment() -> void:
 	_sky_mat = ProceduralSkyMaterial.new()
+	_sky_mat.sun_angle_max = 20.0
 	var sky := Sky.new()
 	sky.sky_material = _sky_mat
-	_env = Environment.new()
-	_env.background_mode = Environment.BG_SKY
-	_env.sky = sky
-	_env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	_env.ambient_light_energy = 1.1
-	_env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	_env.fog_enabled = true
-	_env.fog_density = 0.012
+	_env = Look.environment(sky)
 	var we := WorldEnvironment.new()
 	we.environment = _env
 	add_child(we)
-	_sun = DirectionalLight3D.new()
-	_sun.rotation_degrees = Vector3(-58, -30, 0)
-	_sun.shadow_enabled = true
-	_sun.shadow_opacity = 0.55
-	_sun.directional_shadow_max_distance = 40.0
+	_sun = Look.sun()
 	add_child(_sun)
-	_cam = Camera3D.new()
-	_cam.fov = 46.0
-	_cam.rotation_degrees = Vector3(-58, 0, 0)
-	_cam.far = 200.0
+	_cam = Look.camera()
 	add_child(_cam)
 
 func _apply_mood(c: Color, duration: float = 0.0) -> void:
@@ -267,16 +254,21 @@ func _apply_mood(c: Color, duration: float = 0.0) -> void:
 	_mood_tween.tween_method(func(t: float): _set_mood(from.lerp(c, t)), 0.0, 1.0, duration)
 
 func _set_mood(c: Color) -> void:
+	# Each beat's tint colors the sky, light and haze, but the sky stays sky-blue overhead in daylight
+	# and the ground keeps its own colors, so scenes get a mood without turning one flat color.
 	_mood = c
 	var lum := c.get_luminance()
-	_sky_mat.sky_horizon_color = c
-	_sky_mat.ground_horizon_color = c
-	_sky_mat.sky_top_color = c.lerp(Color(0.2, 0.4, 0.8), 0.55 * lum).darkened(0.25)
-	_sky_mat.ground_bottom_color = c.darkened(0.5)
-	_env.fog_light_color = c
-	_env.ambient_light_energy = lerpf(0.5, 0.9, lum)
-	_sun.light_energy = lerpf(0.2, 0.85, lum)
-	_sun.light_color = Color(1.0, 0.95, 0.85).lerp(c, 0.2)
+	var day := smoothstep(0.12, 0.62, lum)
+	var horizon := c.darkened(0.35).lerp(Color(0.8, 0.87, 0.95).lerp(c, 0.45), day)
+	_sky_mat.sky_horizon_color = horizon
+	_sky_mat.ground_horizon_color = horizon
+	_sky_mat.sky_top_color = c.darkened(0.7).lerp(Color(0.24, 0.46, 0.82).lerp(c, 0.2), day)
+	_sky_mat.ground_bottom_color = horizon.darkened(0.5)
+	_env.fog_light_color = horizon
+	_env.ambient_light_color = horizon.lerp(Color(0.55, 0.65, 0.85), 0.5)
+	_env.ambient_light_energy = lerpf(0.55, 0.6, day)
+	_sun.light_energy = lerpf(0.4, 1.25, day)
+	_sun.light_color = Color(1.0, 0.94, 0.82).lerp(c, 0.25)
 
 # ---------- world building ----------
 
@@ -331,20 +323,35 @@ func _ground_color(x: float) -> Color:
 	if s["kind"] == "sea" and x > float(s["x0"]) + (float(s["x1"]) - float(s["x0"])) * 0.6:
 		c = GROUND["sky"]
 	var t := clampf((x - float(s["x0"])) / 8.0, 0.0, 1.0)
-	return Color(GROUND[s["prev"]]).lerp(c, t * t * (3.0 - 2.0 * t))
+	# The sea's stretch ends in dry land, so the next scene blends in from land, not water.
+	var prev: Color = GROUND["sky"] if s["prev"] == "sea" else GROUND[s["prev"]]
+	return prev.lerp(c, t * t * (3.0 - 2.0 * t))
 
 func _build_ground(root: Node3D) -> void:
-	# Ground in 2 m strips whose color blends smoothly between scenes.
-	var x := -20.0
-	while x < _world_end + 30.0:
-		Props.slab(root, x, x + 2.0, _ground_color(x + 1.0), -40.0, 40.0)
-		x += 2.0
+	# One big ground plane. Its colors blend smoothly between scenes (a strip texture, one pixel per
+	# half meter) and a shader adds grassy patches and the worn path, so it never looks flat.
+	var x0 := -20.0
+	var length := _world_end + 30.0 - x0
+	var w := int(length * 2.0)
+	var img := Image.create(w, 1, false, Image.FORMAT_RGBA8)
+	for i in w:
+		var x := x0 + (i + 0.5) / 2.0
+		var c := _ground_color(x)
+		c.a = 0.0 if String(_scenery_at(x)["kind"]) == "void" else 1.0
+		img.set_pixel(i, 0, c)
+	var pm := PlaneMesh.new()
+	pm.size = Vector2(length, 80.0)
+	pm.subdivide_width = 0
+	var mi := MeshInstance3D.new()
+	mi.name = "Ground"
+	mi.mesh = pm
+	mi.position = Vector3(x0 + length / 2.0, 0.0, 0.0)
+	mi.material_override = Look.ground_material(ImageTexture.create_from_image(img), x0, length)
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	root.add_child(mi)
 
 func _build_section(root: Node3D, kind: String, x0: float, x1: float) -> void:
-	var ground: Color = GROUND[kind]
 	var sea_split := x0 + (x1 - x0) * 0.6
-	if kind != "void":
-		Props.add(root, Props.box(Vector3(x1 - x0, 0.04, 2.4)), ground.lightened(0.1), Vector3((x0 + x1) / 2.0, 0.02, 0.0))
 	var len := x1 - x0
 	match kind:
 		"void":
@@ -357,6 +364,9 @@ func _build_section(root: Node3D, kind: String, x0: float, x1: float) -> void:
 				beam.material_override.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 			Props.add(root, Props.sphere(1.6), Color(1, 0.95, 0.7), Vector3((x0 + x1) / 2, 7, -10), 3.0)
 		"sea":
+			# The gathered waters on both sides, with dry land along the path (Genesis 1:9).
+			for side in [[-40.0, -1.7], [1.7, 40.0]]:
+				Props.water(root, x0, sea_split, side[0], side[1], 0.03, Color(0.1, 0.33, 0.52))
 			for i in int(len * 0.3):
 				Props.rock(root, Vector3(_rng.randf_range(x0, sea_split), 0.0, _side_z(3.0, 14.0)), _rng.randf_range(0.6, 1.8), Color(0.45, 0.5, 0.52))
 			for i in 8:
@@ -371,7 +381,7 @@ func _build_section(root: Node3D, kind: String, x0: float, x1: float) -> void:
 				Props.add(root, Props.sphere(0.1, 1.0, 4), Color(1, 1, 0.9), Vector3(_rng.randf_range(x0, x1), _rng.randf_range(6, 12), _rng.randf_range(-12, -6)), 3.0)
 			for i in 7:
 				Props.bird(root, Vector3(_rng.randf_range(x0, x1), _rng.randf_range(3, 6), _rng.randf_range(-8, 8)), Color(0.9, 0.9, 0.95))
-			Props.slab(root, mid + 2, mid + 9, Color(0.2, 0.5, 0.75), -12, -5, 0.03, 0.1)
+			Props.water(root, mid + 2, mid + 9, -12, -5)
 			for i in 6:
 				Props.creature(root, "fish", Vector3(mid + _rng.randf_range(2.5, 8.5), 0.05, _rng.randf_range(-11.5, -5.5)), 1.4)
 			Props.creature(root, "whale", Vector3(mid + 5.5, -0.9, -8.5), 0.55)
@@ -425,7 +435,7 @@ func _build_garden(root: Node3D, kind: String, x0: float, x1: float) -> void:
 	for i in int(len * 1.5):
 		Props.flower(root, Vector3(_rng.randf_range(x0, x1), 0, _rng.randf_range(-6, 6)), [Color(1, 0.5, 0.6), Color(1, 0.9, 0.4), Color(0.7, 0.6, 1.0), Color(1, 1, 1)][_rng.randi() % 4])
 	if kind == "eden":
-		Props.slab(root, x0, x1, Color(0.25, 0.55, 0.8), -9.5, -6.0, 0.03, 0.1)
+		Props.water(root, x0, x1, -9.5, -6.0)
 		# The tree of life in the midst of the garden (Genesis 2:9).
 		Props.tree(root, Vector3(x1 - 4.0, 0, -3.6), 1.6, Color(0.3, 0.7, 0.3), Color(1.0, 0.85, 0.3), "tree_2")
 	if kind == "naming":
@@ -474,6 +484,8 @@ func _build_scribe() -> void:
 	_scribe.female = GameState.scribe_gender == "female"
 	_scribe.position = Vector3(0, 0, 0)
 	add_child(_scribe)
+	# Pollen and dust drifting in the light around the scribe (stars in the dark at the start).
+	Look.motes(_scribe)
 
 # ---------- HUD ----------
 
@@ -482,9 +494,7 @@ func _build_hud() -> void:
 	add_child(layer)
 	_title_label = Label.new()
 	_title_label.position = Vector2(30, 20)
-	_title_label.add_theme_font_size_override("font_size", 34)
-	_title_label.add_theme_color_override("font_outline_color", Color.BLACK)
-	_title_label.add_theme_constant_override("outline_size", 8)
+	_title_label.theme_type_variation = &"HeaderLabel"
 	_title_label.text = "Follow the path to the right"
 	layer.add_child(_title_label)
 	_joystick = Joystick.new()

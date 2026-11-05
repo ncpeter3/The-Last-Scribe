@@ -85,11 +85,24 @@ static func box(s: Vector3) -> BoxMesh:
 static func slab(parent: Node3D, x0: float, x1: float, c: Color, z0: float = -45.0, z1: float = 10.0, y: float = 0.0, thick: float = 0.4) -> void:
 	add(parent, box(Vector3(x1 - x0, thick, z1 - z0)), c, Vector3((x0 + x1) / 2.0, y - thick / 2.0, (z0 + z1) / 2.0))
 
+## A pool, river or sea surface from x0..x1 and z0..z1, using the shared water look.
+static func water(parent: Node3D, x0: float, x1: float, z0: float, z1: float, y: float = 0.03, deep: Color = Color(0.12, 0.38, 0.55)) -> MeshInstance3D:
+	var pm := PlaneMesh.new()
+	pm.size = Vector2(x1 - x0, z1 - z0)
+	var mi := MeshInstance3D.new()
+	mi.mesh = pm
+	mi.material_override = Look.water_material(deep)
+	mi.position = Vector3((x0 + x1) / 2.0, y, (z0 + z1) / 2.0)
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(mi)
+	return mi
+
 static func tree(parent: Node3D, pos: Vector3, s: float, leaf: Color, fruit: Color = Color(0, 0, 0, 0), kind: String = "") -> Node3D:
 	if kind == "":
 		kind = _pick(TREES, pos)
 	var m := nature(parent, kind, pos, s * 0.5)
 	if m != null:
+		Look.fade_near_camera(m)
 		if fruit.a > 0.0:
 			_fruit_on(parent, m, fruit, 7)
 		return m

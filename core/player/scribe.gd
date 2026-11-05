@@ -13,6 +13,8 @@ var max_x := 1e9
 var min_z := -14.0
 var max_z := 14.0
 var female := true
+## Use the low-poly look (the 2060 home) instead of the 3D model used in the chapters.
+var low_poly := false
 ## Walls and furniture to walk around: rectangles on the ground (x, z). Empty outdoors.
 var blockers: Array[Rect2] = []
 const RADIUS := 0.3
@@ -21,8 +23,14 @@ var _visual: Node3D
 var _legs: Array[Node3D] = []
 var _t := 0.0
 var _model := false
+var _lp: LowPolyPerson
 
 func _ready() -> void:
+	if low_poly:
+		_lp = LowPolyPerson.create(LowPolyPerson.SCRIBE_F if female else LowPolyPerson.SCRIBE_M)
+		_visual = _lp
+		add_child(_lp)
+		return
 	var id := "scribe_female" if female else "scribe_male"
 	if CharacterFactory.has_model(id):
 		_visual = CharacterFactory.make(id, self, Vector3.ZERO)
@@ -67,12 +75,17 @@ func _process(delta: float) -> void:
 		# Face the direction of travel (the figure's front is +X).
 		var target := atan2(-v.y, v.x)
 		_visual.rotation.y = lerp_angle(_visual.rotation.y, target, 0.25)
+		if _lp:
+			_lp.walk_speed = v.length()
+			return
 		if _model:
 			CharacterFactory.play(_visual, "Walk", 0.0, clampf(v.length() * 1.3, 0.6, 1.3))
 			return
 		_visual.position.y = absf(sin(_t)) * 0.07
 		_legs[0].rotation.z = sin(_t) * 0.6
 		_legs[1].rotation.z = -sin(_t) * 0.6
+	elif _lp:
+		_lp.walk_speed = 0.0
 	elif _model:
 		CharacterFactory.play(_visual, "Idle")
 	else:
