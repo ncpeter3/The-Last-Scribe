@@ -20,3 +20,10 @@ jobs:
           timeout 300 godot --headless res://tools/test/home_playtest.tscn 2>&1 | grep -v 'mesh_get_surface_count\|Parameter "m" is null' | tee home.log
           if grep -q "SCRIPT ERROR" home.log; then echo "Script errors during playthrough"; exit 1; fi
         shell: bash
+      - name: Play through the start screen (title, scribe choice, story intro)
+        run: |
+          set -o pipefail
+          timeout 300 godot --headless res://tools/test/start_playtest.tscn 2>&1 | grep -v 'mesh_get_surface_count\|Parameter "m" is null' | tee start.log
+          if grep -q "SCRIPT ERROR" start.log; then echo "Script errors during playthrough"; exit 1; fi
+          grep -q "START PLAYTEST PASSED" start.log
+        shell: bash
