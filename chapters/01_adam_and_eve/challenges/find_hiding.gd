@@ -9,6 +9,7 @@ var _spot := Vector3.ZERO
 var _bush: Node3D
 var _people: Array = []
 var _time := 0.0
+var _d0 := 0.0  # how far away the scribe started
 
 func build() -> void:
 	_spot = Vector3(x0 + SPOT.x, 0, SPOT.y)
@@ -44,3 +45,15 @@ func status() -> String:
 	elif d < 9.0:
 		warmth = "Closer. You hear leaves rustling."
 	return "Where art thou? Find where Adam and Eve hid.   %s" % warmth
+
+func task() -> Dictionary:
+	var d := flat_dist(_spot)
+	if _d0 <= 0.0:
+		_d0 = maxf(d, FOUND + 1.0)
+	var hint := "The leaves are still here."
+	if d < 5.0:
+		hint = "Very close. Leaves are rustling right nearby!"
+	elif d < 9.0:
+		hint = "Closer. You hear leaves rustling."
+	var p := 1.0 if not running else clampf(1.0 - (d - FOUND) / (_d0 - FOUND), 0.0, 0.99)
+	return {"title": "Where art thou? Find where Adam and Eve hid", "hint": hint, "progress": p}

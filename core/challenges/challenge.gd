@@ -63,6 +63,11 @@ func act() -> void:
 func status() -> String:
 	return ""
 
+## Override: the task card in the top-left corner (see core/ui/task_tracker.gd):
+## {title, hint?, done + total, or progress 0..1}.
+func task() -> Dictionary:
+	return {"title": status(), "progress": 0.0}
+
 func finish() -> void:
 	running = false
 	completed.emit()

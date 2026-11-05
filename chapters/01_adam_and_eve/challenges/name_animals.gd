@@ -92,3 +92,7 @@ func _answer(i: int, choice: int) -> void:
 
 func status() -> String:
 	return "Record every living creature: %d/%d written in the scroll.   Walk up slowly." % [_count(), _animals.size()]
+
+func task() -> Dictionary:
+	return {"title": "Record every living creature in your scroll", "hint": "Walk up slowly so they don't run off.",
+		"done": _count(), "total": _animals.size()}
