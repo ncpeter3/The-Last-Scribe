@@ -14,7 +14,7 @@ var _at_river := false
 
 func build() -> void:
 	# The river continues from Eden into this part of the garden.
-	Props.slab(self, x0, x1, Color(0.3, 0.6, 0.85), RIVER_Z0, RIVER_Z1, 0.04, 0.1)
+	Props.water(self, x0, x1, RIVER_Z0, RIVER_Z1, 0.04)
 	for i in 6:
 		Props.rock(self, Vector3(lerpf(x0 + 1, x1 - 1, i / 5.0), 0, RIVER_Z1 + 0.4), 0.5)
 	var spots := [Vector3(2.5, 0, 1.5), Vector3(4.5, 0, -2.0), Vector3(6.5, 0, 3.0), Vector3(8.5, 0, -0.5), Vector3(10.5, 0, 2.0)]

@@ -16,3 +16,10 @@ Changes made for this game (by `tools/art/`): characters recolored with natural 
 new clothing colors, hair and fur swapped between characters, a satchel, strap and scroll added to the
 scribes, wings added to the cherub, animals resized to real-world sizes, textures shrunk to 512 px.
 The serpent (`characters/serpent.glb`) was made from scratch in `tools/art/build_nature.py` (also CC0).
+
+## Fonts
+
+| File | Font | License |
+| --- | --- | --- |
+| `fonts/Nunito.ttf` | Nunito by Vernon Adams, Cyreal and Jacques Le Bailly (from Google Fonts) | SIL Open Font License 1.1 (`fonts/OFL-Nunito.txt`) |
+| `fonts/Cinzel.ttf` | Cinzel by Natanael Gama (from Google Fonts) | SIL Open Font License 1.1 (`fonts/OFL-Cinzel.txt`) |
