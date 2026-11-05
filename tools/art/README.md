@@ -12,7 +12,7 @@ tools/art/build_all.sh               # downloads the packs into art_sources/ (gi
 
 | Script | Makes |
 | --- | --- |
-| `build_characters.py` | `characters/*.glb`: scribe_female, scribe_male, adam, eve, adam_skins, eve_skins, cherub |
+| `build_characters.py` | `characters/*.glb`: scribe_female, scribe_male, adam, eve, adam_skins, eve_skins, cherub, and the family at home (mom, dad, grandma, sibling) |
 | `build_animals.py` | `animals/*.glb`: 15 animals with Idle and/or Walk animations |
 | `build_nature.py` | `nature/*.gltf` (+ shared `nature/textures/`) and `characters/serpent.glb` |
 

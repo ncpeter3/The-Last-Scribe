@@ -10,6 +10,17 @@
 - **Monetization:** free for now.
 - **Scribe role:** mostly an observer of the main story, but the world is open to explore and interact with (animals, plants, objects). In Adam and Eve there are no other characters to talk to until they have children.
 
+## Opening: home in 2060
+
+The game starts in the scribe's home the night they leave (`chapters/00_home/`). The family is
+there: Mom (kitchen), Dad (living room window), Grandma (her armchair; she remembers paper Bibles)
+and little brother Sam with Biscuit the dog. Each talk asks the scribe a question ("Are you sure?",
+"Why the very beginning?", "Why you?") and every answer gets a loving, supportive reply; two
+answers share a verse that goes into the Scroll Journal. Talking is optional, but if the scribe
+walks up to the time machine in the garage without talking to anyone, it asks first. Whoever they
+talked to comes to the garage to see them off, then Chapter 1 starts. Text: `data/home.json`.
+`tools/test/home_playtest.tscn` plays it headless in CI.
+
 ## Chapter 1 challenges (Eden)
 
 Each challenge starts right after the verse it teaches, and the next story beat waits until it

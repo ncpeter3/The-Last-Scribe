@@ -1,0 +1,138 @@
+{
+  "intro": [
+    {"speaker": "You", "text": "Tonight's the night. The time machine in the garage is finally ready."},
+    {"speaker": "You", "text": "Every Bible left in 2060 is a digital copy, and nobody can tell anymore which words have been changed."},
+    {"speaker": "You", "text": "So I'm going back to the very beginning, to see it with my own eyes and write it down true."},
+    {"speaker": "You", "text": "My family is home. I should talk to them before I go. The garage is through the living room."}
+  ],
+  "family": [
+    {
+      "id": "mom", "name": "Mom", "model": "mom", "x": -9.1, "z": 2.4, "face": 0,
+      "talk": [
+        {"speaker": "Mom", "text": "There you are. I made your favorite tonight, just in case it's the last real dinner you get for a while."},
+        {"speaker": "Mom", "text": "Are you sure you want to do this, sweetheart? The beginning of the world is a long way from our kitchen."}
+      ],
+      "question": "What do you tell Mom?",
+      "options": ["I'm sure. Someone has to see it with their own eyes.", "Honestly? I'm a little scared."],
+      "replies": [
+        [
+          {"speaker": "Mom", "text": "You always did want to see things for yourself. Even when you were little, you'd never believe a story until you'd checked it."},
+          {"speaker": "Mom", "text": "Just promise me you'll be careful. Watch, and write, and don't wander too far."}
+        ],
+        [
+          {"speaker": "Mom", "text": "Scared is all right. It means you know this matters."},
+          {"speaker": "Mom", "text": "\"Be strong and of a good courage; be not afraid... for the LORD thy God is with thee whithersoever thou goest.\" I'll be praying that over you every day.", "verse": "Joshua 1:9"}
+        ]
+      ],
+      "after": [
+        {"speaker": "Mom", "text": "Now come here and give me a hug before you go. I love you, my {child}."}
+      ],
+      "again": [
+        {"speaker": "Mom", "text": "Go on. We'll be right here when you get back. I'll keep your plate warm."}
+      ]
+    },
+    {
+      "id": "dad", "name": "Dad", "model": "dad", "x": 4.0, "z": -5.6, "face": -60,
+      "talk": [
+        {"speaker": "Dad", "text": "Hey, kiddo. I keep looking at that machine in the garage. It hums even when nobody's touching it."},
+        {"speaker": "Dad", "text": "Help me understand something. Why go all the way back to the very beginning? Why not start somewhere closer to us?"}
+      ],
+      "question": "What do you tell Dad?",
+      "options": ["If the beginning is wrong, everything after it is too.", "I want to see every story in order, as it happened."],
+      "replies": [
+        [
+          {"speaker": "Dad", "text": "Huh. Like pouring the foundation before you build the walls."},
+          {"speaker": "Dad", "text": "That makes sense. You can't build a straight house on a crooked foundation."}
+        ],
+        [
+          {"speaker": "Dad", "text": "One story at a time, in order. That's how your grandma read them to me every night when I was a boy."},
+          {"speaker": "Dad", "text": "Start with \"In the beginning\" and keep going. I like that."}
+        ]
+      ],
+      "after": [
+        {"speaker": "Dad", "text": "I'm proud of you. Not just because it's brave, though it is. Because you care about the truth enough to go and find it."}
+      ],
+      "again": [
+        {"speaker": "Dad", "text": "Garage door's unlocked. Don't forget your satchel. And your scroll!"}
+      ]
+    },
+    {
+      "id": "grandma", "name": "Grandma", "model": "grandma", "x": -1.85, "z": -3.0, "face": 0, "sit": true,
+      "talk": [
+        {"speaker": "Grandma", "text": "Come sit by me a minute. My knees aren't going anywhere, but you are."},
+        {"speaker": "Grandma", "text": "When I was young, I had a Bible made of paper. I could hold it in my hands, and nobody could change a single word without me seeing."},
+        {"speaker": "Grandma", "text": "Then the books went away, and the screens started saying whatever someone wanted them to say."},
+        {"speaker": "Grandma", "text": "So tell me, dear. Why does it have to be you?"}
+      ],
+      "question": "What do you tell Grandma?",
+      "options": ["Because I can't stop thinking about it, Grandma.", "Because you taught me those words were worth keeping."],
+      "replies": [
+        [
+          {"speaker": "Grandma", "text": "Maybe that's how you know you're called to it."},
+          {"speaker": "Grandma", "text": "Young Samuel heard his name in the night and answered, \"Speak; for thy servant heareth.\" Sounds like you're listening too.", "verse": "1 Samuel 3:10"}
+        ],
+        [
+          {"speaker": "Grandma", "text": "Oh, sweetheart. Then all my old stories did their job."},
+          {"speaker": "Grandma", "text": "\"The grass withereth, the flower fadeth: but the word of our God shall stand for ever.\" Go and find it standing.", "verse": "Isaiah 40:8"}
+        ]
+      ],
+      "after": [
+        {"speaker": "Grandma", "text": "Bring me back a page I can hold, will you? I've saved a spot on my shelf for it."}
+      ],
+      "again": [
+        {"speaker": "Grandma", "text": "Go on, now. I'll be right here in my chair, waiting for that page."}
+      ]
+    },
+    {
+      "id": "sam", "name": "Sam", "model": "sibling", "x": 2.6, "z": 2.4, "face": 150,
+      "talk": [
+        {"speaker": "Sam", "text": "Is it true? You're going back to before there were even people?"},
+        {"speaker": "Sam", "text": "Will you see the very first animals? Like, the very first dog ever?"}
+      ],
+      "question": "What do you tell Sam?",
+      "options": ["I'll write down every animal I see, just for you.", "I'll bring the whole story back for you to read."],
+      "replies": [
+        [
+          {"speaker": "Sam", "text": "Every single one? Even the bugs?"},
+          {"speaker": "Sam", "text": "Okay. But if you see Biscuit's great-great-great... a LOT of greats... grandpa, say hi for me."}
+        ],
+        [
+          {"speaker": "Sam", "text": "A real one? Nobody at my school has ever even seen a real one."},
+          {"speaker": "Sam", "text": "Then I can read it to Biscuit. He likes stories."}
+        ]
+      ],
+      "after": [
+        {"speaker": "Sam", "text": "Hey... you're coming back, right?"},
+        {"speaker": "You", "text": "I promise. Every story, in order, and then home."},
+        {"speaker": "Sam", "text": "Okay. Pinky promise counts double. You're the best {big} ever."}
+      ],
+      "again": [
+        {"speaker": "Sam", "text": "Biscuit and me are gonna guard your room till you get back."}
+      ]
+    }
+  ],
+  "looks": [
+    {"id": "tablet", "name": "Your tablet", "x": -5.2, "z": -5.6,
+      "note": "Three digital copies of Genesis 1:1, and all three say something different. One has a whole verse missing. Which one is true? Nobody can say anymore."},
+    {"id": "shelf", "name": "Grandma's shelf", "x": -0.2, "z": -6.0,
+      "note": "Grandma's old bookshelf. It once held real paper books. Now it holds photos, and one empty spot she calls \"saved for the Book.\""},
+    {"id": "biscuit", "name": "Pet Biscuit", "x": 3.6, "z": 3.3,
+      "note": "Biscuit thumps his tail. He doesn't know where you're going, but he's sure you'll come back."}
+  ],
+  "machine": {
+    "x": 11.0, "z": -3.2,
+    "nobody": [
+      {"speaker": "You", "text": "My family is just inside, and I haven't said goodbye to anyone yet."}
+    ],
+    "nobody_question": "Go back inside first?",
+    "nobody_options": ["Go say goodbye first", "I'm ready. Go now."],
+    "depart": [
+      {"speaker": "Codex", "text": "Time machine online. Destination: In the beginning. Genesis, chapter 1."},
+      {"speaker": "You", "text": "Satchel. Scroll. Everyone I love, right here in my heart. Here we go."}
+    ],
+    "send_off": [
+      {"speaker": "Mom", "text": "We love you! Be careful!"},
+      {"speaker": "Sam", "text": "Pinky promise counts double!"}
+    ]
+  }
+}
