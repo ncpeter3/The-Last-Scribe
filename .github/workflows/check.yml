@@ -33,3 +33,9 @@ jobs:
           timeout 120 godot --headless res://tools/test/ui_test.tscn 2>&1 | grep -v 'mesh_get_surface_count\|Parameter "m" is null' | tee ui.log
           if grep -q "SCRIPT ERROR" ui.log; then echo "Script errors in UI test"; exit 1; fi
         shell: bash
+      - name: Check every question fits on phone and tablet screens
+        run: |
+          set -o pipefail
+          timeout 120 godot --headless res://tools/test/choice_shots.tscn 2>&1 | grep -v 'mesh_get_surface_count\|Parameter "m" is null' | tee choice.log
+          if grep -q "SCRIPT ERROR" choice.log; then echo "Script errors in choice test"; exit 1; fi
+        shell: bash
