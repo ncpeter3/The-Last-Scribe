@@ -37,7 +37,7 @@ func _choice(text: String, gender: String) -> Control:
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 8)
 	var id := "scribe_" + gender
-	if CharacterFactory.has_model(id):
+	if true:  # every scribe has a low-poly preview
 		var holder := SubViewportContainer.new()
 		holder.stretch = true
 		holder.custom_minimum_size = Vector2(320, 260)

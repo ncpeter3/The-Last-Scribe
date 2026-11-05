@@ -1,7 +1,6 @@
 extends Node3D
-## The scribe: walks freely on the ground plane (top-down 3D). Uses the real 3D model
-## (shared_assets/characters/scribe_female.glb or scribe_male.glb) with Idle/Walk animations,
-## or a simple low-poly figure if the model is missing.
+## The scribe: walks freely on the ground plane (top-down 3D), drawn as a low-poly figure
+## (core/lowpoly/low_poly_person.gd) in a slate-blue robe with a teal sash, satchel and scroll.
 ## Move with WASD or the on-screen joystick (move_vec: x = right, y = down the screen / +Z).
 ## frozen stops movement during dialogue; min_x/max_x and z limits keep the scribe in bounds.
 
@@ -13,48 +12,19 @@ var max_x := 1e9
 var min_z := -14.0
 var max_z := 14.0
 var female := true
-## Use the low-poly look (the 2060 home) instead of the 3D model used in the chapters.
-var low_poly := false
+## Kept so scenes can still set it; the scribe is always low-poly now.
+var low_poly := true
 ## Walls and furniture to walk around: rectangles on the ground (x, z). Empty outdoors.
 var blockers: Array[Rect2] = []
 const RADIUS := 0.3
 
 var _visual: Node3D
-var _legs: Array[Node3D] = []
-var _t := 0.0
-var _model := false
 var _lp: LowPolyPerson
 
 func _ready() -> void:
-	if low_poly:
-		_lp = LowPolyPerson.create(LowPolyPerson.SCRIBE_F if female else LowPolyPerson.SCRIBE_M)
-		_visual = _lp
-		add_child(_lp)
-		return
-	var id := "scribe_female" if female else "scribe_male"
-	if CharacterFactory.has_model(id):
-		_visual = CharacterFactory.make(id, self, Vector3.ZERO)
-		_model = true
-		return
-	_visual = Node3D.new()
-	add_child(_visual)
-	var robe := Color(0.82, 0.74, 0.55)
-	var sash := Color(0.55, 0.2, 0.15)
-	var skin := Color(0.85, 0.68, 0.52)
-	var hair := Color(0.25, 0.15, 0.1) if female else Color(0.18, 0.12, 0.08)
-	_mesh(_cyl(0.28, 0.42, 1.0, 8), robe, Vector3(0, 0.75, 0), _visual)
-	_mesh(_cyl(0.34, 0.34, 0.1, 8), sash, Vector3(0, 0.82, 0), _visual)
-	_mesh(_sphere(0.2), skin, Vector3(0, 1.45, 0), _visual)
-	_mesh(_sphere(0.215, 0.7), hair, Vector3(0, 1.5, -0.02), _visual)
-	if female:
-		_mesh(_cyl(0.13, 0.08, 0.5, 6), hair, Vector3(0, 1.2, -0.17), _visual)
-	_mesh(_box(Vector3(0.12, 0.3, 0.4)), Color(0.4, 0.28, 0.16), Vector3(0.25, 0.75, 0), _visual)
-	for x in [-0.12, 0.12]:
-		var leg := Node3D.new()
-		leg.position = Vector3(x, 0.28, 0)
-		_visual.add_child(leg)
-		_mesh(_cyl(0.07, 0.07, 0.3, 6), Color(0.35, 0.25, 0.15), Vector3(0, -0.14, 0), leg)
-		_legs.append(leg)
+	_lp = LowPolyPerson.create(LowPolyPerson.SCRIBE_F if female else LowPolyPerson.SCRIBE_M)
+	_visual = _lp
+	add_child(_lp)
 
 func _process(delta: float) -> void:
 	var v := Vector2(Input.get_axis("move_left", "move_right"), Input.get_axis("move_up", "move_down"))
@@ -71,66 +41,15 @@ func _process(delta: float) -> void:
 	if not _blocked(position.x, nz):
 		position.z = nz
 	if v.length() > 0.05:
-		_t += delta * 9.0
 		# Face the direction of travel (the figure's front is +X).
 		var target := atan2(-v.y, v.x)
 		_visual.rotation.y = lerp_angle(_visual.rotation.y, target, 0.25)
-		if _lp:
-			_lp.walk_speed = v.length()
-			return
-		if _model:
-			CharacterFactory.play(_visual, "Walk", 0.0, clampf(v.length() * 1.3, 0.6, 1.3))
-			return
-		_visual.position.y = absf(sin(_t)) * 0.07
-		_legs[0].rotation.z = sin(_t) * 0.6
-		_legs[1].rotation.z = -sin(_t) * 0.6
-	elif _lp:
-		_lp.walk_speed = 0.0
-	elif _model:
-		CharacterFactory.play(_visual, "Idle")
+		_lp.walk_speed = v.length()
 	else:
-		_visual.position.y = lerpf(_visual.position.y, 0.0, 0.2)
-		for l in _legs:
-			l.rotation.z = lerpf(l.rotation.z, 0.0, 0.2)
+		_lp.walk_speed = 0.0
 
 func _blocked(x: float, z: float) -> bool:
 	for r in blockers:
 		if x > r.position.x - RADIUS and x < r.end.x + RADIUS and z > r.position.y - RADIUS and z < r.end.y + RADIUS:
 			return true
 	return false
-
-static func _mat(c: Color) -> StandardMaterial3D:
-	var m := StandardMaterial3D.new()
-	m.albedo_color = c
-	m.roughness = 1.0
-	return m
-
-static func _mesh(mesh: Mesh, c: Color, pos: Vector3, parent: Node) -> MeshInstance3D:
-	var mi := MeshInstance3D.new()
-	mi.mesh = mesh
-	mi.material_override = _mat(c)
-	mi.position = pos
-	parent.add_child(mi)
-	return mi
-
-static func _cyl(top: float, bottom: float, h: float, seg: int) -> CylinderMesh:
-	var m := CylinderMesh.new()
-	m.top_radius = top
-	m.bottom_radius = bottom
-	m.height = h
-	m.radial_segments = seg
-	m.rings = 1
-	return m
-
-static func _sphere(r: float, hemi: float = 1.0) -> SphereMesh:
-	var m := SphereMesh.new()
-	m.radius = r
-	m.height = r * 2.0 * hemi
-	m.radial_segments = 10
-	m.rings = 6
-	return m
-
-static func _box(size: Vector3) -> BoxMesh:
-	var m := BoxMesh.new()
-	m.size = size
-	return m

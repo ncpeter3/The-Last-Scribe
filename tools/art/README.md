@@ -1,45 +1,17 @@
-# Art pipeline
+# Art: the low-poly kit
 
-The models in `shared_assets/` are built by these Blender scripts from free CC0 packs (see
-`shared_assets/CREDITS.md`). You only need this to change or add art; the game uses the built files.
+Everything you see in the game is built in code, in one flat-shaded low-poly style, from one small
+palette. There are no model files to download or rebuild.
 
-## Rebuild everything
-
-```bash
-python3.11 -m pip install bpy        # Blender as a Python module (needs Python 3.11)
-tools/art/build_all.sh               # downloads the packs into art_sources/ (git-ignored), then builds
-```
-
-| Script | Makes |
+| File | What it makes |
 | --- | --- |
-| `build_characters.py` | `characters/*.glb`: scribe_female, scribe_male, adam, eve, adam_skins, eve_skins, cherub, and the family at home (mom, dad, grandma, sibling) |
-| `build_animals.py` | `animals/*.glb`: 15 animals with Idle and/or Walk animations |
-| `build_nature.py` | `nature/*.gltf` (+ shared `nature/textures/`) and `characters/serpent.glb` |
+| `core/lowpoly/low_poly.gd` (`LowPoly`) | The palette and a mesh builder (box, prism, ball, dome, wedge, ring, hoop) that merges many shapes into one mesh with one shared material. Colors with alpha below 1 glow: `LowPoly.glow(color, strength)`. |
+| `core/lowpoly/low_poly_person.gd` (`LowPolyPerson`) | People from a look Dictionary (presets: both scribes, the family, Adam, Eve, their coats of skins, the cherub), animated in code: walk, sit, and gestures (talk, wave, cheer, hug, ...). |
+| `core/lowpoly/low_poly_animal.gd` (`LowPolyAnimal`) | 15 animals plus the serpent. Land animals wander and graze (never into water), birds fly in loops or perch, fish and whales swim inside their water. |
+| `core/lowpoly/low_poly_dog.gd` (`LowPolyDog`) | Biscuit, the family dog. |
+| `core/world/props.gd` (`Props`) | Trees, rocks, grass, flowers, bushes, water, flames, and creatures placed in the world. Repeated plants share meshes. |
+| `core/lowpoly/*.gdshader` | The shared material (with glow and fade-near-camera), flat-lit simple shapes, and faceted moving water. |
 
-Each script takes `-- <sources dir> <output dir> [ids...]`, so you can rebuild one model, for example
-`python3.11 tools/art/build_characters.py -- art_sources shared_assets/characters eve`.
-
-## How the game uses them
-
-- `CharacterFactory.make(id, ...)` loads `characters/<id>.glb`, turns it to face +X and plays `Idle`
-  (`CharacterFactory.play(node, "Walk")` switches animation). Missing models fall back to simple shapes.
-- `Props.tree/rock/grass/flower/bird/creature/nature` place nature and animals the same way.
-- Characters share one skeleton with these animations: Idle, Walk, Run, PickUp, SitDown, Victory.
-
-## Adding a new person
-
-Add a function to `build_characters.py` that starts from one of the pack's 50 characters
-(`base("Kimono_Male")`), recolors materials, grafts hair or clothing from another character
-(`graft(...)`), and adds props bound to a bone (`prop(...)`). Then add it to `BUILDERS`.
-
-## Low-poly kit (the 2060 home)
-
-The opening home uses a different, flat-shaded low-poly style built entirely in code, no Blender needed:
-
-- `core/lowpoly/low_poly.gd` (`LowPoly`): the palette and a mesh builder (box, prism, ball, dome,
-  wedge, ring, hoop) that merges many shapes into one mesh with one shared material. Colors with alpha
-  below 1 glow (`LowPoly.glow(color, strength)`).
-- `core/lowpoly/low_poly_person.gd` (`LowPolyPerson`): people from a look Dictionary (presets for the
-  scribes and the family), animated in code: walk, sit, and gestures (talk, wave, cheer, hug, ...).
-- `core/lowpoly/low_poly_dog.gd` (`LowPolyDog`): Biscuit.
-- `tools/test/lowpoly_lineup.tscn` saves a lineup screenshot of every character for checking the art.
+`CharacterFactory.make(id, ...)` builds any named character. `tools/test/lowpoly_lineup.tscn` saves a
+screenshot of the people for checking the art; `tools/test/scenery_shots.tscn` saves each part of
+chapter 1.
