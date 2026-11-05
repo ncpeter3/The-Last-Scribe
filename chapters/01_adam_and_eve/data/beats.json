@@ -555,5 +555,540 @@
    "note": "Scribe's note: God places cherubim and a flaming sword at the east of Eden to keep the way of the tree of life (Genesis 3:24).",
    "verse": "Genesis 3:24"
   }
+ ],
+ "forbidden_fruit": [
+  {
+   "speaker": "Adam",
+   "text": "Don't you know you are not to eat from that tree?"
+  },
+  {
+   "speaker": "Adam",
+   "text": "Not that one! The LORD God said of this tree, thou shalt not eat of it."
+  },
+  {
+   "speaker": "Adam",
+   "text": "Again? Every other tree in the whole garden is yours to enjoy. Just not this one!"
+  },
+  {
+   "speaker": "Adam",
+   "text": "Put it down, friend. That is the tree of the knowledge of good and evil."
+  },
+  {
+   "speaker": "Adam",
+   "text": "Don't you know you are not to eat from that tree? I'll keep knocking it away as long as it takes."
+  },
+  {
+   "speaker": "Adam",
+   "text": "You are a stubborn one! Try the figs over there, they are very good."
+  }
+ ],
+ "side_quests": [
+  {
+   "id": "seeds",
+   "type": "find",
+   "after": "day2_3",
+   "title": "Seeds after his kind",
+   "marker": [
+    22.5,
+    2.4
+   ],
+   "task": "Gather seeds from the new plants",
+   "verb": "Pick up the seed",
+   "intro": [
+    {
+     "speaker": "Scribe",
+     "text": "The dry land is already full of plants, and every one carries its own seed. I'd like to gather a few for my scroll."
+    },
+    {
+     "speaker": "Codex",
+     "text": "Find five seed pods on the new land. Look for the green sparkles."
+    }
+   ],
+   "items": [
+    {
+     "at": [
+      22.0,
+      -3.0
+     ],
+     "kind": "seed"
+    },
+    {
+     "at": [
+      24.0,
+      4.0
+     ],
+     "kind": "seed"
+    },
+    {
+     "at": [
+      27.5,
+      -2.0
+     ],
+     "kind": "seed"
+    },
+    {
+     "at": [
+      29.0,
+      5.0
+     ],
+     "kind": "seed"
+    },
+    {
+     "at": [
+      33.0,
+      3.0
+     ],
+     "kind": "seed"
+    }
+   ],
+   "done": [
+    {
+     "speaker": "Scripture",
+     "text": "And the earth brought forth grass, and herb yielding seed after his kind, and the tree yielding fruit, whose seed was in itself, after his kind: and God saw that it was good.",
+     "verse": "Genesis 1:12"
+    },
+    {
+     "speaker": "Scribe",
+     "text": "Scribe's note: each plant makes seed after its own kind. God built the whole garden to keep on growing."
+    }
+   ]
+  },
+  {
+   "id": "birds",
+   "type": "find",
+   "after": "day4_5",
+   "title": "Every winged fowl",
+   "marker": [
+    26.0,
+    3.0
+   ],
+   "task": "Sketch four resting birds",
+   "verb": "Sketch the bird",
+   "intro": [
+    {
+     "speaker": "Scribe",
+     "text": "Birds! The very first ones. A few have landed on the rocks to rest."
+    },
+    {
+     "speaker": "Codex",
+     "text": "Walk up to four perched birds and sketch each one in your scroll."
+    }
+   ],
+   "items": [
+    {
+     "at": [
+      28.0,
+      -4.5
+     ],
+     "kind": "bird"
+    },
+    {
+     "at": [
+      31.0,
+      4.5
+     ],
+     "kind": "bird"
+    },
+    {
+     "at": [
+      34.0,
+      -3.0
+     ],
+     "kind": "bird",
+     "species": "eagle",
+     "scale": 0.8
+    },
+    {
+     "at": [
+      38.0,
+      5.0
+     ],
+     "kind": "bird"
+    }
+   ],
+   "done": [
+    {
+     "speaker": "Scripture",
+     "text": "And God created great whales, and every living creature that moveth, which the waters brought forth abundantly, after their kind, and every winged fowl after his kind: and God saw that it was good.",
+     "verse": "Genesis 1:21"
+    }
+   ]
+  },
+  {
+   "id": "lamb",
+   "type": "lamb",
+   "after": "day6",
+   "title": "The lost lamb",
+   "marker": [
+    40.0,
+    2.2
+   ],
+   "lamb": [
+    36.5,
+    9.0
+   ],
+   "flock": [
+    41.0,
+    -6.0
+   ],
+   "intro": [
+    {
+     "speaker": "Scribe",
+     "text": "Listen... a little bleat, far off. One lamb has wandered away from the flock."
+    },
+    {
+     "speaker": "Codex",
+     "text": "Find the lost lamb, call it, and lead it back to the sheep on the other side of the path."
+    }
+   ],
+   "done": [
+    {
+     "speaker": "Scripture",
+     "text": "And God made the beast of the earth after his kind, and cattle after their kind, and every thing that creepeth upon the earth after his kind: and God saw that it was good.",
+     "verse": "Genesis 1:25"
+    },
+    {
+     "speaker": "Scribe",
+     "text": "Scribe's note: back with its flock. Later Scripture often calls God's people His sheep."
+    }
+   ]
+  },
+  {
+   "id": "rest",
+   "type": "rest",
+   "after": "day7",
+   "title": "A day of rest",
+   "marker": [
+    49.0,
+    2.2
+   ],
+   "seat": [
+    51.0,
+    -4.0
+   ],
+   "seconds": 5,
+   "intro": [
+    {
+     "speaker": "Scribe",
+     "text": "Everything is finished, and God is resting. Maybe a scribe can rest a moment too."
+    },
+    {
+     "speaker": "Codex",
+     "text": "Sit on the mossy stone and rest for a few moments."
+    }
+   ],
+   "done": [
+    {
+     "speaker": "Scripture",
+     "text": "Thus the heavens and the earth were finished, and all the host of them.",
+     "verse": "Genesis 2:1"
+    },
+    {
+     "speaker": "Scribe",
+     "text": "Scribe's note: rest was part of creation too. God blessed the seventh day and made it holy."
+    }
+   ]
+  },
+  {
+   "id": "rivers",
+   "type": "find",
+   "after": "adam",
+   "title": "The four heads of the river",
+   "marker": [
+    55.5,
+    2.3
+   ],
+   "task": "Find the four springs of the river",
+   "verb": "Read the spring's name",
+   "intro": [
+    {
+     "speaker": "Scribe",
+     "text": "Scripture says the river out of Eden parts into four heads. Each one has a name."
+    },
+    {
+     "speaker": "Codex",
+     "text": "Follow the river and find four springs along its bank, up the screen. Record each name."
+    }
+   ],
+   "items": [
+    {
+     "at": [
+      66.0,
+      -9.6
+     ],
+     "kind": "spring",
+     "lines": [
+      {
+       "speaker": "Scripture",
+       "text": "The name of the first is Pison: that is it which compasseth the whole land of Havilah, where there is gold;",
+       "verse": "Genesis 2:11"
+      }
+     ]
+    },
+    {
+     "at": [
+      70.0,
+      -9.6
+     ],
+     "kind": "spring",
+     "lines": [
+      {
+       "speaker": "Scripture",
+       "text": "And the name of the second river is Gihon: the same is it that compasseth the whole land of Ethiopia.",
+       "verse": "Genesis 2:13"
+      }
+     ]
+    },
+    {
+     "at": [
+      74.0,
+      -9.6
+     ],
+     "kind": "spring",
+     "lines": [
+      {
+       "speaker": "Scripture",
+       "text": "And the name of the third river is Hiddekel: that is it which goeth toward the east of Assyria. And the fourth river is Euphrates.",
+       "verse": "Genesis 2:14"
+      }
+     ]
+    },
+    {
+     "at": [
+      77.5,
+      -9.6
+     ],
+     "kind": "spring",
+     "lines": [
+      {
+       "speaker": "Scribe",
+       "text": "The fourth head is Euphrates, named last in Genesis 2:14. People still know that river's name in 2060."
+      }
+     ]
+    }
+   ],
+   "done": [
+    {
+     "speaker": "Scribe",
+     "text": "Scribe's note: four rivers from one. The Euphrates and the Tigris (Hiddekel) are rivers people still know today."
+    }
+   ]
+  },
+  {
+   "id": "gems",
+   "type": "find",
+   "after": "adam",
+   "title": "The gold of that land",
+   "marker": [
+    61.0,
+    2.4
+   ],
+   "task": "Find gold, bdellium, and onyx",
+   "verb": "Pick it up",
+   "intro": [
+    {
+     "speaker": "Scribe",
+     "text": "Something glints in the stream by the pond. Scripture mentions treasures in the land around the river."
+    },
+    {
+     "speaker": "Codex",
+     "text": "Find three treasures: gold in the stream, bdellium by the pond, and onyx on the riverbank."
+    }
+   ],
+   "items": [
+    {
+     "at": [
+      55.4,
+      -11.9
+     ],
+     "kind": "gold",
+     "lines": [
+      {
+       "speaker": "Scribe",
+       "text": "Gold, shining in the stream."
+      }
+     ]
+    },
+    {
+     "at": [
+      59.7,
+      -9.8
+     ],
+     "kind": "bdellium",
+     "lines": [
+      {
+       "speaker": "Scribe",
+       "text": "Bdellium: a pale, sweet-smelling resin, like a pearl of tree sap."
+      }
+     ]
+    },
+    {
+     "at": [
+      69.0,
+      -9.0
+     ],
+     "kind": "onyx",
+     "lines": [
+      {
+       "speaker": "Scribe",
+       "text": "And the onyx stone, black with bands of white."
+      }
+     ]
+    }
+   ],
+   "done": [
+    {
+     "speaker": "Scripture",
+     "text": "And the gold of that land is good: there is bdellium and the onyx stone.",
+     "verse": "Genesis 2:12"
+    },
+    {
+     "speaker": "Scribe",
+     "text": "Scribe's note: onyx shows up again much later, on the shoulders of the high priest's clothes (Exodus 28:9)."
+    }
+   ]
+  },
+  {
+   "id": "herbs",
+   "type": "find",
+   "after": "naming",
+   "title": "Green herb for every beast",
+   "marker": [
+    90.5,
+    2.4
+   ],
+   "task": "Pick three green herbs",
+   "verb": "Pick the herb",
+   "deliver": "animals",
+   "deliver_count": 3,
+   "deliver_task": "Give a herb to three animals",
+   "deliver_verb": "Give a green herb",
+   "deliver_intro": [
+    {
+     "speaker": "Codex",
+     "text": "Now give one herb each to three different animals. Walk up to one and tap to share."
+    }
+   ],
+   "intro": [
+    {
+     "speaker": "Scribe",
+     "text": "Scripture says God gave the green plants as food for every beast. The animals here look hungry!"
+    },
+    {
+     "speaker": "Codex",
+     "text": "Pick three green herbs, then share them with three different animals."
+    }
+   ],
+   "items": [
+    {
+     "at": [
+      86.0,
+      -4.0
+     ],
+     "kind": "herb"
+    },
+    {
+     "at": [
+      94.0,
+      5.5
+     ],
+     "kind": "herb"
+    },
+    {
+     "at": [
+      99.0,
+      -5.5
+     ],
+     "kind": "herb"
+    }
+   ],
+   "done": [
+    {
+     "speaker": "Scripture",
+     "text": "And to every beast of the earth, and to every fowl of the air, and to every thing that creepeth upon the earth, wherein there is life, I have given every green herb for meat: and it was so.",
+     "verse": "Genesis 1:30"
+    }
+   ]
+  },
+  {
+   "id": "flowers",
+   "type": "find",
+   "after": "eve",
+   "title": "Flowers for Eve",
+   "marker": [
+    115.5,
+    2.6
+   ],
+   "task": "Pick five flowers",
+   "verb": "Pick the flower",
+   "deliver": "eve",
+   "deliver_count": 1,
+   "deliver_task": "Bring the flowers to Eve",
+   "deliver_verb": "Give the flowers to Eve",
+   "deliver_intro": [
+    {
+     "speaker": "Codex",
+     "text": "A lovely bunch. Now bring them to Eve."
+    }
+   ],
+   "intro": [
+    {
+     "speaker": "Scribe",
+     "text": "Eve is seeing the garden for the very first time. I'll pick her some of the best flowers."
+    },
+    {
+     "speaker": "Codex",
+     "text": "Pick five sparkling flowers, then bring them to Eve."
+    }
+   ],
+   "items": [
+    {
+     "at": [
+      105.0,
+      -4.0
+     ],
+     "kind": "flower"
+    },
+    {
+     "at": [
+      108.0,
+      3.4
+     ],
+     "kind": "flower"
+    },
+    {
+     "at": [
+      111.0,
+      -5.0
+     ],
+     "kind": "flower"
+    },
+    {
+     "at": [
+      120.5,
+      5.8
+     ],
+     "kind": "flower"
+    },
+    {
+     "at": [
+      125.0,
+      -5.8
+     ],
+     "kind": "flower"
+    }
+   ],
+   "done": [
+    {
+     "speaker": "Eve",
+     "text": "For me? They are beautiful! Everything in this garden is so good."
+    },
+    {
+     "speaker": "Scripture",
+     "text": "And out of the ground made the LORD God to grow every tree that is pleasant to the sight, and good for food; the tree of life also in the midst of the garden, and the tree of knowledge of good and evil.",
+     "verse": "Genesis 2:9"
+    }
+   ]
+  }
  ]
 }

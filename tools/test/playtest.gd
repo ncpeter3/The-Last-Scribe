@@ -111,8 +111,13 @@ func _run() -> void:
 		return
 	var beats: Array = ch._beats
 	var shot_beats := ["adam", "naming", "eve", "hiding", "gate"]
+	if not _one_of_each("start"):
+		return
 	for i in beats.size():
 		var b: Dictionary = beats[i]
+		if b["id"] == "serpent":
+			if not await _check_forbidden_fruit():
+				return
 		await _put(Vector3(float(b["x"]), 0, 0))
 		if not ch._dialogue.active:
 			_fail("beat %s did not start" % b["id"])
@@ -136,6 +141,10 @@ func _run() -> void:
 		if ch._beat_index != i + 1:
 			_fail("beat index %d after %s" % [ch._beat_index, b["id"]])
 			return
+	if not _one_of_each("end"):
+		return
+	if not await _play_side_quests():
+		return
 	if not "01_adam_and_eve" in GameState.completed_chapters:
 		_fail("chapter not marked complete")
 		return
@@ -145,6 +154,121 @@ func _run() -> void:
 			return
 	print("PLAYTEST PASSED: %d beats, %d verses recorded" % [beats.size(), GameState.unlocked_verses.size()])
 	get_tree().quit(0)
+
+## There is only ever one Adam and one Eve in the chapter.
+func _one_of_each(when: String) -> bool:
+	var count := {"adam": 0, "eve": 0}
+	for p in ch.find_children("*", "LowPolyPerson", true, false):
+		if p.is_queued_for_deletion():
+			continue
+		var id := String(p.name).trim_suffix("_skins")
+		if count.has(id):
+			count[id] += 1
+	if count["adam"] != 1 or count["eve"] != 1:
+		_fail("at the %s there are %d Adams and %d Eves" % [when, count["adam"], count["eve"]])
+		return false
+	return true
+
+## Before the serpent's scene, plucking the forbidden fruit makes Adam run over and knock it away,
+## with a different line each time.
+func _check_forbidden_fruit() -> bool:
+	var seen := []
+	for k in 3:
+		await _put(ch._forbidden_pos + Vector3(0.8, 0, 1.6))
+		await _act("Pluck a fruit")
+		var t := 0.0
+		while not ch._dialogue.active and t < 8.0:
+			await get_tree().create_timer(0.1).timeout
+			t += 0.1
+		if not ch._dialogue.active:
+			_fail("Adam never came to stop the scribe")
+			return false
+		var adam: Node3D = ch.get_actor("adam")
+		if adam.position.distance_to(ch._scribe.position) > 2.0:
+			_fail("Adam spoke from too far away (%.1f m)" % adam.position.distance_to(ch._scribe.position))
+			return false
+		var line: String = ch._dialogue._lines[ch._dialogue._index]["text"]
+		if line in seen:
+			_fail("Adam repeated himself: " + line)
+			return false
+		seen.append(line)
+		if k == 0:
+			await _shot("forbidden_fruit")
+		await _tap_through()
+	print("Forbidden fruit: Adam stopped the scribe %d times" % seen.size())
+	return true
+
+func _wait_for(cond: Callable, secs: float) -> bool:
+	var t := 0.0
+	while not cond.call() and t < secs:
+		await get_tree().create_timer(0.1).timeout
+		t += 0.1
+	return cond.call()
+
+## Play every side quest to the end.
+func _play_side_quests() -> bool:
+	var qs: Array = ch._quests
+	if qs.size() < 8:
+		_fail("only %d side quests" % qs.size())
+		return false
+	for q in qs:
+		if q.state != "offered":
+			_fail("side quest %s is %s, not offered" % [q.name, q.state])
+			return false
+		await _put(q.marker_pos + Vector3(0.5, 0, 0.3))
+		await _act("Side quest: %s" % q.title)
+		await _tap_through()
+		if q.state != "active":
+			_fail("side quest %s did not start" % q.name)
+			return false
+		if q.name in ["rivers", "flowers"]:
+			await _put(q._items[0]["node"].global_position + Vector3(1.2, 0, 2.0))
+			await _shot("side_quest_" + q.name)
+		match String(q.cfg["type"]):
+			"find":
+				for it in q._items:
+					var n: Node3D = it["node"]
+					await _put(n.global_position + Vector3(0.6, 0, 0.6))
+					await _act(String(q.cfg.get("verb", "")))
+					await _tap_through()
+				if q.cfg.get("deliver", "") == "eve":
+					await _tap_through()
+					await _put(ch.get_actor("eve").global_position + Vector3(0.8, 0, 0.8))
+					await _act(String(q.cfg["deliver_verb"]))
+				elif q.cfg.get("deliver", "") == "animals":
+					await _tap_through()
+					for k in 3:
+						await _frames(2)
+						var target: Node3D = null
+						for a in ch.find_children("*", "LowPolyAnimal", true, false):
+							if a.mode == "wander" and not a in q._fed and a.species != "sheep":
+								target = a
+								break
+						await _put(target.global_position + Vector3(0.5, 0, 0.5))
+						await _act(String(q.cfg["deliver_verb"]))
+			"lamb":
+				await _put(q._lamb.position + Vector3(0.6, 0, 0.6))
+				await _act("Call the lamb")
+				await _tap_through()
+				# Walk slowly to the flock; the lamb should follow.
+				var from: Vector3 = ch._scribe.position
+				for k in 60:
+					await _put(from.lerp(q._flock, (k + 1) / 60.0))
+					await _frames(3)
+				if not await _wait_for(func(): return q.state != "active", 8.0):
+					_fail("the lamb did not follow the scribe home")
+					return false
+			"rest":
+				await _put(q._seat + Vector3(0.6, 0, 0.8))
+				await _act("Sit and rest")
+				await _wait_for(func(): return ch._dialogue.active, 8.0)
+		await _wait_for(func(): return ch._dialogue.active or q.state == "done", 3.0)
+		await _tap_through()
+		if q.state != "done":
+			_fail("side quest %s did not finish (%s)" % [q.name, q.progress()])
+			return false
+	print("Side quests: all %d done" % qs.size())
+	return true
 
 func _play(kind: String, c: Node) -> void:
 	match kind:
@@ -166,7 +290,22 @@ func _play(kind: String, c: Node) -> void:
 				await _put(n.position + Vector3(-1.0, 0, 0.6))
 				await _act("Write it in the scroll")
 				if not ch._choice.active:
-					_fail("no group question")
+					_fail("no name question")
+					return
+				var opts: Array = c.name_options(i)
+				var right: int = opts.find(c._animals[i]["name"])
+				if i == 0:
+					ch._choice._pick((right + 1) % 3)  # wrong name on purpose
+					await _frames(2)
+					if not ch._dialogue.active:
+						_fail("no hint after a wrong name")
+						return
+					await _tap_through()
+					await _act("Write it in the scroll")
+				ch._choice._pick(right)
+				await _frames(2)
+				if not ch._choice.active:
+					_fail("no group question after naming")
 					return
 				if i == 0:
 					await _shot("name_animals_question")
@@ -177,10 +316,17 @@ func _play(kind: String, c: Node) -> void:
 						return
 					await _tap_through()
 					await _act("Write it in the scroll")
+					if not ch._choice.active:
+						_fail("no group question when asked again")
+						return
 				ch._choice._pick(int(c._animals[i]["group"]))
 				await _frames(3)
 				if i == 4:
 					await _shot("name_animals")
+			for a in c._animals:
+				if a["name"] == "Horse" and int(a["group"]) == 0:
+					_fail("the horse is recorded as cattle")
+					return
 		"gather_fruit":
 			for i in c._trees.size():
 				await _put(c._trees[i]["pos"] + Vector3(0, 0, 1.6 * (1 if c._trees[i]["pos"].z < 0 else -1)))
