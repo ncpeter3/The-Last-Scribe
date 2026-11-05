@@ -30,12 +30,13 @@ func _questions() -> Array:
 		if f.has("question"):
 			out.append([String(f["question"]), f["options"]])
 	out.append(["[b]Adam names this creature.[/b]\nWhich group from Genesis 2:20 should the scribe write it under?", NameAnimals.GROUPS])
-	var beats = JSON.parse_string(FileAccess.get_file_as_string("res://chapters/01_adam_and_eve/data/beats.json"))
-	for b in beats["beats"]:
-		var qs: Array = b.get("challenge", {}).get("questions", [])
-		for i in qs.size():
-			var q: Dictionary = qs[i]
-			out.append(["[b]Scroll check %d of %d[/b]\nFill in the missing words.\n\n[i]\"%s\"[/i]  (%s)" % [i + 1, qs.size(), q["text"], q["verse"]], q["options"]])
+	for path in ["res://chapters/01_adam_and_eve/data/beats.json", "res://chapters/02_cain_and_abel/data/beats.json"]:
+		var beats = JSON.parse_string(FileAccess.get_file_as_string(path))
+		for b in beats["beats"]:
+			var qs: Array = b.get("challenge", {}).get("questions", [])
+			for i in qs.size():
+				var q: Dictionary = qs[i]
+				out.append(["[b]Scroll check %d of %d[/b]\nFill in the missing words.\n\n[i]\"%s\"[/i]  (%s)" % [i + 1, qs.size(), q["text"], q["verse"]], q["options"]])
 	# A stress case: four long answers.
 	out.append(["What do you say?", ["The tablet copies got changed, like someone scribbling in your favorite book, so nobody knows what is true anymore.",
 		"Somebody has to see it for real and write it down so it never gets lost again, not ever.",

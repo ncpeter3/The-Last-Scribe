@@ -387,7 +387,7 @@
     "intro": [
      {
       "speaker": "Codex",
-      "text": "Before you return to 2060, check your scroll. Fill in the missing words from what you recorded."
+      "text": "Before you travel on, check your scroll. Fill in the missing words from what you recorded."
      }
     ],
     "done": [],
@@ -1090,5 +1090,24 @@
     }
    ]
   }
- ]
+ ],
+ "next": {
+  "scene": "res://chapters/02_cain_and_abel/scenes/chapter.tscn",
+  "title": "Chapter 2: Cain and Abel",
+  "verb": "Travel on to Chapter 2",
+  "lines": [
+   {
+    "speaker": "Codex",
+    "text": "Chapter 1 is restored and safe in your scroll. The time gate is open again, just past the cherubim."
+   },
+   {
+    "speaker": "Scribe",
+    "text": "Adam and Eve have a long road ahead of them. Let's see what happens to their family."
+   },
+   {
+    "speaker": "Codex",
+    "text": "Step into the time gate when you're ready. Next: Genesis 4, Cain and Abel."
+   }
+  ]
+ }
 }

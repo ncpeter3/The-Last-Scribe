@@ -22,6 +22,7 @@ func _ready() -> void:
 	GameState.unlocked_verses = []
 	GameState.completed_chapters = []
 	ch = CHAPTER.instantiate()
+	ch.auto_change_scene = false
 	add_child(ch)
 	_run()
 
@@ -143,6 +144,11 @@ func _run() -> void:
 			return
 	if not _one_of_each("end"):
 		return
+	# The chapter ends with the time gate opening on to Chapter 2.
+	await _tap_through()
+	if ch._portal == null:
+		_fail("no time gate to Chapter 2")
+		return
 	if not await _play_side_quests():
 		return
 	if not "01_adam_and_eve" in GameState.completed_chapters:
@@ -152,6 +158,15 @@ func _run() -> void:
 		if not v in GameState.unlocked_verses:
 			_fail("verse %s was not recorded" % v)
 			return
+	await _put(ch.portal_pos() + Vector3(0.6, 0, 0.8))
+	await _shot("time_gate")
+	await _act("Travel on to Chapter 2")
+	if not ch.gone:
+		_fail("the time gate did not take the scribe on")
+		return
+	if not ResourceLoader.exists(String(ch._data["next"]["scene"])):
+		_fail("Chapter 2 scene is missing")
+		return
 	print("PLAYTEST PASSED: %d beats, %d verses recorded" % [beats.size(), GameState.unlocked_verses.size()])
 	get_tree().quit(0)
 

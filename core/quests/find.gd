@@ -5,8 +5,8 @@ extends SideQuest
 ##     kind is a Props.treasure kind (gold, onyx, bdellium, seed, herb, flower), or "bird" (a perched
 ##     bird to sketch, which stays) or "spring" (a bubbling spring, which stays).
 ##   verb: action text, e.g. "Pick up the seed".
-##   deliver (optional): "eve" (bring them all to Eve) or "animals" (give one each to `deliver_count`
-##   different land animals). deliver_verb: action text for that.
+##   deliver (optional): a story character's id, e.g. "eve" (bring them all to that person), or
+##   "animals" (give one each to `deliver_count` different land animals). deliver_verb: action text.
 
 const RANGE := 1.6
 
@@ -81,16 +81,16 @@ func update(delta: float) -> void:
 				best = d
 				_near_animal = an
 
-func _eve_near() -> bool:
-	var eve: Node3D = host.get_actor("eve")
-	return eve != null and eve.visible and flat_dist(eve.global_position) < 2.4
+func _person_near() -> bool:
+	var who: Node3D = host.get_actor(String(cfg["deliver"]))
+	return who != null and who.visible and flat_dist(who.global_position) < 2.4
 
 func active_action() -> String:
 	if _near >= 0:
 		return String(cfg.get("verb", "Pick it up"))
 	if _delivering():
-		if cfg["deliver"] == "eve" and _eve_near():
-			return String(cfg.get("deliver_verb", "Give them to Eve"))
+		if cfg["deliver"] != "animals" and _person_near():
+			return String(cfg.get("deliver_verb", "Give them"))
 		if cfg["deliver"] == "animals" and _near_animal:
 			return String(cfg.get("deliver_verb", "Give a green herb"))
 	return ""
@@ -123,10 +123,9 @@ func active_act() -> void:
 			glow_ring(_near_animal.global_position, 0.8)
 			_delivered += 1
 			_check_done()
-		elif cfg["deliver"] == "eve" and _eve_near():
+		elif cfg["deliver"] != "animals" and _person_near():
 			_delivered = int(cfg.get("deliver_count", 1))
-			var eve: Node3D = host.get_actor("eve")
-			SideQuest.hop(eve)
+			SideQuest.hop(host.get_actor(String(cfg["deliver"])))
 			_check_done()
 
 func _check_done() -> void:
