@@ -145,6 +145,7 @@ static func tree(parent: Node3D, pos: Vector3, s: float, leaf: Color, fruit: Col
 			var f := fb.instance(false)
 			f.position = pos + (crown[0] + d * crown[1]) * size
 			f.set_meta("fruit", true)
+			f.material_override = L.material_faded()
 			f.visibility_range_end = FAR
 			parent.add_child(f)
 	return t

@@ -6,7 +6,7 @@ extends Node
 const CHAPTER := preload("res://chapters/01_adam_and_eve/scenes/chapter.tscn")
 # [file label, scribe x, scribe z, beat whose mood to show]
 const SPOTS := [["void", 3.0, 0.0, 0], ["light", 12.0, 0.0, 1], ["sea", 21.0, 0.5, 2], ["sky", 31.0, 0.0, 3],
-	["animals", 41.0, 0.0, 4], ["rest", 50.0, 0.0, 5], ["eden", 60.0, -2.0, 6], ["tree", 140.0, 0.0, 9],
+	["animals", 41.0, 0.0, 4], ["rest", 50.0, 0.0, 5], ["eden", 60.0, -2.0, 6], ["eden_pond", 57.0, -5.0, 6], ["naming", 84.0, 0.0, 7], ["flowers", 108.0, 3.0, 8], ["gather", 121.0, 0.0, 8], ["tree", 140.0, 0.0, 9],
 	["dark", 150.0, 0.0, 10], ["gate", 175.0, 0.0, 11]]
 
 func _ready() -> void:

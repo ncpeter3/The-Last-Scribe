@@ -5,7 +5,10 @@ extends Node3D
 ## walk freely and tap "Look" on glowing orbs for Scribe's notes and bonus verses.
 ## A beat can have a challenge (see core/challenges/challenge.gd) that starts right after the
 ## beat's verses and has its own area of the world; the beat's "after_lines" play when it's done.
-## All text lives in data/beats.json. Distances are in meters.
+## There is one Adam and one Eve (they appear when Scripture tells of them, then walk from scene to
+## scene and wander), optional side quests marked by golden scrolls (data "side_quests", see
+## core/challenges/side_quest.gd), and the forbidden tree, where Adam stops any scribe who reaches
+## for its fruit. All text lives in data/beats.json. Distances are in meters.
 
 const DialogueBox := preload("res://core/ui/dialogue_box.gd")
 const Scribe := preload("res://core/player/scribe.gd")
@@ -383,8 +386,7 @@ func _build_world() -> void:
 	root.name = "World"
 	add_child(root)
 	_world = root
-	for r in _regions:
-		_build_section(root, String(r["kind"]), float(r["x0"]), float(r["x1"]))
+	# Challenges first, so their rivers and pools are known and the scenery keeps out of them.
 	for i in _beats.size():
 		var b: Dictionary = _beats[i]
 		var x := float(b["x"])
@@ -395,6 +397,8 @@ func _build_world() -> void:
 			root.add_child(ch)
 			ch.build()
 			_challenges[i] = ch
+	for r in _regions:
+		_build_section(root, String(r["kind"]), float(r["x0"]), float(r["x1"]))
 	_build_ground(root)
 	for d in _discoverables:
 		_orb(root, float(d["x"]))

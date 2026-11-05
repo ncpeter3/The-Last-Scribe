@@ -181,8 +181,6 @@ func _check_forbidden_fruit() -> bool:
 			await get_tree().create_timer(0.1).timeout
 			t += 0.1
 		if not ch._dialogue.active:
-			var ad: Node3D = ch.get_actor("adam")
-			print("DBG adam ", ad.position, " vis ", ad.visible, " scribe ", ch._scribe.position, " plucking ", ch._plucking, " busy ", ch._roam("adam").busy(), " paused ", ch._roam("adam").paused, " fruit ", ch._pluck_fruit)
 			_fail("Adam never came to stop the scribe")
 			return false
 		var adam: Node3D = ch.get_actor("adam")
@@ -223,6 +221,9 @@ func _play_side_quests() -> bool:
 		if q.state != "active":
 			_fail("side quest %s did not start" % q.name)
 			return false
+		if q.name in ["rivers", "flowers"]:
+			await _put(q._items[0]["node"].global_position + Vector3(1.2, 0, 2.0))
+			await _shot("side_quest_" + q.name)
 		match String(q.cfg["type"]):
 			"find":
 				for it in q._items:
