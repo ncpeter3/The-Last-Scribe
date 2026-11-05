@@ -7,6 +7,8 @@ extends Node
 
 const CHAPTER := preload("res://chapters/01_adam_and_eve/scenes/chapter.tscn")
 
+const DialogueBox := preload("res://core/ui/dialogue_box.gd")
+
 var ch: Node
 var shots := ""
 var _n := 0
@@ -15,6 +17,8 @@ func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots="):
 			shots = a.substr(8)
+	# Taps go straight to the next line (the typewriter and read time are checked in ui_test).
+	DialogueBox.test_fast = true
 	GameState.unlocked_verses = []
 	GameState.completed_chapters = []
 	ch = CHAPTER.instantiate()

@@ -107,3 +107,9 @@ func status() -> String:
 	var jar := "Jar: %s" % ("full" if _jar == JAR_SIZE else ("half" if _jar > 0 else "empty"))
 	var tip := "   (Fill it at the river, up the screen.)" if _jar == 0 else ""
 	return "Dress and keep the garden: %d/%d plants watered.   %s%s" % [_watered(), _plants.size(), jar, tip]
+
+func task() -> Dictionary:
+	var jar := "Jar: %s." % ("full" if _jar == JAR_SIZE else ("half full" if _jar > 0 else "empty"))
+	if _jar == 0:
+		jar += " Fill it at the river, up the screen."
+	return {"title": "Dress and keep the garden: water every plant", "hint": jar, "done": _watered(), "total": _plants.size()}

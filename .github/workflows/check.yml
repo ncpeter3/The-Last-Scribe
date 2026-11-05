@@ -27,3 +27,9 @@ jobs:
           if grep -q "SCRIPT ERROR" start.log; then echo "Script errors during playthrough"; exit 1; fi
           grep -q "START PLAYTEST PASSED" start.log
         shell: bash
+      - name: Check the dialogue box, task tracker and bumps
+        run: |
+          set -o pipefail
+          timeout 120 godot --headless res://tools/test/ui_test.tscn 2>&1 | grep -v 'mesh_get_surface_count\|Parameter "m" is null' | tee ui.log
+          if grep -q "SCRIPT ERROR" ui.log; then echo "Script errors in UI test"; exit 1; fi
+        shell: bash
