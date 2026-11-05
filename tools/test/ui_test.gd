@@ -103,9 +103,23 @@ func _run() -> void:
 			return _fail("an answer's text spills out of its button")
 	var picked := [-1]
 	cp.chosen.connect(func(i): picked[0] = i)
-	cp._pick(1)
+	# A real tap on the second answer: it lights up while pressed and is chosen on release.
+	var at: Vector2 = (cp._buttons.get_child(1) as Control).get_global_rect().get_center()
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	press.position = at
+	press.global_position = at
+	get_viewport().push_input(press, true)
+	await _frames(2)
+	if (cp._buttons.get_child(1) as Control).get_theme_stylebox("panel") != cp._lit:
+		return _fail("an answer did not light up while pressed")
+	var release := press.duplicate()
+	release.pressed = false
+	get_viewport().push_input(release, true)
+	await _frames(2)
 	if picked[0] != 1:
-		return _fail("choice panel did not report the answer")
+		return _fail("tapping an answer did not choose it (got %d)" % picked[0])
 	# ---- task tracker ----
 	var t := TaskTracker.new()
 	add_child(t)
