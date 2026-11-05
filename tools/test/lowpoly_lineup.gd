@@ -16,9 +16,19 @@ func _ready() -> void:
 	var sun := Look.sun()
 	add_child(sun)
 	var g := LowPoly.new()
-	g.box(Vector3(0, -0.05, 0), Vector3(14, 0.1, 6), LowPoly.WOOD_LIGHT)
+	g.box(Vector3(0, -0.05, 1), Vector3(16, 0.1, 8), LowPoly.GRASS)
 	add_child(g.instance())
 	var looks := [LowPolyPerson.SCRIBE_F, LowPolyPerson.SCRIBE_M, LowPolyPerson.MOM, LowPolyPerson.DAD, LowPolyPerson.GRANDMA, LowPolyPerson.SAM]
+	if "--chapter1" in OS.get_cmdline_user_args():
+		looks = [LowPolyPerson.ADAM, LowPolyPerson.EVE, LowPolyPerson.ADAM_SKINS, LowPolyPerson.EVE_SKINS, LowPolyPerson.CHERUB]
+		var ax := -5.0
+		for id in ["cow", "horse", "zebra", "llama", "sheep", "pig", "wolf", "fox", "cat", "chick"]:
+			var a := LowPolyAnimal.create(id)
+			a.mode = "still"
+			a.position = Vector3(ax, 0, 2.2)
+			a.rotation.y = -PI / 2.0 + 0.9
+			add_child(a)
+			ax += 1.25
 	var x := -4.0
 	for l in looks:
 		var p := LowPolyPerson.create(l)

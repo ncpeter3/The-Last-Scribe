@@ -51,6 +51,40 @@ func _tap_through() -> void:
 			_fail("dialogue never ended")
 			return
 
+## Creatures must be alive: most land animals, fish and birds move within a few seconds, and every
+## fish and whale stays inside its water while land animals stay out of it.
+func _check_creatures() -> bool:
+	var all := ch.find_children("*", "LowPolyAnimal", true, false)
+	var start := {}
+	for a in all:
+		start[a] = (a as Node3D).global_position
+	await get_tree().create_timer(4.0).timeout
+	var counts := {}
+	for a in all:
+		var an := a as LowPolyAnimal
+		var kind := "swim" if an.mode == "swim" else ("fly" if an.mode == "fly" else ("walk" if an.mode == "wander" else "other"))
+		if kind == "other":
+			continue
+		var c: Array = counts.get(kind, [0, 0])
+		c[0] += 1
+		if an.global_position.distance_to(start[a]) > 0.2:
+			c[1] += 1
+		counts[kind] = c
+		var p := an.global_position
+		if kind == "swim" and not an.water.grow(0.05).has_point(Vector2(p.x, p.z)):
+			_fail("%s swam out of its water at %s" % [an.species, p])
+			return false
+		if kind == "walk" and Props.in_water(p, 0.0):
+			_fail("%s walked into water at %s" % [an.species, p])
+			return false
+	for kind in ["swim", "fly", "walk"]:
+		var c: Array = counts.get(kind, [0, 0])
+		if c[0] == 0 or c[1] < c[0] / 2:
+			_fail("only %d of %d %s creatures moved" % [c[1], c[0], kind])
+			return false
+	print("Creatures moving: ", counts)
+	return true
+
 func _put(pos: Vector3) -> void:
 	var s: Node3D = ch._scribe
 	s.position = pos
@@ -69,6 +103,8 @@ func _act(expect: String) -> void:
 
 func _run() -> void:
 	await _frames(5)
+	if not await _check_creatures():
+		return
 	var beats: Array = ch._beats
 	var shot_beats := ["adam", "naming", "eve", "hiding", "gate"]
 	for i in beats.size():

@@ -26,6 +26,19 @@ const GRANDMA := {"skin": L.SKIN, "hair": L.HAIR_GRAY, "hair_style": "bun", "top
 const SAM := {"skin": L.SKIN, "hair": L.HAIR_BROWN, "hair_style": "messy", "top": L.SUN, "hood": true,
 	"bottom": L.SKY, "kid": true, "cheeks": true}
 
+# Genesis 1-3. In Eden, simple garments of leaves; at the gate, the coats of skins (Genesis 3:21).
+const ADAM := {"skin": L.SKIN_SHADE, "hair": L.HAIR_DARK, "hair_style": "short", "beard": true, "top": L.LEAF,
+	"bottom": L.LEAF_DARK, "tunic": true, "legs": L.SKIN_SHADE, "shoes": L.SKIN_SHADE, "height": 1.04}
+const EVE := {"skin": L.SKIN_SHADE, "hair": L.HAIR_BROWN, "hair_style": "long", "top": L.LEAF, "bottom": L.LEAF_DARK,
+	"tunic": true, "long_tunic": true, "legs": L.SKIN_SHADE, "shoes": L.SKIN_SHADE, "lashes": true, "flower": L.ROSE}
+const ADAM_SKINS := {"skin": L.SKIN_SHADE, "hair": L.HAIR_DARK, "hair_style": "short", "beard": true, "top": Color("a87a4a"),
+	"stripes": Color("7a5233"), "bottom": Color("8f6438"), "tunic": true, "legs": L.SKIN_SHADE, "shoes": L.WOOD_DARK, "height": 1.04}
+const EVE_SKINS := {"skin": L.SKIN_SHADE, "hair": L.HAIR_BROWN, "hair_style": "long", "top": Color("a87a4a"), "stripes": Color("7a5233"),
+	"bottom": Color("8f6438"), "tunic": true, "long_tunic": true, "legs": L.SKIN_SHADE, "shoes": L.WOOD_DARK, "lashes": true}
+## The cherubim at the east of the garden (Genesis 3:24): tall, white and gold, with wings.
+const CHERUB := {"skin": Color("f0d2b0"), "hair": L.GOLD, "hair_style": "short", "top": L.CLOUD, "bottom": L.CLOUD,
+	"robe": true, "trim": L.GOLD, "sash": L.GOLD, "wings": true, "height": 1.3}
+
 const HIP := 0.84
 const KNEE := 0.44
 const SHOULDER := 1.34
@@ -44,6 +57,7 @@ var _head: Node3D
 var _arms: Array[Node3D] = []  # right, left
 var _thighs: Array[Node3D] = []
 var _shins: Array[Node3D] = []
+var _wings: Array[Node3D] = []
 var _t := 0.0
 var _phase := 0.0
 var _scale := 1.0
@@ -69,6 +83,7 @@ func _build() -> void:
 	var top := _c("top", L.SLATE)
 	var bottom := _c("bottom", L.INK)
 	var shoes := _c("shoes", L.shade(bottom, -0.45))
+	var legs := _c("legs", bottom)
 	var robe: bool = look.get("robe", false)
 	var skirt: bool = look.get("skirt", false)
 
@@ -93,6 +108,14 @@ func _build() -> void:
 	if look.get("hood", false):
 		b.prism(Vector3(0, SHOULDER - HIP - 0.04, -0.06), 0.13, 0.15, 0.1, 6, L.shade(top, -0.12), Color(), Vector2(1.2, 0.9))
 		b.box(Vector3(0, 0.15, 0.135), Vector3(0.18, 0.1, 0.03), L.shade(top, -0.12))
+	if look.get("tunic", false):
+		# A simple knee-length (or longer) garment over bare legs.
+		var low := 0.42 if look.get("long_tunic", false) else 0.3
+		b.prism(Vector3(0, -low, 0), 0.22, 0.16, low + 0.05, 7, bottom, Color(), Vector2(1.05, 0.9))
+		if look.has("stripes"):
+			b.prism(Vector3(0, -low - 0.01, 0), 0.225, 0.215, 0.05, 7, look["stripes"], Color(), Vector2(1.05, 0.9))
+	if look.get("wings", false):
+		pass  # built below so they can move
 	if robe or skirt:
 		# A long garment that flares out over the legs.
 		var c := top if robe else bottom
@@ -113,6 +136,21 @@ func _build() -> void:
 		b.box(Vector3(0.29, 0.0, 0.02), Vector3(0.015, 0.035, 0.04), L.GOLD)
 	_torso.add_child(b.instance())
 
+	if look.get("wings", false):
+		for side in [-1.0, 1.0]:
+			var w := Node3D.new()
+			w.position = Vector3(0.1 * side, 0.42, -0.13)
+			_torso.add_child(w)
+			var wb := L.new()
+			# Long feathers fanning out and down from a golden arch.
+			for k in 4:
+				var ang: float = (0.35 + k * 0.32) * side
+				wb.with(Transform3D(Basis(Vector3.FORWARD, ang), Vector3(0.08 * side, 0.2, -0.04 - k * 0.015)), func():
+					wb.box(Vector3(0.36 * side, 0, 0), Vector3(0.72 - k * 0.1, 0.1, 0.04), L.shade(L.CLOUD, -0.05 * k)))
+			wb.with(Transform3D(Basis(Vector3.FORWARD, 0.35 * side), Vector3(0.08 * side, 0.22, -0.02)), func():
+				wb.box(Vector3(0.36 * side, 0.04, 0), Vector3(0.74, 0.05, 0.05), L.GOLD))
+			w.add_child(wb.instance())
+			_wings.append(w)
 	# Head.
 	_head = Node3D.new()
 	_head.position.y = NECK - HIP
@@ -146,13 +184,13 @@ func _build() -> void:
 		hip.position = Vector3(0.085 * side, 0, 0)
 		_torso.add_child(hip)
 		var th := L.new()
-		th.prism(Vector3(0, -(HIP - KNEE) - 0.02, 0), 0.065, 0.08, HIP - KNEE + 0.02, 5, bottom)
+		th.prism(Vector3(0, -(HIP - KNEE) - 0.02, 0), 0.065, 0.08, HIP - KNEE + 0.02, 5, legs)
 		hip.add_child(th.instance())
 		var knee := Node3D.new()
 		knee.position.y = -(HIP - KNEE)
 		hip.add_child(knee)
 		var sh := L.new()
-		sh.prism(Vector3(0, -KNEE + 0.07, 0), 0.055, 0.065, KNEE - 0.06, 5, bottom)
+		sh.prism(Vector3(0, -KNEE + 0.07, 0), 0.055, 0.065, KNEE - 0.06, 5, legs)
 		sh.box(Vector3(0, -KNEE + 0.045, 0.035), Vector3(0.1, 0.09, 0.2), shoes, Color(), 0.03)
 		knee.add_child(sh.instance())
 		_thighs.append(hip)
@@ -215,6 +253,9 @@ func _build_head(skin: Color, kid: bool) -> MeshInstance3D:
 					h.prism(Vector3.ZERO, r * 0.22, 0.0, r * 0.45, 4, hair))
 		"short":
 			h.box(c + Vector3(0, r * 0.75, -r * 0.1), Vector3(r * 1.6, r * 0.35, r * 1.4), hair, Color(), 0.04)
+	if look.has("flower"):
+		h.ball(c + Vector3(r * 0.8, r * 0.55, r * 0.2), r * 0.18, look["flower"], 0)
+		h.ball(c + Vector3(r * 0.8, r * 0.55, r * 0.2), r * 0.08, L.SUN, 0)
 	return h.instance()
 
 # ---------- animation ----------
@@ -272,6 +313,8 @@ func _process(delta: float) -> void:
 			arm[1] = Vector2(-1.0, -0.2)
 			arm[0] = Vector2(-0.9 + sin(_t * 9.0) * 0.08, 0.15 + sin(_t * 5.0) * 0.06)
 			head = Vector2(0.25, 0.0)
+	for i in _wings.size():
+		_wings[i].rotation.y = (0.35 + sin(_t * 1.4) * 0.12) * (-1.0 if i == 0 else 1.0)
 	_body.position.y = lerpf(_body.position.y, y * _scale, k)
 	_torso.rotation.x = lerpf(_torso.rotation.x, lean, k)
 	_head.rotation.x = lerpf(_head.rotation.x, head.x, k)

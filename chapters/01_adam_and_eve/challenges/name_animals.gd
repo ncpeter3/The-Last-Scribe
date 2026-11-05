@@ -24,6 +24,8 @@ func build() -> void:
 		if a[0] == "eagle":
 			Props.rock(self, pos, 1.0)
 		var n := Props.creature(self, a[0], pos + Vector3(0, 0.45 if a[0] == "eagle" else 0.0, 0), a[3])
+		# Animals brought to Adam stay close by so they can be approached, but still move about.
+		(n as LowPolyAnimal).radius = 1.4
 		_animals.append({"node": n, "group": a[1], "done": false, "rest": 0.0})
 
 func _count() -> int:
@@ -58,11 +60,14 @@ func _startle(a: Dictionary) -> void:
 	var target := n.position + away * 2.5
 	target.x = clampf(target.x, x0 + 1.0, x1 - 1.0)
 	target.z = clampf(target.z, -7.0, 7.0)
-	n.rotation.y = atan2(away.x, away.z)
-	CharacterFactory.play(n, "Run" if CharacterFactory.animator(n) and CharacterFactory.animator(n).has_animation("Run") else "Walk")
-	var tw := n.create_tween()
-	tw.tween_property(n, "position", target, 0.7)
-	tw.tween_callback(func(): CharacterFactory.play(n, "Idle"))
+	var animal := n as LowPolyAnimal
+	if animal.mode == "perch":
+		# A startled bird flutters up and lands a little way off.
+		var tw := n.create_tween()
+		tw.tween_property(n, "position", target + Vector3(0, 1.2, 0), 0.4)
+		tw.tween_property(n, "position", Vector3(target.x, n.position.y, target.z), 0.4)
+		return
+	animal.run_to(target)
 
 func action() -> String:
 	return "Write it in the scroll" if _near >= 0 else ""

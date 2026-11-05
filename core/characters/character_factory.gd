@@ -1,53 +1,41 @@
 class_name CharacterFactory
 extends RefCounted
-## Builds a character by id. If a real model exists at res://shared_assets/characters/<id>.glb
-## it is used (with its Idle/Walk animations); otherwise a simple placeholder figure is built.
+## Builds a character by id, in the game's low-poly style (core/lowpoly).
 ## Ids: scribe_female, scribe_male, adam, eve, adam_skins, eve_skins, cherub, serpent, mom, dad, grandma, sibling.
-## Every character is returned inside a holder node whose front faces +X (like the rest of the game),
-## so turning the holder turns the character.
+## Every character's front faces +X (like the rest of the game), so turning the node turns the character.
 
-const DIR := "res://shared_assets/characters/"
-const LOOPING := ["Idle", "Walk", "Run"]
+const LOOKS := {
+	"scribe_female": LowPolyPerson.SCRIBE_F, "scribe_male": LowPolyPerson.SCRIBE_M,
+	"adam": LowPolyPerson.ADAM, "eve": LowPolyPerson.EVE, "adam_skins": LowPolyPerson.ADAM_SKINS,
+	"eve_skins": LowPolyPerson.EVE_SKINS, "cherub": LowPolyPerson.CHERUB,
+	"mom": LowPolyPerson.MOM, "dad": LowPolyPerson.DAD, "grandma": LowPolyPerson.GRANDMA, "sibling": LowPolyPerson.SAM,
+}
 
 static func has_model(id: String) -> bool:
-	return ResourceLoader.exists(DIR + id + ".glb")
+	return LOOKS.has(id) or id == "serpent"
 
 static func make(id: String, parent: Node3D, pos: Vector3, faces_left: bool = false) -> Node3D:
-	var path := DIR + id + ".glb"
-	if ResourceLoader.exists(path):
-		var holder := Node3D.new()
-		holder.name = id
-		holder.position = pos
-		holder.rotation.y = PI if faces_left else 0.0
-		parent.add_child(holder)
-		var model: Node3D = (load(path) as PackedScene).instantiate()
-		# glTF models face +Z; turn them to face +X.
-		model.rotation.y = PI / 2.0
-		holder.add_child(model)
-		play(holder, "Idle", randf() * 2.0)
-		return holder
-	if id == "cherub":
-		return Props.cherub_placeholder(parent, pos)
+	var n: Node3D
 	if id == "serpent":
-		return Props.serpent_placeholder(parent, pos)
-	return Props.person(parent, pos, id.begins_with("eve") or id.ends_with("female"), faces_left)
+		n = LowPolyAnimal.create("serpent")
+	else:
+		n = LowPolyPerson.create(LOOKS.get(id, LowPolyPerson.SCRIBE_F))
+	n.name = id
+	n.position = pos
+	n.rotation.y = PI if faces_left else 0.0
+	parent.add_child(n)
+	return n
 
-static func animator(holder: Node) -> AnimationPlayer:
-	return holder.find_child("AnimationPlayer", true, false) as AnimationPlayer
+## Kept for older callers: low-poly characters have no AnimationPlayer.
+static func animator(_holder: Node) -> AnimationPlayer:
+	return null
 
-## Play an animation if the model has it. Idle, Walk and Run loop. `offset` starts partway in,
-## so a herd of the same animal doesn't move in lockstep.
-static func play(holder: Node, anim_name: String, offset: float = 0.0, speed: float = 1.0) -> void:
-	var anim := animator(holder)
-	if anim == null or not anim.has_animation(anim_name):
-		return
-	if anim.current_animation == anim_name:
-		anim.speed_scale = speed
-		return
-	var a := anim.get_animation(anim_name)
-	if anim_name in LOOPING:
-		a.loop_mode = Animation.LOOP_LINEAR
-	anim.play(anim_name, 0.2)
-	anim.speed_scale = speed
-	if offset > 0.0:
-		anim.seek(fmod(offset, a.length), true)
+## Animate a character: "Idle", "Walk", "Run", "Victory" (cheer), "SitDown", "Wave", "Talk".
+static func play(holder: Node, anim_name: String, _offset: float = 0.0, speed: float = 1.0) -> void:
+	if holder is LowPolyPerson:
+		var p := holder as LowPolyPerson
+		p.walk_speed = speed if anim_name in ["Walk", "Run"] else 0.0
+		p.sitting = anim_name == "SitDown"
+		p.gesture = {"Victory": "cheer", "Wave": "wave", "Talk": "talk"}.get(anim_name, "")
+	elif holder is LowPolyAnimal:
+		(holder as LowPolyAnimal).set_moving(anim_name in ["Walk", "Run"])

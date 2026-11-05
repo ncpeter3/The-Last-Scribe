@@ -64,6 +64,7 @@ var _time := 0.0
 
 func _ready() -> void:
 	_rng.seed = 1031
+	Props.reset()
 	var data = JSON.parse_string(FileAccess.get_file_as_string(DATA))
 	_beats = data["beats"]
 	_discoverables = data["discoverables"]
@@ -328,26 +329,73 @@ func _ground_color(x: float) -> Color:
 	return prev.lerp(c, t * t * (3.0 - 2.0 * t))
 
 func _build_ground(root: Node3D) -> void:
-	# One big ground plane. Its colors blend smoothly between scenes (a strip texture, one pixel per
-	# half meter) and a shader adds grassy patches and the worn path, so it never looks flat.
+	# Low-poly ground: a sheet of flat-lit triangles. Colors blend between scenes along the path, a
+	# sandy path runs down the middle, gentle hills rise far from the path, and the ground dips under
+	# every pool, river and sea (Props.water_rects) so the water has depth and fish swim beneath it.
 	var x0 := -20.0
-	var length := _world_end + 30.0 - x0
-	var w := int(length * 2.0)
-	var img := Image.create(w, 1, false, Image.FORMAT_RGBA8)
-	for i in w:
-		var x := x0 + (i + 0.5) / 2.0
-		var c := _ground_color(x)
-		c.a = 0.0 if String(_scenery_at(x)["kind"]) == "void" else 1.0
-		img.set_pixel(i, 0, c)
-	var pm := PlaneMesh.new()
-	pm.size = Vector2(length, 80.0)
-	pm.subdivide_width = 0
-	var mi := MeshInstance3D.new()
+	var x1 := _world_end + 30.0
+	var zs: Array[float] = [-40.0, -32.0, -25.0, -20.0, -16.0, -13.0]
+	var z := -11.0
+	while z <= 11.01:
+		zs.append(z)
+		z += 1.0 if absf(z) > 3.0 else 0.5
+	zs.append_array([13.0, 16.0, 20.0, 25.0, 32.0, 40.0])
+	var xs: Array[float] = []
+	var x := x0
+	while x <= x1 + 0.01:
+		xs.append(x)
+		x += 1.0
+	var noise := FastNoiseLite.new()
+	noise.seed = 7
+	noise.frequency = 0.07
+	var h := []
+	var col := []
+	for xi in xs.size():
+		var hr := []
+		var cr := []
+		var gx: float = xs[xi]
+		var base := _ground_color(gx)
+		var void_here := String(_scenery_at(gx)["kind"]) == "void"
+		for zi in zs.size():
+			var gz: float = zs[zi]
+			var p := Vector3(gx, 0, gz)
+			var y := 0.0
+			var c := base
+			if Props.in_water(p, -0.05):
+				y = -0.35
+				c = base.lerp(Color(0.75, 0.68, 0.5), 0.6)
+			elif not void_here:
+				var hill := smoothstep(9.0, 15.0, absf(gz))
+				y = (noise.get_noise_2d(gx, gz) * 0.5 + 0.5) * hill * 1.6 + hill * 0.3
+				c = c.lerp(c.darkened(0.12), noise.get_noise_2d(gx * 2.0, gz * 2.0) * 0.5 + 0.5)
+				# The worn path down the middle.
+				var path := 1.0 - smoothstep(0.7, 1.6, absf(gz + sin(gx * 0.15) * 0.3))
+				c = c.lerp(Color(0.72, 0.6, 0.42), path * 0.75)
+			hr.append(y)
+			cr.append(c)
+		h.append(hr)
+		col.append(cr)
+	var b := LowPoly.new()
+	b.jitter = 0.05
+	for xi in xs.size() - 1:
+		for zi in zs.size() - 1:
+			var a := Vector3(xs[xi], h[xi][zi], zs[zi])
+			var bb := Vector3(xs[xi + 1], h[xi + 1][zi], zs[zi])
+			var c := Vector3(xs[xi + 1], h[xi + 1][zi + 1], zs[zi + 1])
+			var d := Vector3(xs[xi], h[xi][zi + 1], zs[zi + 1])
+			var c1: Color = (col[xi][zi] + col[xi + 1][zi] + col[xi][zi + 1]) / 3.0
+			var c2: Color = (col[xi + 1][zi] + col[xi + 1][zi + 1] + col[xi][zi + 1]) / 3.0
+			c1.a = 1.0
+			c2.a = 1.0
+			# Alternate the diagonal so the facets don't line up in stripes.
+			if (xi + zi) % 2 == 0:
+				b.tri(a, d, bb, c1)
+				b.tri(bb, d, c, c2)
+			else:
+				b.tri(a, d, c, c1)
+				b.tri(a, c, bb, c2)
+	var mi := b.instance(false)
 	mi.name = "Ground"
-	mi.mesh = pm
-	mi.position = Vector3(x0 + length / 2.0, 0.0, 0.0)
-	mi.material_override = Look.ground_material(ImageTexture.create_from_image(img), x0, length)
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(mi)
 
 func _build_section(root: Node3D, kind: String, x0: float, x1: float) -> void:
@@ -360,8 +408,7 @@ func _build_section(root: Node3D, kind: String, x0: float, x1: float) -> void:
 		"light":
 			for i in 5:
 				var bx := _rng.randf_range(x0 + 2, x1 - 2)
-				var beam := Props.add(root, Props.box(Vector3(0.7, 40, 0.7)), Color(1, 0.95, 0.6, 0.22), Vector3(bx, 18, _side_z(3.0, 12.0)), 1.5)
-				beam.material_override.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+				Props.add(root, Props.box(Vector3(0.7, 40, 0.7)), Color(1, 0.95, 0.6, 0.22), Vector3(bx, 18, _side_z(3.0, 12.0)), 1.5)
 			Props.add(root, Props.sphere(1.6), Color(1, 0.95, 0.7), Vector3((x0 + x1) / 2, 7, -10), 3.0)
 		"sea":
 			# The gathered waters on both sides, with dry land along the path (Genesis 1:9).
@@ -373,15 +420,15 @@ func _build_section(root: Node3D, kind: String, x0: float, x1: float) -> void:
 				Props.creature(root, "fish", Vector3(_rng.randf_range(x0, sea_split), 0.05, _side_z(2.0, 10.0)), 1.6)
 			_scatter_plants(root, sea_split, x1, 0.9, false)
 		"sky":
-			_scatter_plants(root, x0, x1, 1.0, true)
 			var mid := (x0 + x1) / 2.0
+			Props.water(root, mid + 2, mid + 9, -12, -5)
+			_scatter_plants(root, x0, x1, 1.0, true)
 			Props.add(root, Props.sphere(1.3), Color(1, 0.9, 0.5), Vector3(mid - 5, 8, -9), 3.0)
 			Props.add(root, Props.sphere(1.0), Color(0.9, 0.92, 1.0), Vector3(mid + 5, 8, -9), 1.2)
 			for i in 6:
 				Props.add(root, Props.sphere(0.1, 1.0, 4), Color(1, 1, 0.9), Vector3(_rng.randf_range(x0, x1), _rng.randf_range(6, 12), _rng.randf_range(-12, -6)), 3.0)
 			for i in 7:
 				Props.bird(root, Vector3(_rng.randf_range(x0, x1), _rng.randf_range(3, 6), _rng.randf_range(-8, 8)), Color(0.9, 0.9, 0.95))
-			Props.water(root, mid + 2, mid + 9, -12, -5)
 			for i in 6:
 				Props.creature(root, "fish", Vector3(mid + _rng.randf_range(2.5, 8.5), 0.05, _rng.randf_range(-11.5, -5.5)), 1.4)
 			Props.creature(root, "whale", Vector3(mid + 5.5, -0.9, -8.5), 0.55)
@@ -412,6 +459,8 @@ func _scatter_plants(root: Node3D, x0: float, x1: float, density: float, trees: 
 	var n := int((x1 - x0) * density)
 	for i in n:
 		var p := Vector3(_rng.randf_range(x0, x1), 0, _side_z(2.5, 12.0))
+		if Props.in_water(p, 0.5):
+			continue
 		if trees and _rng.randf() < 0.3:
 			Props.tree(root, p + Vector3(0, 0, signf(p.z) * _rng.randf_range(0, 5)), _rng.randf_range(0.8, 1.5), Color(0.2, 0.55, 0.25))
 		elif _rng.randf() < 0.12:
@@ -428,14 +477,22 @@ func _build_garden(root: Node3D, kind: String, x0: float, x1: float) -> void:
 	var len := x1 - x0
 	# Challenge areas ("garden") keep trees back so the play space stays open and in view.
 	var near := 8.0 if kind == "garden" else 2.8
+	if kind == "eden":
+		Props.water(root, x0, x1, -9.5, -6.0)
 	for i in int(len * dense):
 		var p := Vector3(_rng.randf_range(x0, x1), 0, _side_z(near, 16.0))
+		if Props.in_water(p, 0.8):
+			continue
 		Props.tree(root, p, _rng.randf_range(0.9, 1.7), leaf.lightened(_rng.randf_range(-0.05, 0.1)), Color(0.9, 0.75, 0.2) if _rng.randf() < 0.3 else Color(0, 0, 0, 0),
 				"dead_tree" if kind == "dark" and _rng.randf() < 0.35 else "")
+	if kind in ["eden", "flowers", "naming"]:
+		for i in 3:
+			Props.bird(root, Vector3(_rng.randf_range(x0, x1), _rng.randf_range(3.5, 5.5), _rng.randf_range(-6, 6)), Color.WHITE)
 	for i in int(len * 1.5):
 		Props.flower(root, Vector3(_rng.randf_range(x0, x1), 0, _rng.randf_range(-6, 6)), [Color(1, 0.5, 0.6), Color(1, 0.9, 0.4), Color(0.7, 0.6, 1.0), Color(1, 1, 1)][_rng.randi() % 4])
 	if kind == "eden":
-		Props.water(root, x0, x1, -9.5, -6.0)
+		for i in 6:
+			Props.creature(root, "fish", Vector3(_rng.randf_range(x0 + 1, x1 - 1), 0, _rng.randf_range(-9.0, -6.5)), 1.0)
 		# The tree of life in the midst of the garden (Genesis 2:9).
 		Props.tree(root, Vector3(x1 - 4.0, 0, -3.6), 1.6, Color(0.3, 0.7, 0.3), Color(1.0, 0.85, 0.3), "tree_2")
 	if kind == "naming":
@@ -447,6 +504,8 @@ func _build_garden(root: Node3D, kind: String, x0: float, x1: float) -> void:
 		Props.serpent(root, Vector3(x1 - 3.7, 0, -1.8))
 
 func _land_animal(root: Node3D, pos: Vector3) -> void:
+	if Props.in_water(pos, 0.8):
+		return
 	var a: Array = LAND_ANIMALS[_rng.randi() % LAND_ANIMALS.size()]
 	Props.creature(root, a[0], pos, float(a[1]) * _rng.randf_range(0.9, 1.1))
 

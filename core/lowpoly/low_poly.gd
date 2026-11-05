@@ -44,10 +44,18 @@ const HAIR_GRAY := Color("d9d6d2")
 
 static var _mat_solid: ShaderMaterial
 static var _mat_clear: ShaderMaterial
+static var _mat_faded: ShaderMaterial
 
 ## A palette color that glows. strength 0..1 (1 = bright neon).
 static func glow(c: Color, strength: float = 0.6) -> Color:
 	return Color(c.r, c.g, c.b, 1.0 - clampf(strength, 0.02, 1.0))
+
+## The solid material, but dissolving near the camera (for trees and other tall things).
+static func material_faded() -> ShaderMaterial:
+	if _mat_faded == null:
+		_mat_faded = material().duplicate()
+		_mat_faded.set_shader_parameter("fade_near", 7.0)
+	return _mat_faded
 
 ## Same color, lighter (t > 0) or darker (t < 0).
 static func shade(c: Color, t: float) -> Color:
@@ -139,11 +147,12 @@ func quad(a: Vector3, b: Vector3, c: Vector3, d: Vector3, color: Color) -> void:
 	tri(a, b, c, color)
 	tri(a, c, d, color)
 
-## A box centered at `center`. `top` colors the top face differently (for counters, beds, ...).
+## A box centered at `center`. `top` colors the top face differently (for counters, beds, ...);
+## leave it out (or pass Color()) to use `color` everywhere.
 ## `bevel` cuts the top edges at an angle, which catches the light nicely.
 func box(center: Vector3, size: Vector3, color: Color, top: Color = Color(0, 0, 0, 0), bevel: float = 0.0) -> void:
 	var h := size / 2.0
-	var tc := color if top.a == 0.0 and top.r == 0.0 and top.g == 0.0 and top.b == 0.0 else top
+	var tc := color if top.r == 0.0 and top.g == 0.0 and top.b == 0.0 else top
 	var bv := minf(bevel, minf(h.x, h.z) * 0.9)
 	var x0 := center.x - h.x
 	var x1 := center.x + h.x
@@ -177,7 +186,7 @@ func box(center: Vector3, size: Vector3, color: Color, top: Color = Color(0, 0, 
 ## `squash` stretches it along X and Z (Vector2(1, 0.6) makes an oval). `twist` turns it (radians).
 func prism(base: Vector3, r0: float, r1: float, height: float, sides: int, color: Color,
 		top: Color = Color(0, 0, 0, 0), squash: Vector2 = Vector2.ONE, twist: float = 0.0) -> void:
-	var tc := color if top.a == 0.0 and top.r == 0.0 and top.g == 0.0 and top.b == 0.0 else top
+	var tc := color if top.r == 0.0 and top.g == 0.0 and top.b == 0.0 else top
 	var lo: Array[Vector3] = []
 	var hi: Array[Vector3] = []
 	for i in sides:

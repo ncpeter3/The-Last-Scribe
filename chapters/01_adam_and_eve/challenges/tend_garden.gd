@@ -17,6 +17,8 @@ func build() -> void:
 	Props.water(self, x0, x1, RIVER_Z0, RIVER_Z1, 0.04)
 	for i in 6:
 		Props.rock(self, Vector3(lerpf(x0 + 1, x1 - 1, i / 5.0), 0, RIVER_Z1 + 0.4), 0.5)
+	for i in 4:
+		Props.creature(self, "fish", Vector3(lerpf(x0 + 2, x1 - 2, i / 3.0), 0, (RIVER_Z0 + RIVER_Z1) / 2.0), 1.0)
 	var spots := [Vector3(2.5, 0, 1.5), Vector3(4.5, 0, -2.0), Vector3(6.5, 0, 3.0), Vector3(8.5, 0, -0.5), Vector3(10.5, 0, 2.0)]
 	for s in spots:
 		var p: Vector3 = s + Vector3(x0, 0, 0)

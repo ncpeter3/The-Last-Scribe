@@ -59,7 +59,7 @@ func act() -> void:
 	# Pick the lowest fruit on the tree: it drops into the scribe's satchel.
 	var low: MeshInstance3D = null
 	for m in t["holder"].get_children():
-		if m is MeshInstance3D and m.mesh is SphereMesh and (low == null or m.position.y < low.position.y):
+		if m is MeshInstance3D and m.has_meta("fruit") and (low == null or m.position.y < low.position.y):
 			low = m
 	if low:
 		var tw := low.create_tween()
