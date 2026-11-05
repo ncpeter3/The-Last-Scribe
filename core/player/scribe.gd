@@ -13,6 +13,9 @@ var max_x := 1e9
 var min_z := -14.0
 var max_z := 14.0
 var female := true
+## Walls and furniture to walk around: rectangles on the ground (x, z). Empty outdoors.
+var blockers: Array[Rect2] = []
+const RADIUS := 0.3
 
 var _visual: Node3D
 var _legs: Array[Node3D] = []
@@ -53,8 +56,12 @@ func _process(delta: float) -> void:
 		v = Vector2.ZERO
 	if v.length() > 1.0:
 		v = v.normalized()
-	position.x = clampf(position.x + v.x * speed * delta, min_x, max_x)
-	position.z = clampf(position.z + v.y * speed * delta, min_z, max_z)
+	var nx := clampf(position.x + v.x * speed * delta, min_x, max_x)
+	if not _blocked(nx, position.z):
+		position.x = nx
+	var nz := clampf(position.z + v.y * speed * delta, min_z, max_z)
+	if not _blocked(position.x, nz):
+		position.z = nz
 	if v.length() > 0.05:
 		_t += delta * 9.0
 		# Face the direction of travel (the figure's front is +X).
@@ -72,6 +79,12 @@ func _process(delta: float) -> void:
 		_visual.position.y = lerpf(_visual.position.y, 0.0, 0.2)
 		for l in _legs:
 			l.rotation.z = lerpf(l.rotation.z, 0.0, 0.2)
+
+func _blocked(x: float, z: float) -> bool:
+	for r in blockers:
+		if x > r.position.x - RADIUS and x < r.end.x + RADIUS and z > r.position.y - RADIUS and z < r.end.y + RADIUS:
+			return true
+	return false
 
 static func _mat(c: Color) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()

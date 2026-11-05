@@ -6,7 +6,7 @@ Credit is not required, but we give it gladly. Downloaded from the OpenGameArt m
 
 | Folder | Source pack | OpenGameArt page |
 | --- | --- | --- |
-| `characters/` (scribes, Adam, Eve, cherub) | Ultimate Animated Character Pack (Nov 2019) | https://opengameart.org/content/animated-characters-pack |
+| `characters/` (scribes, Adam, Eve, cherub, the family at home) | Ultimate Animated Character Pack (Nov 2019) | https://opengameart.org/content/animated-characters-pack |
 | `animals/` cow, horse, sheep, pig, llama, zebra | Farm Animals Pack | https://opengameart.org/content/lowpoly-animated-farm-animal-pack |
 | `animals/` wolf, dog, cat, eagle | Animal Pack Vol.2 | https://opengameart.org/content/animated-animales-low-poly |
 | `animals/` fox, bird, chick, fish, whale | Animals Pack | https://opengameart.org/content/5-low-poly-animals |

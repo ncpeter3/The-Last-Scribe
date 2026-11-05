@@ -2,7 +2,7 @@ class_name CharacterFactory
 extends RefCounted
 ## Builds a character by id. If a real model exists at res://shared_assets/characters/<id>.glb
 ## it is used (with its Idle/Walk animations); otherwise a simple placeholder figure is built.
-## Ids: scribe_female, scribe_male, adam, eve, adam_skins, eve_skins, cherub, serpent.
+## Ids: scribe_female, scribe_male, adam, eve, adam_skins, eve_skins, cherub, serpent, mom, dad, grandma, sibling.
 ## Every character is returned inside a holder node whose front faces +X (like the rest of the game),
 ## so turning the holder turns the character.
 

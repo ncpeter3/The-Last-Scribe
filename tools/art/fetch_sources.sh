@@ -3,6 +3,7 @@
 set -euo pipefail
 DEST="${1:-art_sources}"
 mkdir -p "$DEST"
+touch "$DEST/.gdignore"  # keep Godot from trying to import the raw packs
 B=https://opengameart.org/sites/default/files
 for f in \
   "ultimate_animated_character_pack_by_quaternius.zip" \
